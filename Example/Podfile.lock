@@ -1,0 +1,35 @@
+PODS:
+  - Expecta (1.0.5)
+  - FMDB (2.6.2):
+    - FMDB/standard (= 2.6.2)
+  - FMDB/standard (2.6.2)
+  - SKYKit (0.19.0):
+    - SKYKit/Core (= 0.19.0)
+  - SKYKit/Core (0.19.0):
+    - FMDB (~> 2.5)
+    - SocketRocket (~> 0.4)
+  - SKYKitChat (0.1.0):
+    - SKYKit (~> 0.19.0)
+  - SocketRocket (0.5.1)
+  - Specta (1.0.5)
+
+DEPENDENCIES:
+  - Expecta
+  - SKYKitChat (from `../`)
+  - Specta
+
+EXTERNAL SOURCES:
+  SKYKitChat:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Expecta: e1c022fcd33910b6be89c291d2775b3fe27a89fe
+  FMDB: 854a0341b4726e53276f2a8996f06f1b80f9259a
+  SKYKit: 4554ffca7cf709a9b03b88bb680d9648526c0167
+  SKYKitChat: e304a637def269bf7af27caffffd5fe5a3d09f32
+  SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
+  Specta: ac94d110b865115fe60ff2c6d7281053c6f8e8a2
+
+PODFILE CHECKSUM: 29b0f39ea70f7a44159c6114112e42ab0f993f58
+
+COCOAPODS: 1.1.1
