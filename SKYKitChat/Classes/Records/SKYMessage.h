@@ -9,7 +9,7 @@
 #import "SKYChatRecord.h"
 #import <SKYKit/SKYKit.h>
 
-@class SKYMetadata, SKYReference;
+@class SKYReference;
 
 @interface SKYMessage : SKYChatRecord
 
