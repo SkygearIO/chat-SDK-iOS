@@ -80,4 +80,28 @@
     return returnString;
 }
 
+- (void)addParticipantsWithIDs:(NSString *)participantIDs
+{
+    [self setParticipantIds:[self.participantIds arrayByAddingObjectsFromArray:participantIDs]];
+}
+
+- (void)removeParticipantsWithIDs:(NSString *)participantIDs
+{
+    NSMutableArray *participants = [self.participantIds mutableCopy];
+    [participants removeObjectsInArray:participantIDs];
+    [self setParticipantIds:participants];
+}
+
+- (void)addAdminsWithIDs:(NSString *)adminIDs
+{
+    [self setAdminIds:[self.adminIds arrayByAddingObjectsFromArray:adminIDs]];
+}
+
+- (void)removeAdminsWithIDs:(NSString *)adminIDs
+{
+    NSMutableArray *admins = [self.adminIds mutableCopy];
+    [admins removeObjectsInArray:adminIDs];
+    [self setAdminIds:admins];
+}
+
 @end

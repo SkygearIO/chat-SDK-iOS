@@ -22,4 +22,10 @@
 - (NSString *)toString;
 - (NSString *)getOtherUserUserId:(NSString *)myUserId;
 
+- (void)addParticipantsWithIDs:(nonnull NSString *)participantIDs;
+- (void)removeParticipantsWithIDs:(nonnull NSString *)participantIDs;
+- (void)addAdminsWithIDs:(nonnull NSString *)adminIDs;
+- (void)removeAdminsWithIDs:(nonnull NSString *)adminIDs;
+
+
 @end
