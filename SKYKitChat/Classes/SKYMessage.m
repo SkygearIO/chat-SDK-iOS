@@ -109,7 +109,8 @@
     return metaDataString;
     //    NSString *recordID = @"";
     //    NSString *metaDataString = [self.metadata valueForKey:@"message-voice"];
-    //    NSArray *splitString = [metaDataString componentsSeparatedByString:@"-message-voice"];
+    //    NSArray *splitString = [metaDataString
+    //    componentsSeparatedByString:@"-message-voice"];
     //    if (splitString.count > 0) {
     //        recordID = [splitString objectAtIndex:0];
     //    }

@@ -639,7 +639,8 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
         }];
 }
 
-// FIXME: chat plugin don't have chat:get_unread_message_count lambda function, use this will only
+// FIXME: chat plugin don't have chat:get_unread_message_count lambda function,
+// use this will only
 // get error
 - (void)getUnreadMessageCountWithConversationId:(NSString *)conversationId
                               completionHandler:(SKYContainerUnreadCountOperationActionCompletion)

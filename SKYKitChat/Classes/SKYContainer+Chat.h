@@ -97,9 +97,11 @@ typedef void (^SKYContainerConversationOperationActionCompletion)(SKYConversatio
                               withAsset:(SKYAsset *)asset
                       completionHandler:
                           (SKYContainerMessageOperationActionCompletion)completionHandler;
-//-(void)createMessageWithConversationId:(NSString *)conversationId withBody:(NSString *)body
+//-(void)createMessageWithConversationId:(NSString *)conversationId
+// withBody:(NSString *)body
 // withMetadata:(id)metadata
-// completionHandler:(SKYContainerMessageOperationActionCompletion)completionHandler;//not finished
+// completionHandler:(SKYContainerMessageOperationActionCompletion)completionHandler;//not
+// finished
 - (void)createMessageWithConversationId:(NSString *)conversationId
                                withBody:(NSString *)body
                                 withURL:(NSURL *)url
@@ -114,7 +116,8 @@ typedef void (^SKYContainerConversationOperationActionCompletion)(SKYConversatio
                       completionHandler:(SKYContainerMessageOperationActionCompletion)
                                             completionHandler; // not finished
 //- (void)createMessageWithSKYMessage:(SKYMessage *)message
-// completionHandler:(SKYContainerMessageOperationActionCompletion)completionHandler;//not finished
+// completionHandler:(SKYContainerMessageOperationActionCompletion)completionHandler;//not
+// finished
 
 - (void)getMessagesWithConversationId:(NSString *)conversationId
                             withLimit:(NSString *)limit
