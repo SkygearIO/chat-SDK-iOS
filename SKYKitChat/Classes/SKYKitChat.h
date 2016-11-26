@@ -11,9 +11,7 @@
 
 // record classes
 #import "SKYChatRecord.h"
-#import "SKYChatUser.h"
 #import "SKYConversation.h"
-#import "SKYLastMessageRead.h"
 #import "SKYMessage.h"
 #import "SKYUserChannel.h"
 #import "SKYUserConversation.h"

@@ -7,42 +7,59 @@
 //
 
 #import "SKYUserConversation.h"
-#import "SKYChatUser.h"
 #import "SKYConversation.h"
 #import "SKYMessage.h"
+
+NSString *const SKYUserConversationLastReadMessageKey = @"last_read_message";
+NSString *const SKYUserConversationUnreadCountKey = @"unread_count";
 
 @implementation SKYUserConversation
 
 + (instancetype)recordWithRecord:(SKYRecord *)record
 {
-    return [[super recordWithRecord:record] assignVariableInTransientWithRecord:record];
+    SKYUserConversation *newRecord = [self recordWithRecord:record];
+    [newRecord assignVariableInTransientWithRecord:record];
+    return newRecord;
 }
 
-- (id)assignVariableInTransientWithRecord:(SKYRecord *)record
+- (void)assignVariableInTransientWithRecord:(SKYRecord *)record
 {
     SKYRecord *userRecord = [record.transient valueForKey:@"user"];
     SKYRecord *conversationRecord = [record.transient valueForKey:@"conversation"];
     SKYRecord *lastReadMessage = [record.transient valueForKey:@"last_read_message"];
     if (userRecord != (id)[NSNull null]) {
-        self.user = [SKYChatUser recordWithRecord:userRecord];
+        _userRecord = userRecord;
     }
     if (conversationRecord != (id)[NSNull null]) {
-        self.conversation = [SKYConversation recordWithRecord:conversationRecord];
+        _conversation = [SKYConversation recordWithRecord:conversationRecord];
     }
     if (lastReadMessage != (id)[NSNull null]) {
-        self.lastReadMessage = [SKYMessage recordWithRecord:lastReadMessage];
+        _lastReadMessage = [SKYMessage recordWithRecord:lastReadMessage];
     }
-    return self;
 }
 
-- (void)setUnreadCount:(NSNumber *)unreadCount
+- (NSString *)lastReadMessageID
 {
-    self[@"unread_count"] = unreadCount;
+    SKYReference *message = self[SKYUserConversationLastReadMessageKey];
+    return message.recordID.recordName;
 }
 
-- (NSNumber *)unreadCount
+- (void)setLastReadMessageID:(NSString *)lastReadMessageID
 {
-    return self[@"unread_count"];
+    if (lastReadMessageID) {
+        SKYRecordID *recordID =
+            [SKYRecordID recordIDWithRecordType:@"message" name:lastReadMessageID];
+        self[SKYUserConversationLastReadMessageKey] = [SKYReference referenceWithRecordID:recordID];
+    } else {
+        self[SKYUserConversationLastReadMessageKey] = nil;
+    }
+
+    _lastReadMessage = nil;
+}
+
+- (NSInteger)unreadCount
+{
+    return [self[SKYUserConversationUnreadCountKey] integerValue];
 }
 
 @end

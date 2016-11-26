@@ -11,7 +11,8 @@
 NSString *const SKYConversationParticipantsKey = @"participant_ids";
 NSString *const SKYConversationAdminsKey = @"admin_ids";
 NSString *const SKYConversationTitleKey = @"title";
-NSString *const SKYConversationDirectMessageKey = @"is_direct_message";
+NSString *const SKYConversationDistinctByParticipantsKey = @"distinct_by_participants";
+NSString *const SKYConversationMetadataKey = @"metadata";
 
 @implementation SKYConversation
 
@@ -52,22 +53,33 @@ NSString *const SKYConversationDirectMessageKey = @"is_direct_message";
     return self[SKYConversationTitleKey];
 }
 
-- (void)setIsDirectMessage:(BOOL)isDirectMessage
+- (void)setMetadata:(NSDictionary<NSString *, id> *)metadata
 {
-    self[SKYConversationDirectMessageKey] = @(isDirectMessage);
+    self[SKYConversationMetadataKey] = [metadata copy];
 }
 
-- (BOOL)isDirectMessage
+- (NSDictionary<NSString *, id> *)metadata
 {
-    return [self[SKYConversationDirectMessageKey] boolValue];
+    return self[SKYConversationMetadataKey];
+}
+
+- (void)setDistinctByParticipants:(BOOL)distinctByParticipants
+{
+    self[SKYConversationDistinctByParticipantsKey] = @(distinctByParticipants);
+}
+
+- (BOOL)isDistinctByParticipants
+{
+    return [self[SKYConversationDistinctByParticipantsKey] boolValue];
 }
 
 - (NSString *)toString
 {
     return [NSString stringWithFormat:@"SKYConversation Detail:\nparticipantIds: %@\nadminIds: "
-                                      @"%@\ntitle: %@\nisDirectMessage: %@\nupdatedAt: %@",
+                                      @"%@\ntitle: %@\nisDistinctByParticipant: %@\nupdatedAt: %@",
                                       self.participantIds, self.adminIds, self.title,
-                                      self.isDirectMessage ? @"YES" : @"NO", self.modificationDate];
+                                      self.distinctByParticipants ? @"YES" : @"NO",
+                                      self.modificationDate];
 }
 
 - (void)addParticipantsWithIDs:(NSString *)participantIDs

@@ -6,16 +6,17 @@
 //
 //
 
-#import "SKYChatRecord.h"
 #import <SKYKit/SKYKit.h>
 
-@class SKYChatUser;
+#import "SKYChatRecord.h"
+
 @interface SKYConversation : SKYChatRecord
 
 @property (copy, nonatomic, nonnull) NSArray<NSString *> *participantIds;
 @property (copy, nonatomic, nonnull) NSArray<NSString *> *adminIds;
 @property (copy, nonatomic, nullable) NSString *title;
-@property (assign, nonatomic) BOOL isDirectMessage;
+@property (copy, nonatomic, nullable) NSDictionary<NSString *, id> *metadata;
+@property (assign, nonatomic) BOOL distinctByParticipants;
 
 - (NSString *_Nonnull)toString;
 

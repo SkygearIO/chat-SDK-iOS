@@ -24,24 +24,25 @@ typedef NS_ENUM(int, SKYChatMetaDataType) {
     SKYChatMetaDataText
 };
 
+extern NSString *_Nonnull const SKYChatMessageUnreadCountKey;
+extern NSString *_Nonnull const SKYChatConversationUnreadCountKey;
+
+extern NSString *_Nonnull const SKYChatAdminsMetadataKey;
+extern NSString *_Nonnull const SKYChatDistinctByParticipantsMetadataKey;
+
 extern NSString *_Nonnull const SKYChatMetaDataAssetNameImage;
 extern NSString *_Nonnull const SKYChatMetaDataAssetNameVoice;
 extern NSString *_Nonnull const SKYChatMetaDataAssetNameText;
 
-@class SKYConversation, SKYMessage, SKYUserChannel, SKYLastMessageRead, SKYUserConversation;
+@class SKYConversation, SKYMessage, SKYUserChannel, SKYUserConversation, SKYChatReceipt;
 
 @interface SKYChatExtension : NSObject
 
 typedef void (^SKYChatUserConversationCompletion)(SKYUserConversation *_Nullable conversation,
                                                   NSError *_Nullable error);
 typedef void (^SKYChatMessageCompletion)(SKYMessage *_Nullable message, NSError *_Nullable error);
-typedef void (^SKYChatMarkLastMessageReadCompletion)(SKYUserConversation *_Nullable conversation,
-                                                     NSError *_Nullable error);
-typedef void (^SKYChatLastMessageReadCompletion)(SKYLastMessageRead *_Nullable lastMessageRead,
-                                                 NSError *_Nullable error);
-typedef void (^SKYChatTotalUnreadCountCompletion)(NSDictionary *_Nullable response,
-                                                  NSError *_Nullable error);
-typedef void (^SKYChatUnreadCountCompletion)(NSInteger count, NSError *_Nullable error);
+typedef void (^SKYChatUnreadCountCompletion)(
+    NSDictionary<NSString *, NSNumber *> *_Nullable response, NSError *_Nullable error);
 typedef void (^SKYChatChannelCompletion)(SKYUserChannel *_Nullable userChannel,
                                          NSError *_Nullable error);
 typedef void (^SKYChatGetUserConversationListCompletion)(
@@ -59,15 +60,25 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 
 #pragma mark - Conversations
 
-- (void)createConversationWithParticipantIDs:(NSArray<NSString *> *_Nonnull)participantIds
-                                    adminIDs:(NSArray<NSString *> *_Nonnull)adminIds
+- (void)createConversationWithParticipantIDs:(NSArray<NSString *> *_Nonnull)participantIDs
                                        title:(NSString *_Nullable)title
+                                    metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                            completionHandler:
                                (SKYChatConversationCompletion _Nullable)completionHandler;
 
-- (void)fetchOrCreateDirectConversationWithUserId:(NSString *_Nonnull)userId
-                                completionHandler:
-                                    (SKYChatConversationCompletion _Nullable)completionHandler;
+- (void)createConversationWithParticipantIDs:(NSArray<NSString *> *_Nonnull)participantIDs
+                                       title:(NSString *_Nullable)title
+                                    metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
+                                    adminIDs:(NSArray<NSString *> *_Nullable)adminIDs
+                      distinctByParticipants:(BOOL)distinctByParticipants
+                           completionHandler:
+                               (SKYChatConversationCompletion _Nullable)completionHandler;
+
+- (void)createDirectConversationWithUserID:(NSString *_Nonnull)userID
+                                     title:(NSString *_Nullable)title
+                                  metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
+                         completionHandler:
+                             (SKYChatConversationCompletion _Nullable)completionHandler;
 
 - (void)deleteConversation:(SKYConversation *_Nonnull)conversation
          completionHandler:(SKYChatConversationCompletion _Nullable)completionHandler;
@@ -108,7 +119,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 
 - (void)createMessageWithConversation:(SKYConversation *_Nonnull)conversation
                                  body:(NSString *_Nullable)body
-                             metadata:(NSDictionary *_Nullable)metadata
+                             metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                     completionHandler:(SKYChatMessageCompletion _Nullable)completionHandler;
 
 - (void)createMessageWithConversation:(SKYConversation *_Nonnull)conversation
@@ -162,22 +173,21 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)markDeliveredMessagesWithID:(NSArray<NSString *> *_Nonnull)messageIDs
                   completionHandler:(void (^_Nullable)(NSError *_Nullable error))completionHandler;
 
+- (void)fetchReceiptsWithMessage:(SKYMessage *_Nonnull)message
+               completionHandler:(void (^_Nullable)(NSArray<SKYChatReceipt *> *_Nullable receipts,
+                                                    NSError *_Nullable error))completionHandler;
+
 #pragma mark Message Markers
 
-- (void)getOrCreateLastMessageReadithConversationId:(NSString *_Nonnull)conversationId
-                                  completionHandler:
-                                      (SKYChatLastMessageReadCompletion _Nullable)completionHandler;
+- (void)markLastReadMessage:(SKYMessage *_Nonnull)message
+         inUserConversation:(SKYUserConversation *_Nonnull)userConversation
+          completionHandler:(SKYChatUserConversationCompletion _Nullable)completionHandler;
 
-- (void)markAsLastMessageReadWithConversationId:(NSString *_Nonnull)conversationId
-                                  withMessageId:(NSString *_Nonnull)messageId
-                              completionHandler:
-                                  (SKYChatMarkLastMessageReadCompletion _Nullable)completionHandler;
+- (void)fetchUnreadCountWithUserConversation:(SKYUserConversation *_Nonnull)userConversation
+                           completionHandler:
+                               (SKYChatUnreadCountCompletion _Nullable)completionHandler;
 
-- (void)getTotalUnreadCount:(SKYChatTotalUnreadCountCompletion _Nullable)completionHandler;
-
-- (void)getUnreadMessageCountWithConversationId:(NSString *_Nonnull)conversationId
-                              completionHandler:
-                                  (SKYChatUnreadCountCompletion _Nullable)completionHandler;
+- (void)fetchTotalUnreadCount:(SKYChatUnreadCountCompletion _Nullable)completionHandler;
 
 - (void)getOrCreateUserChannelCompletionHandler:
     (SKYChatChannelCompletion _Nullable)completionHandler;

@@ -6,16 +6,18 @@
 //
 //
 
+#import <SKYKit/SKYKit.h>
+
 #import "SKYChatRecord.h"
-#import "SKYChatUser.h"
-#import "SKYConversation.h"
-#import "SKYMessage.h"
+
+@class SKYMessage, SKYConversation;
 
 @interface SKYUserConversation : SKYChatRecord
 
-@property (strong, nonatomic) SKYChatUser *user;
-@property (strong, nonatomic) SKYConversation *conversation;
-@property (strong, nonatomic) SKYMessage *lastReadMessage;
-@property (assign, nonatomic) NSNumber *unreadCount;
+@property (nonatomic, readonly, nullable) SKYRecord *userRecord;
+@property (nonatomic, readonly, nullable) SKYConversation *conversation;
+@property (nonatomic, readonly, nullable) SKYMessage *lastReadMessage;
+@property (copy, nonatomic, nullable) NSString *lastReadMessageID;
+@property (nonatomic, readonly) NSInteger unreadCount;
 
 @end

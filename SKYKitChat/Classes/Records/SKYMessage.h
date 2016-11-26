@@ -6,10 +6,18 @@
 //
 //
 
-#import "SKYChatRecord.h"
 #import <SKYKit/SKYKit.h>
 
+#import "SKYChatRecord.h"
+
 @class SKYReference;
+
+typedef enum {
+    SKYChatDeliveringConversationStatus,
+    SKYChatDeliveredConversationStatus,
+    SKYChatSomeReadConversationStatus,
+    SKYChatAllReadConversationStatus,
+} SKYChatConversationStatus;
 
 @interface SKYMessage : SKYChatRecord
 
@@ -21,6 +29,7 @@
 @property (assign, nonatomic) bool syncingToServer;
 @property (assign, nonatomic) bool alreadySyncToServer;
 @property (assign, nonatomic) bool fail;
+@property (assign, nonatomic, readonly) SKYChatConversationStatus conversationStatus;
 
 + (instancetype)message;
 

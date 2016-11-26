@@ -7,12 +7,12 @@
 //
 
 #import "SKYMessage.h"
-#import "SKYRecord.h"
 
 NSString *const SKYMessageConversationKey = @"conversation_id";
 NSString *const SKYMessageBodyKey = @"body";
 NSString *const SKYMessageMetadataKey = @"metadata";
 NSString *const SKYMessageAttachmentKey = @"attachment";
+NSString *const SKYMessageConversationStatusKey = @"conversation_status";
 
 @implementation SKYMessage
 
@@ -66,6 +66,20 @@ NSString *const SKYMessageAttachmentKey = @"attachment";
 - (void)setAttachment:(SKYAsset *)attachment
 {
     self[SKYMessageAttachmentKey] = attachment;
+}
+
+- (SKYChatConversationStatus)conversationStatus
+{
+    NSString *stringStatus = self[SKYMessageConversationStatusKey];
+    if ([stringStatus isEqualToString:@"all_read"]) {
+        return SKYChatAllReadConversationStatus;
+    } else if ([stringStatus isEqualToString:@"some_read"]) {
+        return SKYChatSomeReadConversationStatus;
+    } else if ([stringStatus isEqualToString:@"delivered"]) {
+        return SKYChatDeliveredConversationStatus;
+    } else {
+        return SKYChatDeliveringConversationStatus;
+    }
 }
 
 - (NSInteger)getMsgType
