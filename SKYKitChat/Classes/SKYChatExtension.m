@@ -237,7 +237,7 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                              metadata:(NSDictionary *)metadata
                     completionHandler:(SKYChatMessageCompletion)completionHandler
 {
-    SKYMessage *message = [SKYMessage recordWithMessageRecordType];
+    SKYMessage *message = [SKYMessage message];
     if (body) {
         message.body = body;
     }
@@ -290,18 +290,18 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
        toConversation:(SKYConversation *)conversation
     completionHandler:(SKYChatMessageCompletion)completionHandler
 {
-    message.conversationId = [SKYReference referenceWithRecord:conversation];
+    message.conversationID = conversation.recordID.recordName;
     SKYDatabase *database = self.container.publicCloudDatabase;
     [database saveRecord:message
               completion:^(SKYRecord *record, NSError *error) {
                   SKYMessage *msg = nil;
                   if (error) {
-                      message.isAlreadySyncToServer = false;
-                      message.isFail = true;
+                      message.alreadySyncToServer = false;
+                      message.fail = true;
                   } else {
                       msg = [SKYMessage recordWithRecord:record];
-                      msg.isAlreadySyncToServer = true;
-                      msg.isFail = false;
+                      msg.alreadySyncToServer = true;
+                      msg.fail = false;
                   }
                   if (completionHandler) {
                       completionHandler(msg, error);
@@ -391,8 +391,8 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                          SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
 
                          SKYMessage *msg = [SKYMessage recordWithRecord:record];
-                         msg.isAlreadySyncToServer = true;
-                         msg.isFail = false;
+                         msg.alreadySyncToServer = true;
+                         msg.fail = false;
                          if (msg) {
                              [returnArray addObject:msg];
                          }

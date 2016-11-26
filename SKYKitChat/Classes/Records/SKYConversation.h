@@ -12,20 +12,16 @@
 @class SKYChatUser;
 @interface SKYConversation : SKYChatRecord
 
-@property (strong, nonatomic) NSArray<NSString *> *participantIds;
-@property (strong, nonatomic) NSArray<NSString *> *adminIds;
-@property (strong, nonatomic) NSString *title;
+@property (copy, nonatomic, nonnull) NSArray<NSString *> *participantIds;
+@property (copy, nonatomic, nonnull) NSArray<NSString *> *adminIds;
+@property (copy, nonatomic, nullable) NSString *title;
 @property (assign, nonatomic) BOOL isDirectMessage;
-@property (strong, nonatomic) NSDate *updatedDate;
-@property (strong, nonatomic) SKYChatUser *otherUser;
 
-- (NSString *)toString;
-- (NSString *)getOtherUserUserId:(NSString *)myUserId;
+- (NSString *_Nonnull)toString;
 
-- (void)addParticipantsWithIDs:(nonnull NSString *)participantIDs;
-- (void)removeParticipantsWithIDs:(nonnull NSString *)participantIDs;
-- (void)addAdminsWithIDs:(nonnull NSString *)adminIDs;
-- (void)removeAdminsWithIDs:(nonnull NSString *)adminIDs;
-
+- (void)addParticipantsWithIDs:(NSString *_Nonnull)participantIDs;
+- (void)removeParticipantsWithIDs:(NSString *_Nonnull)participantIDs;
+- (void)addAdminsWithIDs:(NSString *_Nonnull)adminIDs;
+- (void)removeAdminsWithIDs:(NSString *_Nonnull)adminIDs;
 
 @end

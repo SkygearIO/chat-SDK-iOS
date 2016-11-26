@@ -13,22 +13,19 @@
 
 @interface SKYMessage : SKYChatRecord
 
-@property (strong, nonatomic) SKYReference *conversationId;
-@property (strong, nonatomic) NSString *conversationID;
-@property (strong, nonatomic) NSString *body;
-@property (strong, nonatomic) NSDictionary *metadata;
-@property (strong, nonatomic) NSDate *createdAt;
+@property (strong, nonatomic, nullable) SKYRecordID *conversationID;
+@property (copy, nonatomic, nullable) NSString *body;
+@property (copy, nonatomic, nullable) NSDictionary<NSString *, id> *metadata;
 @property (strong, nonatomic) SKYAsset *attachment;
 
-@property (strong, nonatomic) UIImage *attachmentImage;
-@property (assign, nonatomic) bool isSyncingToServer;
-@property (assign, nonatomic) bool isAlreadySyncToServer;
-@property (assign, nonatomic) bool isFail;
+@property (assign, nonatomic) bool syncingToServer;
+@property (assign, nonatomic) bool alreadySyncToServer;
+@property (assign, nonatomic) bool fail;
 
-+ (instancetype)recordWithMessageRecordType;
++ (instancetype)message;
 
 - (NSInteger)getMsgType;
-- (NSString *)getAssetURLForImage;
-- (NSString *)getAssetURLForVoice;
+- (NSString *_Null_unspecified)getAssetURLForImage;
+- (NSString *_Null_unspecified)getAssetURLForVoice;
 - (float)getVoiceDuration;
 @end

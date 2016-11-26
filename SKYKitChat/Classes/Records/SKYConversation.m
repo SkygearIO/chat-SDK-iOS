@@ -8,6 +8,11 @@
 
 #import "SKYConversation.h"
 
+NSString *const SKYConversationParticipantsKey = @"participant_ids";
+NSString *const SKYConversationAdminsKey = @"admin_ids";
+NSString *const SKYConversationTitleKey = @"title";
+NSString *const SKYConversationDirectMessageKey = @"is_direct_message";
+
 @implementation SKYConversation
 
 + (instancetype)recordWithRecord:(SKYRecord *)record
@@ -17,47 +22,44 @@
 
 - (void)setParticipantIds:(NSArray<NSString *> *)participantIds
 {
-    self[@"participant_ids"] = participantIds;
+    self[SKYConversationParticipantsKey] = [[NSSet setWithArray:participantIds] allObjects];
 }
 
 - (NSArray<NSString *> *)participantIds
 {
-    return self[@"participant_ids"];
+    NSArray *admins = self[SKYConversationParticipantsKey];
+    return admins ? admins : [NSArray array];
 }
 
 - (void)setAdminIds:(NSArray<NSString *> *)adminIds
 {
-    self[@"admin_ids"] = adminIds;
+    self[SKYConversationAdminsKey] = [[NSSet setWithArray:adminIds] allObjects];
 }
 
 - (NSArray<NSString *> *)adminIds
 {
-    return self[@"admin_ids"];
+    NSArray *admins = self[SKYConversationAdminsKey];
+    return admins ? admins : [NSArray array];
 }
 
 - (void)setTitle:(NSString *)title
 {
-    self[@"title"] = title;
+    self[SKYConversationTitleKey] = [title copy];
 }
 
 - (NSString *)title
 {
-    return self[@"title"];
+    return self[SKYConversationTitleKey];
 }
 
 - (void)setIsDirectMessage:(BOOL)isDirectMessage
 {
-    self[@"is_direct_message"] = isDirectMessage ? @YES : @NO;
+    self[SKYConversationDirectMessageKey] = @(isDirectMessage);
 }
 
 - (BOOL)isDirectMessage
 {
-    return [self[@"is_direct_message"] boolValue];
-}
-
-- (NSDate *)updatedDate
-{
-    return self.modificationDate;
+    return [self[SKYConversationDirectMessageKey] boolValue];
 }
 
 - (NSString *)toString
@@ -65,19 +67,7 @@
     return [NSString stringWithFormat:@"SKYConversation Detail:\nparticipantIds: %@\nadminIds: "
                                       @"%@\ntitle: %@\nisDirectMessage: %@\nupdatedAt: %@",
                                       self.participantIds, self.adminIds, self.title,
-                                      self.isDirectMessage ? @"YES" : @"NO", self.updatedDate];
-}
-
-- (NSString *)getOtherUserUserId:(NSString *)myUserId
-{
-    NSString *returnString = @"";
-    for (NSString *userId in self.participantIds) {
-        if (![myUserId isEqualToString:userId]) {
-            returnString = userId;
-            break;
-        }
-    }
-    return returnString;
+                                      self.isDirectMessage ? @"YES" : @"NO", self.modificationDate];
 }
 
 - (void)addParticipantsWithIDs:(NSString *)participantIDs

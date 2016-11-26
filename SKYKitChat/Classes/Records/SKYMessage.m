@@ -9,61 +9,63 @@
 #import "SKYMessage.h"
 #import "SKYRecord.h"
 
+NSString *const SKYMessageConversationKey = @"conversation_id";
+NSString *const SKYMessageBodyKey = @"body";
+NSString *const SKYMessageMetadataKey = @"metadata";
+NSString *const SKYMessageAttachmentKey = @"attachment";
+
 @implementation SKYMessage
 
-+ (instancetype)recordWithMessageRecordType
++ (instancetype)message
 {
     return [[self alloc] initWithRecordType:@"message"];
 }
 
-- (void)setConversationId:(SKYReference *)conversationId
+- (void)setConversationID:(NSString *)conversationID
 {
-    self[@"conversation_id"] = conversationId;
-}
-
-- (SKYReference *)conversationId
-{
-    return self[@"conversation_id"];
+    if (conversationID) {
+        SKYRecordID *recordID =
+            [SKYRecordID recordIDWithRecordType:@"conversation" name:conversationID];
+        self[SKYMessageConversationKey] = [SKYReference referenceWithRecordID:recordID];
+    } else {
+        self[SKYMessageConversationKey] = nil;
+    }
 }
 
 - (NSString *)conversationID
 {
-    return self.conversationId.recordID.recordName;
+    SKYReference *conversation = self[SKYMessageConversationKey];
+    return conversation.recordID.recordName;
 }
 
 - (void)setBody:(NSString *)body
 {
-    self[@"body"] = body;
+    self[SKYMessageBodyKey] = [body copy];
 }
 
 - (NSString *)body
 {
-    return self[@"body"];
+    return self[SKYMessageBodyKey];
 }
 
 - (void)setMetadata:(NSDictionary *)metadata
 {
-    self[@"metadata"] = metadata;
+    self[SKYMessageMetadataKey] = [metadata copy];
 }
 
 - (NSDictionary *)metadata
 {
-    return self[@"metadata"];
-}
-
-- (NSDate *)createdAt
-{
-    return self.creationDate;
+    return self[SKYMessageMetadataKey];
 }
 
 - (SKYAsset *)attachment
 {
-    return self[@"attachment"];
+    return self[SKYMessageAttachmentKey];
 }
 
 - (void)setAttachment:(SKYAsset *)attachment
 {
-    self[@"attachment"] = attachment;
+    self[SKYMessageAttachmentKey] = attachment;
 }
 
 - (NSInteger)getMsgType
