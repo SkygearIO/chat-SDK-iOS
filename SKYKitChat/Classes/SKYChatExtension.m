@@ -19,7 +19,6 @@
 #import "SKYChatExtension.h"
 #import "SKYContainer_Private.h"
 #import "SKYConversation.h"
-#import "SKYConversationChange.h"
 #import "SKYKit.h"
 #import "SKYLastMessageRead.h"
 #import "SKYMessage.h"
