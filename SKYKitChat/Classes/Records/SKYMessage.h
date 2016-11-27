@@ -12,12 +12,12 @@
 
 @class SKYReference;
 
-typedef enum {
-    SKYChatDeliveringConversationStatus,
-    SKYChatDeliveredConversationStatus,
-    SKYChatSomeReadConversationStatus,
-    SKYChatAllReadConversationStatus,
-} SKYChatConversationStatus;
+typedef NS_ENUM(NSInteger, SKYChatConversationStatus) {
+    SKYChatConversationStatusDelivering,
+    SKYChatConversationStatusDelivered,
+    SKYChatConversationStatusSomeRead,
+    SKYChatConversationStatusAllRead
+};
 
 @interface SKYMessage : SKYChatRecord
 

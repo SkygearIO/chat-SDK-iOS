@@ -31,11 +31,11 @@
 - (SKYChatReceiptStatus)status
 {
     if (self.readAt) {
-        return SKYChatReceiptReadStatus;
+        return SKYChatReceiptStatusRead;
     } else if (self.deliveredAt) {
-        return SKYChatReceiptDeliveredStatus;
+        return SKYChatReceiptStatusDelivered;
     } else {
-        return SKYChatReceiptDeliveringStatus;
+        return SKYChatReceiptStatusDelivering;
     }
 }
 

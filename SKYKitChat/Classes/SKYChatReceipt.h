@@ -8,11 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
-typedef enum {
-    SKYChatReceiptDeliveringStatus,
-    SKYChatReceiptDeliveredStatus,
-    SKYChatReceiptReadStatus,
-} SKYChatReceiptStatus;
+typedef NS_ENUM(NSInteger, SKYChatReceiptStatus) {
+    SKYChatReceiptStatusDelivering,
+    SKYChatReceiptStatusDelivered,
+    SKYChatReceiptStatusRead,
+};
 
 @interface SKYChatReceipt : NSObject
 

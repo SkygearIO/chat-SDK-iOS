@@ -72,13 +72,13 @@ NSString *const SKYMessageConversationStatusKey = @"conversation_status";
 {
     NSString *stringStatus = self[SKYMessageConversationStatusKey];
     if ([stringStatus isEqualToString:@"all_read"]) {
-        return SKYChatAllReadConversationStatus;
+        return SKYChatConversationStatusAllRead;
     } else if ([stringStatus isEqualToString:@"some_read"]) {
-        return SKYChatSomeReadConversationStatus;
+        return SKYChatConversationStatusSomeRead;
     } else if ([stringStatus isEqualToString:@"delivered"]) {
-        return SKYChatDeliveredConversationStatus;
+        return SKYChatConversationStatusDelivered;
     } else {
-        return SKYChatDeliveringConversationStatus;
+        return SKYChatConversationStatusDelivering;
     }
 }
 

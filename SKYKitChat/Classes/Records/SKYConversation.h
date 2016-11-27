@@ -20,9 +20,10 @@
 
 - (NSString *_Nonnull)toString;
 
-- (void)addParticipantsWithIDs:(NSString *_Nonnull)participantIDs;
-- (void)removeParticipantsWithIDs:(NSString *_Nonnull)participantIDs;
-- (void)addAdminsWithIDs:(NSString *_Nonnull)adminIDs;
-- (void)removeAdminsWithIDs:(NSString *_Nonnull)adminIDs;
+- (void)addParticipantsWithUserIDs:(NSString *_Nonnull)userIDs NS_SWIFT_NAME(addParticipants(_:));
+- (void)removeParticipantsWithUserIDs:(NSString *_Nonnull)userIDs
+    NS_SWIFT_NAME(removeParticipants(_:));
+- (void)addAdminsWithUserIDs:(NSString *_Nonnull)userIDs NS_SWIFT_NAME(addAdmins(_:));
+- (void)removeAdminsWithUserIDs:(NSString *_Nonnull)userIDs NS_SWIFT_NAME(removeAdmins(_:));
 
 @end

@@ -82,27 +82,27 @@ NSString *const SKYConversationMetadataKey = @"metadata";
                                       self.modificationDate];
 }
 
-- (void)addParticipantsWithIDs:(NSString *)participantIDs
+- (void)addParticipantsWithUserIDs:(NSString *)userIDs
 {
-    [self setParticipantIds:[self.participantIds arrayByAddingObjectsFromArray:participantIDs]];
+    [self setParticipantIds:[self.participantIds arrayByAddingObjectsFromArray:userIDs]];
 }
 
-- (void)removeParticipantsWithIDs:(NSString *)participantIDs
+- (void)removeParticipantsWithUserIDs:(NSString *)userIDs
 {
     NSMutableArray *participants = [self.participantIds mutableCopy];
-    [participants removeObjectsInArray:participantIDs];
+    [participants removeObjectsInArray:userIDs];
     [self setParticipantIds:participants];
 }
 
-- (void)addAdminsWithIDs:(NSString *)adminIDs
+- (void)addAdminsWithUserIDs:(NSString *)userIDs
 {
-    [self setAdminIds:[self.adminIds arrayByAddingObjectsFromArray:adminIDs]];
+    [self setAdminIds:[self.adminIds arrayByAddingObjectsFromArray:userIDs]];
 }
 
-- (void)removeAdminsWithIDs:(NSString *)adminIDs
+- (void)removeAdminsWithUserIDs:(NSString *)userIDs
 {
     NSMutableArray *admins = [self.adminIds mutableCopy];
-    [admins removeObjectsInArray:adminIDs];
+    [admins removeObjectsInArray:userIDs];
     [self setAdminIds:admins];
 }
 

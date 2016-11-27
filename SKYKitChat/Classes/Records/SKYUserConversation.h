@@ -14,8 +14,8 @@
 
 @interface SKYUserConversation : SKYChatRecord
 
-@property (nonatomic, readonly, nullable) SKYRecord *userRecord;
-@property (nonatomic, readonly, nullable) SKYConversation *conversation;
+@property (nonatomic, readonly, nonnull) SKYRecord *userRecord;
+@property (nonatomic, readonly, nonnull) SKYConversation *conversation;
 @property (nonatomic, readonly, nullable) SKYMessage *lastReadMessage;
 @property (copy, nonatomic, nullable) NSString *lastReadMessageID;
 @property (nonatomic, readonly) NSInteger unreadCount;
