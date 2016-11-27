@@ -202,7 +202,7 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
 #pragma mark Fetching User Conversations
 
 - (void)fetchUserConversationsWithQuery:(SKYQuery *)query
-                             completion:(SKYChatGetUserConversationListCompletion)completion
+                             completion:(SKYChatFetchUserConversationListCompletion)completion
 {
     query.transientIncludes = @{
         @"conversation" : [NSExpression expressionForKeyPath:@"conversation"],
@@ -226,7 +226,8 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
          }];
 }
 
-- (void)fetchUserConversationsCompletionHandler:(SKYChatGetUserConversationListCompletion)completion
+- (void)fetchUserConversationsCompletionHandler:
+    (SKYChatFetchUserConversationListCompletion)completion
 {
     NSPredicate *predicate =
         [NSPredicate predicateWithFormat:@"user = %@", self.container.currentUserRecordID];
@@ -304,6 +305,19 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                              metadata:(NSDictionary *)metadata
                            completion:(SKYChatMessageCompletion)completion
 {
+    [self createMessageWithConversation:conversation
+                                   body:body
+                             attachment:nil
+                               metadata:metadata
+                             completion:completion];
+}
+
+- (void)createMessageWithConversation:(SKYConversation *)conversation
+                                 body:(NSString *)body
+                           attachment:(SKYAsset *)attachment
+                             metadata:(NSDictionary *)metadata
+                           completion:(SKYChatMessageCompletion)completion
+{
     SKYMessage *message = [SKYMessage message];
     if (body) {
         message.body = body;
@@ -311,47 +325,14 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
     if (metadata) {
         message.metadata = metadata;
     }
+    if (attachment) {
+        message.attachment = attachment;
+    }
     [self addMessage:message toConversation:conversation completion:completion];
 }
 
-- (void)createMessageWithConversation:(SKYConversation *)conversation
-                                 body:(NSString *)body
-                                image:(UIImage *)image
-                           completion:(SKYChatMessageCompletion)completion
+- (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
 {
-    SKYMessage *message = [SKYMessage recordWithRecordType:@"message"];
-    message.body = body;
-    NSString *assetName = [self getAssetNameByType:SKYChatMetaDataAssetNameImage];
-    NSString *mimeType = [self getMimeTypeByType:SKYChatMetaDataAssetNameImage];
-    SKYAsset *asset = [SKYAsset assetWithName:assetName data:UIImageJPEGRepresentation(image, 0.7)];
-    asset.mimeType = mimeType;
-
-    [self addMessage:message andAsset:asset toConversation:conversation completion:completion];
-}
-
-- (void)createMessageWithConversation:(SKYConversation *)conversation
-                                 body:(NSString *)body
-                         voiceFileURL:(NSURL *)url
-                             duration:(float)duration
-                           completion:(SKYChatMessageCompletion)completion
-{
-    SKYMessage *message = [SKYMessage recordWithRecordType:@"message"];
-    message.body = body;
-
-    NSString *assetName = [self getAssetNameByType:SKYChatMetaDataVoice];
-    NSString *mimeType = [self getMimeTypeByType:SKYChatMetaDataVoice];
-    assetName = [NSString stringWithFormat:@"%@duration%.1fduration", assetName, duration];
-    SKYAsset *asset = [SKYAsset assetWithName:assetName fileURL:url];
-    asset.mimeType = mimeType;
-
-    [self addMessage:message andAsset:asset toConversation:conversation completion:completion];
-}
-
-- (void)addMessage:(SKYMessage *)message
-    toConversation:(SKYConversation *)conversation
-        completion:(SKYChatMessageCompletion)completion
-{
-    message.conversationID = conversation.recordID.recordName;
     SKYDatabase *database = self.container.publicCloudDatabase;
     [database saveRecord:message
               completion:^(SKYRecord *record, NSError *error) {
@@ -371,16 +352,16 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
 }
 
 - (void)addMessage:(SKYMessage *)message
-          andAsset:(SKYAsset *)asset
     toConversation:(SKYConversation *)conversation
         completion:(SKYChatMessageCompletion)completion
 {
-    if (!asset) {
-        [self addMessage:message toConversation:conversation completion:completion];
+    message.conversationID = conversation.recordID.recordName;
+    if (!message.attachment || message.attachment.url.isFileURL) {
+        [self saveMessage:message completion:completion];
         return;
     }
 
-    [self.container uploadAsset:asset
+    [self.container uploadAsset:message.attachment
               completionHandler:^(SKYAsset *uploadedAsset, NSError *error) {
                   if (error) {
                       NSLog(@"error uploading asset: %@", error);
@@ -390,7 +371,7 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                   } else {
                       message.attachment = uploadedAsset;
                   }
-                  [self addMessage:message toConversation:conversation completion:completion];
+                  [self saveMessage:message completion:completion];
               }];
 }
 
@@ -414,7 +395,7 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
 - (void)fetchMessagesWithConversation:(SKYConversation *)conversation
                                 limit:(NSInteger)limit
                            beforeTime:(NSDate *)beforeTime
-                           completion:(SKYChatGetMessagesListCompletion)completion
+                           completion:(SKYChatFetchMessagesListCompletion)completion
 {
     [self fetchMessagesWithConversationID:conversation.recordID.recordName
                                     limit:limit
@@ -425,7 +406,7 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
 - (void)fetchMessagesWithConversationID:(NSString *)conversationId
                                   limit:(NSInteger)limit
                              beforeTime:(NSDate *)beforeTime
-                             completion:(SKYChatGetMessagesListCompletion)completion
+                             completion:(SKYChatFetchMessagesListCompletion)completion
 {
     NSString *dateString = @"";
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
@@ -621,53 +602,6 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                                              }];
         }
     }];
-}
-
-#pragma mark - Assets
-
-- (NSString *)getAssetNameByType:(SKYChatMetaDataType)type
-{
-    switch (type) {
-        case SKYChatMetaDataImage:
-            return SKYChatMetaDataAssetNameImage;
-            break;
-        case SKYChatMetaDataVoice:
-            return SKYChatMetaDataAssetNameVoice;
-            break;
-        case SKYChatMetaDataText:
-            return SKYChatMetaDataAssetNameText;
-            break;
-    }
-    return @"";
-}
-
-- (NSString *)getMimeTypeByType:(SKYChatMetaDataType)type
-{
-    switch (type) {
-        case SKYChatMetaDataImage:
-            return @"image/png";
-            break;
-        case SKYChatMetaDataVoice:
-            return @"audio/aac";
-            break;
-        case SKYChatMetaDataText:
-            return @"text/";
-            break;
-    }
-    return @"";
-}
-
-- (void)fetchAssetsByRecordId:(NSString *)recordId
-                   completion:(SKYChatGetAssetsListCompletion)completion
-{
-    NSString *recordName = [@"" stringByAppendingString:recordId];
-    NSLog(@"recordName :%@", recordName);
-    [self.container.privateCloudDatabase
-        fetchRecordWithID:[SKYRecordID recordIDWithCanonicalString:recordName]
-        completionHandler:^(SKYRecord *record, NSError *error) {
-            SKYAsset *asset = record[@"image"];
-            completion(asset, error);
-        }];
 }
 
 @end

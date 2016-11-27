@@ -18,12 +18,6 @@
 
 #import <SKYKit/SKYKit.h>
 
-typedef NS_ENUM(int, SKYChatMetaDataType) {
-    SKYChatMetaDataImage,
-    SKYChatMetaDataVoice,
-    SKYChatMetaDataText
-};
-
 extern NSString *_Nonnull const SKYChatMessageUnreadCountKey;
 extern NSString *_Nonnull const SKYChatConversationUnreadCountKey;
 
@@ -45,12 +39,10 @@ typedef void (^SKYChatUnreadCountCompletion)(
     NSDictionary<NSString *, NSNumber *> *_Nullable response, NSError *_Nullable error);
 typedef void (^SKYChatChannelCompletion)(SKYUserChannel *_Nullable userChannel,
                                          NSError *_Nullable error);
-typedef void (^SKYChatGetUserConversationListCompletion)(
+typedef void (^SKYChatFetchUserConversationListCompletion)(
     NSArray<SKYUserConversation *> *_Nullable conversationList, NSError *_Nullable error);
-typedef void (^SKYChatGetMessagesListCompletion)(NSArray<SKYMessage *> *_Nullable messageList,
-                                                 NSError *_Nullable error);
-typedef void (^SKYChatGetAssetsListCompletion)(SKYAsset *_Nullable assets,
-                                               NSError *_Nullable error);
+typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nullable messageList,
+                                                   NSError *_Nullable error);
 typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable conversation,
                                               NSError *_Nullable error);
 
@@ -108,14 +100,16 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  @param adminIDs an array of all participants that can administrate the conversation
  @param completion completion block
  */
+
+// clang-format off
 - (void)createConversationWithParticipantIDs:(NSArray<NSString *> *_Nonnull)participantIDs
                                        title:(NSString *_Nullable)title
                                     metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                                     adminIDs:(NSArray<NSString *> *_Nullable)adminIDs
                       distinctByParticipants:(BOOL)distinctByParticipants
                                   completion:(SKYChatConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(createConversation(participantIDs:title:metadata:adminIDs:distinctByParticipants:
-                                     completion:));
+    NS_SWIFT_NAME(createConversation(participantIDs:title:metadata:adminIDs:distinctByParticipants:completion:));
+// clang-format on
 
 /**
  Creates a direct conversation with a specific user.
@@ -179,7 +173,7 @@ NS_SWIFT_NAME(saveConversation(_ : completion:));
  @param completion completion block
  */
 - (void)fetchUserConversationsWithCompletion:
-    (SKYChatGetUserConversationListCompletion _Nullable)completion;
+    (SKYChatFetchUserConversationListCompletion _Nullable)completion;
 
 /**
  Fetches a user conversation by ID.
@@ -269,23 +263,28 @@ NS_SWIFT_NAME(saveConversation(_ : completion:));
                            completion:(SKYChatMessageCompletion _Nullable)completion;
 NS_SWIFT_NAME(createMessage(conversation : body : metadata : completion:));
 
-- (void)createMessageWithConversation:(SKYConversation *_Nonnull)conversation
-                                 body:(NSString *_Nullable)body
-                                image:(UIImage *_Nullable)image
-                           completion:(SKYChatMessageCompletion _Nullable)completion;
-NS_SWIFT_NAME(createMessage(conversation : body : image : completion:));
+/**
+ Creates a message in the specified conversation with an attachment.
 
+ @param conversation conversation object
+ @param body message body
+ @param attachment SKYAsset object containing the attachment.
+ @param metadata application metadata for the conversation
+ @param completion completion block
+ */
 - (void)createMessageWithConversation:(SKYConversation *_Nonnull)conversation
                                  body:(NSString *_Nullable)body
-                         voiceFileURL:(NSURL *_Nullable)url
-                             duration:(float)duration
+                           attachment:(SKYAsset *_Nullable)attachment
+                             metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                            completion:(SKYChatMessageCompletion _Nullable)completion;
-NS_SWIFT_NAME(createMessage(conversation : body : voiceFileURL : duration : completion:));
+NS_SWIFT_NAME(createMessage(conversation : body : attachment : metadata : completion:));
 
 /**
  Adds a message to a conversation.
 
- The message is modified with the conversation and saved to the server.
+ The message is modified with the conversation and saved to the server. If the message contains
+ attachment and the attachment is not uploaded yet, the attachment will be uploaded first and
+ the message is then saved to the server.
 
  @param message message to add to a conversation
  @param conversation conversation object
@@ -295,23 +294,6 @@ NS_SWIFT_NAME(createMessage(conversation : body : voiceFileURL : duration : comp
     toConversation:(SKYConversation *_Nonnull)conversation
         completion:(SKYChatMessageCompletion _Nullable)completion
     NS_SWIFT_NAME(addMessage(_:to:completion:));
-
-/**
- Adds a message and an asset to a conversation.
-
- The specified asset is uploaded to the server before attaching to the specified message.
- The message is then modified with the conversation and saved to the server.
-
- @param message mesaage to add to a conversation
- @param asset asset to add to the mssage
- @param conversation conversation object
- @param completion completion block
- */
-- (void)addMessage:(SKYMessage *_Nonnull)message
-          andAsset:(SKYAsset *_Nullable)asset
-    toConversation:(SKYConversation *_Nonnull)conversation
-        completion:(SKYChatMessageCompletion _Nullable)completion;
-NS_SWIFT_NAME(addMessage(_ : asset : to : completion:));
 
 /**
  Deletes a message.
@@ -344,7 +326,7 @@ NS_SWIFT_NAME(addMessage(_ : asset : to : completion:));
 - (void)fetchMessagesWithConversation:(SKYConversation *_Nonnull)conversation
                                 limit:(NSInteger)limit
                            beforeTime:(NSDate *_Nullable)beforeTime
-                           completion:(SKYChatGetMessagesListCompletion _Nullable)completion
+                           completion:(SKYChatFetchMessagesListCompletion _Nullable)completion
     NS_SWIFT_NAME(fetchMessages(conversation:limit:beforeTime:completion:));
 
 /**
@@ -358,7 +340,7 @@ NS_SWIFT_NAME(addMessage(_ : asset : to : completion:));
 - (void)fetchMessagesWithConversationID:(NSString *_Nonnull)conversationId
                                   limit:(NSInteger)limit
                              beforeTime:(NSDate *_Nullable)beforeTime
-                             completion:(SKYChatGetMessagesListCompletion _Nullable)completion
+                             completion:(SKYChatFetchMessagesListCompletion _Nullable)completion
     NS_SWIFT_NAME(fetchMessages(conversationID:limit:beforeTime:completion:));
 
 #pragma mark Delivery and Read Status
@@ -455,10 +437,5 @@ NS_SWIFT_NAME(addMessage(_ : asset : to : completion:));
 #pragma mark - Subscriptions
 
 - (void)subscribeHandler:(void (^_Nonnull)(NSDictionary<NSString *, id> *_Nonnull))messageHandler;
-
-#pragma mark - Assets
-
-- (void)fetchAssetsByRecordId:(NSString *_Nonnull)recordId
-                   completion:(SKYChatGetAssetsListCompletion _Nullable)completion;
 
 @end

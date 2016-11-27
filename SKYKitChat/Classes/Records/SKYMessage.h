@@ -10,13 +10,15 @@
 
 #import "SKYChatRecord.h"
 
+extern NSString *const SKYMessageTypeMetadataKey;
+
 @class SKYReference;
 
-typedef NS_ENUM(NSInteger, SKYChatConversationStatus) {
-    SKYChatConversationStatusDelivering,
-    SKYChatConversationStatusDelivered,
-    SKYChatConversationStatusSomeRead,
-    SKYChatConversationStatusAllRead
+typedef NS_ENUM(NSInteger, SKYMessageConversationStatus) {
+    SKYMessageConversationStatusDelivering,
+    SKYMessageConversationStatusDelivered,
+    SKYMessageConversationStatusSomeRead,
+    SKYMessageConversationStatusAllRead
 };
 
 @interface SKYMessage : SKYChatRecord
@@ -24,17 +26,13 @@ typedef NS_ENUM(NSInteger, SKYChatConversationStatus) {
 @property (strong, nonatomic, nullable) SKYRecordID *conversationID;
 @property (copy, nonatomic, nullable) NSString *body;
 @property (copy, nonatomic, nullable) NSDictionary<NSString *, id> *metadata;
-@property (strong, nonatomic) SKYAsset *attachment;
+@property (strong, nonatomic, readwrite, nullable) SKYAsset *attachment;
 
 @property (assign, nonatomic) bool syncingToServer;
 @property (assign, nonatomic) bool alreadySyncToServer;
 @property (assign, nonatomic) bool fail;
-@property (assign, nonatomic, readonly) SKYChatConversationStatus conversationStatus;
+@property (assign, nonatomic, readonly) SKYMessageConversationStatus conversationStatus;
 
 + (instancetype)message;
 
-- (NSInteger)getMsgType;
-- (NSString *_Null_unspecified)getAssetURLForImage;
-- (NSString *_Null_unspecified)getAssetURLForVoice;
-- (float)getVoiceDuration;
 @end
