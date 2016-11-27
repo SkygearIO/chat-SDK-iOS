@@ -237,12 +237,10 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
 - (void)fetchUserConversationWithID:(NSString *)conversationId
                          completion:(SKYChatUserConversationCompletion)completion
 {
-    NSPredicate *pred1 =
-        [NSPredicate predicateWithFormat:@"user = %@", self.container.currentUserRecordID];
-    NSPredicate *pred2 = [NSPredicate predicateWithFormat:@"conversation = %@", conversationId];
-    NSCompoundPredicate *predicate =
-        [NSCompoundPredicate andPredicateWithSubpredicates:@[ pred1, pred2 ]];
-    SKYQuery *query = [SKYQuery queryWithRecordType:@"user_conversation" predicate:predicate];
+    NSPredicate *pred =
+        [NSPredicate predicateWithFormat:@"user = %@ AND conversation = %@",
+                                         self.container.currentUserRecordID, conversationId];
+    SKYQuery *query = [SKYQuery queryWithRecordType:@"user_conversation" predicate:pred];
     query.limit = 1;
     [self fetchUserConversationsWithQuery:query
                                completion:^(NSArray<SKYUserConversation *> *conversationList,
