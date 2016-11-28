@@ -1,5 +1,5 @@
 //
-//  SKYContainer+Chat.m
+//  SKYChatReceipt.h
 //  SKYKit
 //
 //  Copyright 2016 Oursky Ltd.
@@ -17,15 +17,21 @@
 //  limitations under the License.
 //
 
-#import "SKYContainer+Chat.h"
+#import <Foundation/Foundation.h>
 
-#import "SKYChatExtension.h"
+typedef NS_ENUM(NSInteger, SKYChatReceiptStatus) {
+    SKYChatReceiptStatusDelivering,
+    SKYChatReceiptStatusDelivered,
+    SKYChatReceiptStatusRead,
+};
 
-@implementation SKYContainer (Chat)
+@interface SKYChatReceipt : NSObject
 
-- (SKYChatExtension *)chatExtension
-{
-    return [[SKYChatExtension alloc] initWithContainer:self];
-}
+@property (nonatomic, readonly, nonnull) NSString *userID;
+@property (nonatomic, readonly, nullable) NSDate *deliveredAt;
+@property (nonatomic, readonly, nullable) NSDate *readAt;
+@property (nonatomic, readonly) SKYChatReceiptStatus status;
+
+- (instancetype)initWithReceiptDictionary:(NSDictionary<NSString *, id> *_Nonnull)dict;
 
 @end

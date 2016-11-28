@@ -1,5 +1,5 @@
 //
-//  SKYContainer+Chat.m
+//  SKYKitChat.h
 //  SKYKit
 //
 //  Copyright 2016 Oursky Ltd.
@@ -17,15 +17,12 @@
 //  limitations under the License.
 //
 
+#import "SKYChatExtension.h"
 #import "SKYContainer+Chat.h"
 
-#import "SKYChatExtension.h"
-
-@implementation SKYContainer (Chat)
-
-- (SKYChatExtension *)chatExtension
-{
-    return [[SKYChatExtension alloc] initWithContainer:self];
-}
-
-@end
+// record classes
+#import "SKYChatRecord.h"
+#import "SKYConversation.h"
+#import "SKYMessage.h"
+#import "SKYUserChannel.h"
+#import "SKYUserConversation.h"

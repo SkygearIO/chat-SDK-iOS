@@ -1,5 +1,5 @@
 //
-//  SKYContainer+Chat.m
+//  SKYChatRecord.h
 //  SKYKit
 //
 //  Copyright 2016 Oursky Ltd.
@@ -17,15 +17,10 @@
 //  limitations under the License.
 //
 
-#import "SKYContainer+Chat.h"
+#import <SKYKit/SKYKit.h>
 
-#import "SKYChatExtension.h"
+@interface SKYChatRecord : SKYRecord
 
-@implementation SKYContainer (Chat)
-
-- (SKYChatExtension *)chatExtension
-{
-    return [[SKYChatExtension alloc] initWithContainer:self];
-}
++ (instancetype)recordWithRecord:(SKYRecord *)record;
 
 @end
