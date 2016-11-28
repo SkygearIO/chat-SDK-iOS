@@ -226,8 +226,7 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
          }];
 }
 
-- (void)fetchUserConversationsCompletionHandler:
-    (SKYChatFetchUserConversationListCompletion)completion
+- (void)fetchUserConversationsWithCompletion:(SKYChatFetchUserConversationListCompletion)completion
 {
     NSPredicate *predicate =
         [NSPredicate predicateWithFormat:@"user = %@", self.container.currentUserRecordID];
@@ -450,7 +449,7 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
         completion:(void (^)(NSError *error))completion
 {
     [self.container callLambda:lambda
-                     arguments:messageIDs
+                     arguments:@[ messageIDs ]
              completionHandler:^(NSDictionary *dict, NSError *error) {
                  if (completion) {
                      completion(error);

@@ -17,7 +17,7 @@ NSString *const SKYUserConversationUnreadCountKey = @"unread_count";
 
 + (instancetype)recordWithRecord:(SKYRecord *)record
 {
-    SKYUserConversation *newRecord = [self recordWithRecord:record];
+    SKYUserConversation *newRecord = [super recordWithRecord:record];
     [newRecord assignVariableInTransientWithRecord:record];
     return newRecord;
 }
