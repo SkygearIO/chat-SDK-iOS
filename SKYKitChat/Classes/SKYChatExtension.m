@@ -47,6 +47,7 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                                          userInfo:nil];
         }
         _container = container;
+        _automaticallyMarkMessagesAsDelivered = YES;
     }
     return self;
 }
@@ -436,6 +437,14 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                          }
                      }
                      completion(returnArray, error);
+                     
+                     // The SDK notifies the server that these messages are received
+                     // from the client side. The app developer is not required
+                     // to call this method.
+                     if (returnArray.count && self.automaticallyMarkMessagesAsDelivered) {
+                         [self markDeliveredMessages:returnArray completion:nil];
+                     }
+
                  } else {
                      completion(nil, error);
                  }

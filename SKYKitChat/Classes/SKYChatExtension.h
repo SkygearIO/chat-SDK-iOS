@@ -53,6 +53,13 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 @property (strong, nonatomic, readonly, nonnull) SKYContainer *container;
 
 /**
+ Gets or sets whether messages fetched from server are automatically marked as delivered.
+ 
+ The SDK automatically mark messages as delivered by default.
+ */
+@property (assign, nonatomic) bool automaticallyMarkMessagesAsDelivered;
+
+/**
  Creates an instance of SKYChatExtension.
 
  For most user of the chat extension, get an instance of SKYChatExtension by using the category
@@ -348,6 +355,8 @@ NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
 
 /**
  Marks messages as read.
+ 
+ Marking a messages as read also mark the message as delivered.
 
  @param messages messages to mark
  @param completion completion block
@@ -358,6 +367,8 @@ NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
 
 /**
  Marks messages as read.
+ 
+ Marking a messages as read also mark the message as delivered.
 
  @param messageIDs ID of messages to mark
  @param completion completion block
@@ -368,6 +379,9 @@ NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
 
 /**
  Marks messages as delivered.
+ 
+ The SDK marks a message as delivered automatically when the message is fetched from server.
+ You are not required to call this method.
 
  @param messages messages to delivered
  @param completion completion block
@@ -379,6 +393,9 @@ NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
 /**
  Marks messages as delivered.
 
+ The SDK marks a message as delivered automatically when the message is fetched from server.
+ You are not required to call this method.
+ 
  @param messageIDs ID of messages to delivered
  @param completion completion block
  */
