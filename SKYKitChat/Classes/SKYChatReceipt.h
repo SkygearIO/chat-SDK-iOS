@@ -32,6 +32,6 @@ typedef NS_ENUM(NSInteger, SKYChatReceiptStatus) {
 @property (nonatomic, readonly, nullable) NSDate *readAt;
 @property (nonatomic, readonly) SKYChatReceiptStatus status;
 
-- (instancetype)initWithReceiptDictionary:(NSDictionary<NSString *, id> *_Nonnull)dict;
+- (instancetype _Nullable)initWithReceiptDictionary:(NSDictionary<NSString *, id> *_Nonnull)dict;
 
 @end
