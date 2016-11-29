@@ -54,7 +54,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 
 /**
  Gets or sets whether messages fetched from server are automatically marked as delivered.
- 
+
  The SDK automatically mark messages as delivered by default.
  */
 @property (assign, nonatomic) bool automaticallyMarkMessagesAsDelivered;
@@ -171,7 +171,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  */
 - (void)saveConversation:(SKYConversation *_Nonnull)conversation
               completion:(SKYChatConversationCompletion _Nullable)completion
-NS_SWIFT_NAME(saveConversation(_:completion:));
+    NS_SWIFT_NAME(saveConversation(_:completion:));
 
 #pragma mark Fetching User Conversations
 
@@ -220,7 +220,7 @@ NS_SWIFT_NAME(saveConversation(_:completion:));
  @param conversation conversation record
  @param completion completion block
  */
-- (void)removeParticipantsUserWithIDs:(NSArray<NSString *> *_Nonnull)userIDs
+- (void)removeParticipantsWithUserIDs:(NSArray<NSString *> *_Nonnull)userIDs
                      fromConversation:(SKYConversation *_Nonnull)conversation
                            completion:(SKYChatConversationCompletion _Nullable)completion
     NS_SWIFT_NAME(removeParticipants(userIDs:from:completion:));
@@ -255,6 +255,16 @@ NS_SWIFT_NAME(saveConversation(_:completion:));
                      completion:(SKYChatConversationCompletion _Nullable)completion
     NS_SWIFT_NAME(removeAdmins(userIDs:from:completion:));
 
+/**
+ Remove the current user from the specified conversation.
+
+ This method should be called when the current user wants to leave a conversation. Since modifying
+ the participant list is only allowed if the user is an admin, calling
+ -removeParticipantsWithUserIDs:fromConversation:completion: does not work.
+ */
+- (void)leaveConversation:(SKYConversation *_Nonnull)conversation
+               completion:(void (^_Nullable)(NSError *_Nullable error))completion;
+
 #pragma mark - Messages
 
 /**
@@ -269,7 +279,7 @@ NS_SWIFT_NAME(saveConversation(_:completion:));
                                  body:(NSString *_Nullable)body
                              metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                            completion:(SKYChatMessageCompletion _Nullable)completion
-NS_SWIFT_NAME(createMessage(conversation:body:metadata:completion:));
+    NS_SWIFT_NAME(createMessage(conversation:body:metadata:completion:));
 
 /**
  Creates a message in the specified conversation with an attachment.
@@ -285,7 +295,7 @@ NS_SWIFT_NAME(createMessage(conversation:body:metadata:completion:));
                            attachment:(SKYAsset *_Nullable)attachment
                              metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                            completion:(SKYChatMessageCompletion _Nullable)completion
-NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
+    NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
 
 /**
  Adds a message to a conversation.
@@ -355,7 +365,7 @@ NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
 
 /**
  Marks messages as read.
- 
+
  Marking a messages as read also mark the message as delivered.
 
  @param messages messages to mark
@@ -367,7 +377,7 @@ NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
 
 /**
  Marks messages as read.
- 
+
  Marking a messages as read also mark the message as delivered.
 
  @param messageIDs ID of messages to mark
@@ -379,7 +389,7 @@ NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
 
 /**
  Marks messages as delivered.
- 
+
  The SDK marks a message as delivered automatically when the message is fetched from server.
  You are not required to call this method.
 
@@ -395,7 +405,7 @@ NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
 
  The SDK marks a message as delivered automatically when the message is fetched from server.
  You are not required to call this method.
- 
+
  @param messageIDs ID of messages to delivered
  @param completion completion block
  */

@@ -299,6 +299,18 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
     [self saveConversation:conversation completion:completion];
 }
 
+- (void)leaveConversation:(SKYConversation *)conversation
+               completion:(void (^)(NSError *error))completion
+{
+    [self.container callLambda:@"chat:leave_conversation"
+                     arguments:@[ conversation.recordID.recordName ]
+             completionHandler:^(NSDictionary *response, NSError *error) {
+                 if (completion) {
+                     completion(error);
+                 }
+             }];
+}
+
 #pragma mark - Messages
 
 - (void)createMessageWithConversation:(SKYConversation *)conversation
@@ -437,7 +449,7 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                          }
                      }
                      completion(returnArray, error);
-                     
+
                      // The SDK notifies the server that these messages are received
                      // from the client side. The app developer is not required
                      // to call this method.
