@@ -10,3 +10,9 @@ target 'SKYKitChat_Example' do
   pod 'Expecta'
   end
 end
+
+target 'Swift Example' do
+  use_frameworks!
+
+  pod 'SKYKitChat', :path => '../'
+end
