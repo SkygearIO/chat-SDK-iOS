@@ -163,8 +163,8 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  @param completion completion block
  */
 - (void)saveConversation:(SKYConversation *_Nonnull)conversation
-              completion:(SKYChatConversationCompletion _Nullable)completion;
-NS_SWIFT_NAME(saveConversation(_ : completion:));
+              completion:(SKYChatConversationCompletion _Nullable)completion
+NS_SWIFT_NAME(saveConversation(_:completion:));
 
 #pragma mark Fetching User Conversations
 
@@ -261,8 +261,8 @@ NS_SWIFT_NAME(saveConversation(_ : completion:));
 - (void)createMessageWithConversation:(SKYConversation *_Nonnull)conversation
                                  body:(NSString *_Nullable)body
                              metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
-                           completion:(SKYChatMessageCompletion _Nullable)completion;
-NS_SWIFT_NAME(createMessage(conversation : body : metadata : completion:));
+                           completion:(SKYChatMessageCompletion _Nullable)completion
+NS_SWIFT_NAME(createMessage(conversation:body:metadata:completion:));
 
 /**
  Creates a message in the specified conversation with an attachment.
@@ -277,8 +277,8 @@ NS_SWIFT_NAME(createMessage(conversation : body : metadata : completion:));
                                  body:(NSString *_Nullable)body
                            attachment:(SKYAsset *_Nullable)attachment
                              metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
-                           completion:(SKYChatMessageCompletion _Nullable)completion;
-NS_SWIFT_NAME(createMessage(conversation : body : attachment : metadata : completion:));
+                           completion:(SKYChatMessageCompletion _Nullable)completion
+NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
 
 /**
  Adds a message to a conversation.
