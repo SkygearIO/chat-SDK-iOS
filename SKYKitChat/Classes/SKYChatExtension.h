@@ -31,6 +31,15 @@ extern NSString *_Nonnull const SKYChatMetaDataAssetNameText;
 
 @class SKYConversation, SKYMessage, SKYUserChannel, SKYUserConversation, SKYChatReceipt;
 
+/**
+ SKYChatExtension is a simple object that expose easy to use helper methods to develop a chat
+ app.
+
+ Most of the functions provide by the chat plugin is available through this extension object.
+
+ The extension requires a SKYContainer to function. For most app developer, you should obtain
+ a SKYChatExtension through the `-[SKYContainer chatExtension]` category method.
+ */
 @interface SKYChatExtension : NSObject
 
 typedef void (^SKYChatUserConversationCompletion)(SKYUserConversation *_Nullable conversation,

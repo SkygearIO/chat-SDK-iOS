@@ -19,19 +19,60 @@
 
 #import <Foundation/Foundation.h>
 
+/**
+ Message receipt status.
+ */
 typedef NS_ENUM(NSInteger, SKYChatReceiptStatus) {
+    /**
+     The messge is being delivered, it is not yet received by the other party.
+     */
     SKYChatReceiptStatusDelivering,
+
+    /**
+     The messsage is delivered, but it is not read yet.
+     */
     SKYChatReceiptStatusDelivered,
+
+    /**
+     The message is delivered and read.
+     */
     SKYChatReceiptStatusRead,
 };
 
+/**
+ SKYChatReceipt contains information about the receipt status of a message for each user. Receipt
+ contains date and time for delivery and read status.
+ */
 @interface SKYChatReceipt : NSObject
 
+/**
+ The User ID of the user to whom the message is delivered or read.
+ */
 @property (nonatomic, readonly, nonnull) NSString *userID;
+
+/**
+ Gets date and time the message is delivered to the user.
+ */
 @property (nonatomic, readonly, nullable) NSDate *deliveredAt;
+
+/**
+ Gets date and time the message is read by the user.
+ */
 @property (nonatomic, readonly, nullable) NSDate *readAt;
+
+/**
+ Gets the receipt status.
+
+ The receipt status is calculated from the date of delivery and read of the message.
+ */
 @property (nonatomic, readonly) SKYChatReceiptStatus status;
 
+/**
+ Instantiate an instance of SKYChatReceipt.
+
+ Most developer do not need to create an instance of SKYChatReceipt. The SDK creates instances
+ of this class to provide information of message receipt.
+ */
 - (instancetype _Nullable)initWithReceiptDictionary:(NSDictionary<NSString *, id> *_Nonnull)dict;
 
 @end

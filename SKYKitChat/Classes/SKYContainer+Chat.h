@@ -23,6 +23,9 @@
 
 @interface SKYContainer (Chat)
 
+/**
+ Returns a SKYChatExtension object that is associated with this SKYContainer.
+ */
 - (SKYChatExtension *)chatExtension;
 
 @end
