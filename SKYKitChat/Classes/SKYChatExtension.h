@@ -98,7 +98,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)createConversationWithParticipantIDs:(NSArray<NSString *> *_Nonnull)participantIDs
                                        title:(NSString *_Nullable)title
                                     metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
-                                  completion:(SKYChatConversationCompletion _Nullable)completion
+                                  completion:(SKYChatUserConversationCompletion _Nullable)completion
     NS_SWIFT_NAME(createConversation(participantIDs:title:metadata:completion:));
 
 /**
@@ -124,7 +124,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                                     metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                                     adminIDs:(NSArray<NSString *> *_Nullable)adminIDs
                       distinctByParticipants:(BOOL)distinctByParticipants
-                                  completion:(SKYChatConversationCompletion _Nullable)completion
+                                  completion:(SKYChatUserConversationCompletion _Nullable)completion
     NS_SWIFT_NAME(createConversation(participantIDs:title:metadata:adminIDs:distinctByParticipants:completion:));
 // clang-format on
 
@@ -144,7 +144,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)createDirectConversationWithUserID:(NSString *_Nonnull)userID
                                      title:(NSString *_Nullable)title
                                   metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
-                                completion:(SKYChatConversationCompletion _Nullable)completion
+                                completion:(SKYChatUserConversationCompletion _Nullable)completion
     NS_SWIFT_NAME(createDirectConversation(userID:title:metadata:completion:));
 
 /**
@@ -193,14 +193,26 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
     (SKYChatFetchUserConversationListCompletion _Nullable)completion;
 
 /**
- Fetches a user conversation by ID.
+ Fetches a user conversation by conversation ID.
 
- @param conversationId ID of conversation
+ @param conversationID ID of conversation
  @param completion completion block
  */
-- (void)fetchUserConversationWithID:(NSString *_Nonnull)conversationId
-                         completion:(SKYChatUserConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(fetchUserConversation(id:completion:));
+- (void)fetchUserConversationWithConversationID:(NSString *_Nonnull)conversationID
+                                     completion:
+                                         (SKYChatUserConversationCompletion _Nullable)completion
+    NS_SWIFT_NAME(fetchUserConversation(conversationID:completion:));
+
+/**
+ Fetches a user conversation by conversation.
+
+ @param conversation conversation object
+ @param completion completion block
+ */
+- (void)fetchUserConversationWithConversation:(SKYConversation *_Nonnull)conversation
+                                   completion:
+                                       (SKYChatUserConversationCompletion _Nullable)completion
+    NS_SWIFT_NAME(fetchUserConversation(conversation:completion:));
 
 #pragma mark Conversation Memberships
 
