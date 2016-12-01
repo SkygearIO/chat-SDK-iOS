@@ -421,14 +421,21 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                              beforeTime:(NSDate *)beforeTime
                              completion:(SKYChatFetchMessagesListCompletion)completion
 {
-    NSString *dateString = @"";
-    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
-    [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ"];
-    dateString = [formatter stringFromDate:beforeTime];
-    NSLog(@"dateString :%@", dateString);
+
+    NSMutableArray *arguments = [NSMutableArray arrayWithObjects:conversationId, @(limit), nil];
+    if (beforeTime) {
+        NSString *dateString = @"";
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
+        [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ"];
+        dateString = [formatter stringFromDate:beforeTime];
+        NSLog(@"dateString :%@", dateString);
+
+        [arguments addObject:dateString];
+    }
+
     [self.container callLambda:@"chat:get_messages"
-                     arguments:@[ conversationId, @(limit), dateString ]
+                     arguments:arguments
              completionHandler:^(NSDictionary *response, NSError *error) {
                  if (error) {
                      NSLog(@"error calling hello:someone: %@", error);
