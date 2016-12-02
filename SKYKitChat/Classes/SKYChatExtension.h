@@ -148,26 +148,6 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
     NS_SWIFT_NAME(createDirectConversation(userID:title:metadata:completion:));
 
 /**
- Deletes a conversation.
-
- @param conversation the conversation to be deleted
- @param completion completion block
- */
-- (void)deleteConversation:(SKYConversation *_Nonnull)conversation
-                completion:(SKYChatConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(deleteConversation(_:completion:));
-
-/**
- Deletes a conversation by ID.
-
- @param conversationID the ID of the conversation to be deleted
- @param completion completion block
- */
-- (void)deleteConversationWithID:(NSString *_Nonnull)conversationID
-                      completion:(SKYChatConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(deleteConversation(id:completion:));
-
-/**
  Saves a conversation.
 
  This method can be used to save a new conversation or update an existing conversation. This
@@ -345,26 +325,6 @@ NS_SWIFT_NAME(leave(conversationID:completion:));
     toConversation:(SKYConversation *_Nonnull)conversation
         completion:(SKYChatMessageCompletion _Nullable)completion
     NS_SWIFT_NAME(addMessage(_:to:completion:));
-
-/**
- Deletes a message.
-
- @param message message to delete
- @param completion completion block
- */
-- (void)deleteMessage:(SKYMessage *_Nonnull)message
-           completion:(SKYChatMessageCompletion _Nullable)completion
-    NS_SWIFT_NAME(deleteMessage(_:completion:));
-
-/**
- Deletes a messsage by ID.
-
- @param messageID ID of the message to delete
- @param completion completion block
- */
-- (void)deleteMessageWithID:(NSString *_Nonnull)messageID
-                 completion:(SKYChatMessageCompletion _Nullable)completion
-    NS_SWIFT_NAME(deleteMessage(id:completion:));
 
 /**
  Fetch messages in a conversation.

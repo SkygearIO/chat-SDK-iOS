@@ -182,26 +182,6 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                                     completion:completion];
 }
 
-- (void)deleteConversation:(SKYConversation *)conversation
-                completion:(SKYChatConversationCompletion)completion
-{
-    [self deleteConversationWithID:conversation.recordID.recordName completion:completion];
-}
-
-- (void)deleteConversationWithID:(NSString *)conversationId
-                      completion:(SKYChatConversationCompletion)completion
-{
-    SKYRecordID *recordID =
-        [SKYRecordID recordIDWithRecordType:@"conversation" name:conversationId];
-    [self.container.publicCloudDatabase
-        deleteRecordWithID:recordID
-         completionHandler:^(SKYRecordID *recordID, NSError *error) {
-             if (completion != nil) {
-                 completion(nil, error);
-             }
-         }];
-}
-
 - (void)saveConversation:(SKYConversation *)conversation
               completion:(SKYChatConversationCompletion)completion
 {
@@ -431,23 +411,6 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                   }
                   [self saveMessage:message completion:completion];
               }];
-}
-
-- (void)deleteMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
-{
-    [self deleteMessageWithID:message.recordID.recordName completion:completion];
-}
-
-- (void)deleteMessageWithID:(NSString *)messageID completion:(SKYChatMessageCompletion)completion
-{
-    SKYRecordID *recordID = [SKYRecordID recordIDWithRecordType:@"message" name:messageID];
-    [self.container.publicCloudDatabase
-        deleteRecordWithID:recordID
-         completionHandler:^(SKYRecordID *recordID, NSError *error) {
-             if (completion != nil) {
-                 completion(nil, error);
-             }
-         }];
 }
 
 - (void)fetchMessagesWithConversation:(SKYConversation *)conversation
