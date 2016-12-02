@@ -340,8 +340,15 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
 - (void)leaveConversation:(SKYConversation *)conversation
                completion:(void (^)(NSError *error))completion
 {
+    [self leaveConversationWithConversationID:conversation.recordID.recordName
+                                   completion:completion];
+}
+
+- (void)leaveConversationWithConversationID:(NSString *)conversationID
+               completion:(void (^)(NSError *error))completion
+{
     [self.container callLambda:@"chat:leave_conversation"
-                     arguments:@[ conversation.recordID.recordName ]
+                     arguments:@[ conversationID ]
              completionHandler:^(NSDictionary *response, NSError *error) {
                  if (completion) {
                      completion(error);

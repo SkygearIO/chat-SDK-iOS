@@ -286,6 +286,18 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)leaveConversation:(SKYConversation *_Nonnull)conversation
                completion:(void (^_Nullable)(NSError *_Nullable error))completion;
 
+/**
+ Remove the current user from the specified conversation by ID.
+ 
+ This method should be called when the current user wants to leave a conversation. Since modifying
+ the participant list is only allowed if the user is an admin, calling
+ -removeParticipantsWithUserIDs:fromConversation:completion: does not work.
+ */
+- (void)leaveConversationWithConversationID:(NSString *_Nonnull)conversationID
+                                 completion:(void (^_Nullable)(NSError *_Nullable error))completion
+NS_SWIFT_NAME(leave(conversationID:completion:));
+
+
 #pragma mark - Messages
 
 /**
