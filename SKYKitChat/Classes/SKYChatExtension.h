@@ -19,17 +19,23 @@
 
 #import <SKYKit/SKYKit.h>
 
+#import "SKYChatReceipt.h"
+#import "SKYChatRecordChange.h"
+#import "SKYChatTypingIndicator.h"
+
 extern NSString *_Nonnull const SKYChatMessageUnreadCountKey;
 extern NSString *_Nonnull const SKYChatConversationUnreadCountKey;
 
 extern NSString *_Nonnull const SKYChatAdminsMetadataKey;
 extern NSString *_Nonnull const SKYChatDistinctByParticipantsMetadataKey;
 
-extern NSString *_Nonnull const SKYChatMetaDataAssetNameImage;
-extern NSString *_Nonnull const SKYChatMetaDataAssetNameVoice;
-extern NSString *_Nonnull const SKYChatMetaDataAssetNameText;
+extern NSString *_Nonnull const SKYChatDidReceiveTypingIndicatorNotification;
+extern NSString *_Nonnull const SKYChatDidReceiveRecordChangeNotification;
 
-@class SKYConversation, SKYMessage, SKYUserChannel, SKYUserConversation, SKYChatReceipt;
+extern NSString *_Nonnull const SKYChatTypingIndicatorUserInfoKey;
+extern NSString *_Nonnull const SKYChatRecordChangeUserInfoKey;
+
+@class SKYConversation, SKYMessage, SKYUserChannel, SKYUserConversation;
 
 /**
  SKYChatExtension is a simple object that expose easy to use helper methods to develop a chat
@@ -62,6 +68,16 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  The SDK automatically mark messages as delivered by default.
  */
 @property (assign, nonatomic) bool automaticallyMarkMessagesAsDelivered;
+
+/**
+ Gets or sets user channel message handler.
+
+ The user channel message handler is a low-level interface for getting messages from the user
+ channel.
+ For most apps, get messages from user channel with notifications posted by chat extension.
+ */
+@property (nonatomic, copy, nullable) void (^userChannelMessageHandler)
+    (NSDictionary<NSString *, id> *_Nonnull);
 
 #pragma mark - Conversations
 
@@ -252,15 +268,14 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 
 /**
  Remove the current user from the specified conversation by ID.
- 
+
  This method should be called when the current user wants to leave a conversation. Since modifying
  the participant list is only allowed if the user is an admin, calling
  -removeParticipantsWithUserIDs:fromConversation:completion: does not work.
  */
 - (void)leaveConversationWithConversationID:(NSString *_Nonnull)conversationID
                                  completion:(void (^_Nullable)(NSError *_Nullable error))completion
-NS_SWIFT_NAME(leave(conversationID:completion:));
-
+    NS_SWIFT_NAME(leave(conversationID:completion:));
 
 #pragma mark - Messages
 
@@ -439,53 +454,107 @@ NS_SWIFT_NAME(leave(conversationID:completion:));
 
 #pragma mark Typing Indicator
 
-- (void)publishTypingEvent:(NSString *_Nonnull)typingEvent
+- (void)sendTypingIndicator:(SKYChatTypingEvent)typingEvent
             inConversation:(SKYConversation *_Nonnull)conversation
-NS_SWIFT_NAME(publishTypingEvent(_:in:));
+    NS_SWIFT_NAME(sendTypingIndicator(_:in:));
 
-- (void)publishTypingEvent:(NSString *_Nonnull)typingEvent
+- (void)sendTypingIndicator:(SKYChatTypingEvent)typingEvent
             inConversation:(SKYConversation *_Nonnull)conversation
                       date:(NSDate *_Nonnull)date
                 completion:(void (^_Nullable)(NSError *_Nullable error))completion
-NS_SWIFT_NAME(publishTypingEvent(_:in:at:completion:));
+    NS_SWIFT_NAME(sendTypingIndicator(_:in:at:completion:));
 
 #pragma mark - Subscriptions
 
 /**
- Obtains the user channel.
- 
- If no user channel exists, a new user channel will be created.
+ Fetches the user channel, or creates one if it does not exist.
  */
 - (void)fetchOrCreateUserChannelWithCompletion:(SKYChatChannelCompletion _Nullable)completion
-NS_SWIFT_NAME(fetchOrCreateUserChannel(completion:));
+    NS_SWIFT_NAME(fetchOrCreateUserChannel(completion:));
 
 /**
- Deletes all user channels.
+ Deletes all user channel.
+
+ If chat extension is currently subscribed to a user channel, the chat extension will unsubscribe
+ from
+ the user channel first before deleting.
  */
 - (void)deleteAllUserChannelsWithCompletion:(void (^_Nullable)(NSError *_Nullable error))completion
-NS_SWIFT_NAME(deleteAllUserChannels(completion:));
+    NS_SWIFT_NAME(deleteAllUserChannels(completion:));
 
 /**
- Subscribe a message handler to the specified user channel.
+ Subscribe to changes from user channel.
+
+ Changes such as new messages and typing indicator are pushed to the client side using pubsub. If
+ you are interested to receive these events, you should call this method so that chat
+ extension will subscribe to these messages. When subscribed, the chat extension will post
+ notifications
+ using NSNotificationCenter. Observe to these notifications by adding an observer to the default
+ NSNotificationCenter.
+
+ If user channel does not exist yet, one will be created for you automatically.
+
+ Alternatively, if you are interested in one type of events from the user channel such as typing
+ indicators,
+ you can call the -subscribeToTypingIndicatorInConversation:handler: convenient method to get typing
+ indicator objects
+ as they are received. You do not need to call this method as that convenient method will call this
+ method
+ for you.
  */
-- (void)subscribeToUserChannel:(SKYUserChannel *_Nonnull)userChannel
-                       handler:(void (^_Nonnull)(NSDictionary<NSString *, id> *_Nonnull))messageHandler
-NS_SWIFT_NAME(subscribe(toUserChannel:handler:));
+- (void)subscribeToUserChannelWithCompletion:(void (^_Nullable)(NSError *_Nullable error))completion
+    NS_SWIFT_NAME(subscribeToUserChannelWithCompletion(completion:));
 
 /**
- Subscribe a message handler to a user channel.
- 
- The channel for the current user will be fetched from the server. If no user channel exists,
- a new one will be created.
+ Unsubscribe from user channel.
+
+ If the chat extension is currently subscribed to a user channel, the chat extension will
+ unsubscribe from
+ the underlying pubsub channel.
+
+ The chat extension will also unsubscribe from user channel when the current user is changed (such
+ as logout).
  */
-- (void)subscribeToUserChannelWithHandler:(void (^_Nonnull)(NSDictionary<NSString *, id> *_Nonnull))messageHandler
-                               completion:(void (^_Nullable)(NSError *_Nullable error))completion
-NS_SWIFT_NAME(subscribe(handler:completion:));
+- (void)unsubscribeFromUserChannel;
 
-- (void)unsubscribeFromUserChannel:(SKYUserChannel *_Nonnull)userChannel
-NS_SWIFT_NAME(unsubscribeFromUserChannel(_:));
+/**
+ Subscribe to typing indicator events in a conversation.
 
-- (void)unsubscribeFromUserChannelWithCompletion:(void (^_Nullable)(NSError *_Nullable error))completion
-NS_SWIFT_NAME(unsubscribeFromUserChannel(completion:));
+ To get typing indicator event, call this method with a handler that accepts a
+ SKYChatTypingIndicator as parameter.
+ You are also required to specify a conversation where typing indicator events apply. You may
+ subscribe to multiple
+ conversation at the same time.
+
+ This method adds an observer to NSNotificationCenter and return the observer to you. If you are no
+ longer interested
+ in updates for a particular conversation. Remove the observer from NSNotificationCenter using the
+ returned object.
+ */
+- (id _Nonnull)
+subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
+                                 handler:(void (^_Nonnull)(
+                                             SKYChatTypingIndicator *_Nonnull indicator))handler
+    NS_SWIFT_NAME(subscribeToTypingIndicator(in:handler:));
+
+/**
+ Subscribe to message events in a conversation.
+
+ To get message event, call this method with a handler that accepts a SKYChatRecordChangeEvent and
+ SKYMessage as parameters.
+ You are also required to specify a conversation where message events apply. You may subscribe to
+ multiple
+ conversation at the same time.
+
+ This method adds an observer to NSNotificationCenter and return the observer to you. If you are no
+ longer interested
+ in updates for a particular conversation. Remove the observer from NSNotificationCenter using the
+ returned object.
+ */
+- (id _Nonnull)subscribeToMessagesInConversation:(SKYConversation *_Nonnull)conversation
+                                         handler:
+                                             (void (^_Nonnull)(SKYChatRecordChangeEvent event,
+                                                               SKYMessage *_Nonnull record))handler
+    NS_SWIFT_NAME(subscribeToMessages(in:handler:));
 
 @end

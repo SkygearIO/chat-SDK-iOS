@@ -23,6 +23,8 @@
 #import <SKYKit/SKYKit.h>
 
 #import "SKYChatReceipt.h"
+#import "SKYChatRecordChange_Private.h"
+#import "SKYChatTypingIndicator_Private.h"
 #import "SKYConversation.h"
 #import "SKYMessage.h"
 #import "SKYPubsub.h"
@@ -33,11 +35,18 @@
 NSString *const SKYChatMessageUnreadCountKey = @"message";
 NSString *const SKYChatConversationUnreadCountKey = @"conversation";
 
-NSString *const SKYChatMetaDataAssetNameImage = @"message-image";
-NSString *const SKYChatMetaDataAssetNameVoice = @"message-voice";
-NSString *const SKYChatMetaDataAssetNameText = @"message-text";
+NSString *const SKYChatDidReceiveTypingIndicatorNotification =
+    @"SKYChatDidReceiveTypingIndicatorNotification";
+NSString *const SKYChatDidReceiveRecordChangeNotification =
+    @"SKYChatDidReceiveRecordChangeNotification";
 
-@implementation SKYChatExtension
+NSString *const SKYChatTypingIndicatorUserInfoKey = @"typingIndicator";
+NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
+
+@implementation SKYChatExtension {
+    id notificationObserver;
+    SKYUserChannel *subscribedUserChannel;
+}
 
 - (instancetype)initWithContainer:(SKYContainer *_Nonnull)container
 {
@@ -49,8 +58,23 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
         }
         _container = container;
         _automaticallyMarkMessagesAsDelivered = YES;
+
+        notificationObserver = [[NSNotificationCenter defaultCenter]
+            addObserverForName:SKYContainerDidChangeCurrentUserNotification
+                        object:container
+                         queue:[NSOperationQueue mainQueue]
+                    usingBlock:^(NSNotification *_Nonnull note) {
+                        // Unsubscribe because the current user has changed. We do not
+                        // want the UI to keep notified for changes intended for previous user.
+                        [self unsubscribeFromUserChannel];
+                    }];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:notificationObserver];
 }
 
 #pragma mark - Conversations
@@ -188,6 +212,14 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
 {
     [self.container.publicCloudDatabase saveRecord:conversation
                                         completion:^(SKYRecord *record, NSError *error) {
+                                            if (!completion) {
+                                                return;
+                                            }
+
+                                            if (error) {
+                                                completion(nil, error);
+                                            }
+
                                             SKYConversation *newConversation =
                                                 [SKYConversation recordWithRecord:record];
                                             completion(newConversation, error);
@@ -326,7 +358,7 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
 }
 
 - (void)leaveConversationWithConversationID:(NSString *)conversationID
-               completion:(void (^)(NSError *error))completion
+                                 completion:(void (^)(NSError *error))completion
 {
     [self.container callLambda:@"chat:leave_conversation"
                      arguments:@[ conversationID ]
@@ -602,33 +634,42 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
                  if (error) {
                      completion(nil, error);
                  }
-                 completion(response, error);
+
+                 // Ensure the dictionary has correct type of classes
+                 NSMutableDictionary *fixedResponse = [NSMutableDictionary dictionary];
+                 [response enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+                     if ([obj isKindOfClass:[NSNumber class]]) {
+                         [fixedResponse setObject:obj forKey:key];
+                     }
+                 }];
+
+                 completion(fixedResponse, error);
 
              }];
 }
 
 #pragma mark Typing Indicator
 
-- (void)publishTypingEvent:(NSString *)typingEvent
+- (void)sendTypingIndicator:(SKYChatTypingEvent)typingEvent
             inConversation:(SKYConversation *)conversation
 {
-    [self publishTypingEvent:typingEvent
+    [self sendTypingIndicator:typingEvent
               inConversation:conversation
                         date:[NSDate date]
                   completion:nil];
 }
 
-- (void)publishTypingEvent:(NSString *)typingEvent
+- (void)sendTypingIndicator:(SKYChatTypingEvent)typingEvent
             inConversation:(SKYConversation *)conversation
                       date:(NSDate *)date
                 completion:(void (^)(NSError *error))completion
 {
     [self.container callLambda:@"chat:typing"
                      arguments:@[
-                                 conversation.recordID.recordName,
-                                 typingEvent,
-                                 [SKYDataSerialization stringFromDate:date],
-                                 ]
+                         conversation.recordID.recordName,
+                         SKYChatTypingEventToString(typingEvent),
+                         [SKYDataSerialization stringFromDate:date],
+                     ]
              completionHandler:^(NSDictionary *dict, NSError *error) {
                  if (completion) {
                      completion(error);
@@ -640,19 +681,20 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
 
 - (void)fetchOrCreateUserChannelWithCompletion:(SKYChatChannelCompletion)completion
 {
-    [self fetchUserChannelWithCompletion:^(SKYUserChannel * _Nullable userChannel, NSError * _Nullable error) {
+    [self fetchUserChannelWithCompletion:^(SKYUserChannel *_Nullable userChannel,
+                                           NSError *_Nullable error) {
         if (error) {
             if (completion) {
                 completion(nil, error);
             }
             return;
         }
-        
+
         if (!userChannel) {
             [self createUserChannelWithCompletion:completion];
             return;
         }
-        
+
         if (completion) {
             completion(userChannel, nil);
         }
@@ -664,117 +706,222 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
     SKYQuery *query = [SKYQuery queryWithRecordType:@"user_channel" predicate:nil];
     query.limit = 1;
     [self.container.privateCloudDatabase
-     performQuery:query
-     completionHandler:^(NSArray *results, NSError *error) {
-         if (!completion) {
-             return;
-         }
-         
-         if (error || results.count == 0) {
-             completion(nil, error);
-         }
-         
-         completion([SKYUserChannel recordWithRecord:results.firstObject], error);
-     }];
+             performQuery:query
+        completionHandler:^(NSArray *results, NSError *error) {
+            if (!completion) {
+                return;
+            }
+
+            if (error || results.count == 0) {
+                completion(nil, error);
+                return;
+            }
+
+            completion([SKYUserChannel recordWithRecord:results.firstObject], error);
+        }];
 }
 
 - (void)createUserChannelWithCompletion:(SKYChatChannelCompletion)completion
 {
     SKYUserChannel *userChannel = [SKYUserChannel recordWithRecordType:@"user_channel"];
     userChannel.name = [[NSUUID UUID] UUIDString];
-    [self.container.privateCloudDatabase
-     saveRecord:userChannel
-     completion:^(SKYRecord *record, NSError *error) {
-         if (!completion) {
-             return;
-         }
-         
-         if (error) {
-             completion(nil, error);
-             return;
-         }
-         
-         SKYUserChannel *channel = [SKYUserChannel recordWithRecord:record];
-         completion(channel, error);
-     }];
+    [self.container.privateCloudDatabase saveRecord:userChannel
+                                         completion:^(SKYRecord *record, NSError *error) {
+                                             if (!completion) {
+                                                 return;
+                                             }
+
+                                             if (error) {
+                                                 completion(nil, error);
+                                                 return;
+                                             }
+
+                                             SKYUserChannel *channel =
+                                                 [SKYUserChannel recordWithRecord:record];
+                                             completion(channel, error);
+                                         }];
 }
 
 - (void)deleteAllUserChannelsWithCompletion:(void (^)(NSError *error))completion
 {
     SKYQuery *query = [SKYQuery queryWithRecordType:@"user_channel" predicate:nil];
     [self.container.privateCloudDatabase
-     performQuery:query
-     completionHandler:^(NSArray *results, NSError *error) {
-         if (error) {
-             if (completion) {
-                 completion(error);
-             }
-             return;
-         }
-         
-         NSMutableArray *recordIDsToDelete = [NSMutableArray array];
-         [results enumerateObjectsUsingBlock:^(SKYRecord *record, NSUInteger idx, BOOL * _Nonnull stop) {
-             [recordIDsToDelete addObject:record.recordID];
-         }];
-         
-         if (!recordIDsToDelete.count) {
-             if (completion) {
-                 completion(nil);
-             }
-             return;
-         }
-         
-         [self.container.privateCloudDatabase
-          deleteRecordsWithIDs:recordIDsToDelete
-          completionHandler:^(NSArray *deletedRecordIDs, NSError *error) {
-              if (completion) {
-                  completion(error);
-              }
-          } perRecordErrorHandler:nil];
-     }];
+             performQuery:query
+        completionHandler:^(NSArray *results, NSError *error) {
+            if (error) {
+                if (completion) {
+                    completion(error);
+                }
+                return;
+            }
+
+            NSMutableArray *recordIDsToDelete = [NSMutableArray array];
+            [results enumerateObjectsUsingBlock:^(SKYRecord *record, NSUInteger idx,
+                                                  BOOL *_Nonnull stop) {
+                [recordIDsToDelete addObject:record.recordID];
+            }];
+
+            if (!recordIDsToDelete.count) {
+                if (completion) {
+                    completion(nil);
+                }
+                return;
+            }
+
+            [self.container.privateCloudDatabase
+                 deleteRecordsWithIDs:recordIDsToDelete
+                    completionHandler:^(NSArray *deletedRecordIDs, NSError *error) {
+                        if (completion) {
+                            completion(error);
+                        }
+                    }
+                perRecordErrorHandler:nil];
+        }];
 }
 
-- (void)subscribeToUserChannel:(SKYUserChannel *)userChannel
-                       handler:(void (^)(NSDictionary<NSString *,id> * _Nonnull))messageHandler
+- (void)handleUserChannelDictionary:(NSDictionary<NSString *, id> *)dict
 {
-    [self.container.pubsubClient subscribeTo:userChannel.name
-                                     handler:^(NSDictionary *data) {
-                                         messageHandler(data);
-                                     }];
+    NSString *dictionaryEventType = dict[@"event"];
+    NSDictionary *data = dict[@"data"];
+    if ([SKYChatTypingIndicator isTypingIndicatorEventType:dictionaryEventType]) {
+        [data enumerateKeysAndObjectsUsingBlock:^(NSString *conversationIDString,
+                                                  NSDictionary *userDict, BOOL *stop) {
+            NSString *conversationID =
+                [[SKYRecordID recordIDWithCanonicalString:conversationIDString] recordName];
+
+            SKYChatTypingIndicator *indicator =
+                [[SKYChatTypingIndicator alloc] initWithDictionary:userDict
+                                                    conversationID:conversationID];
+
+            [[NSNotificationCenter defaultCenter]
+                postNotificationName:SKYChatDidReceiveTypingIndicatorNotification
+                              object:self
+                            userInfo:@{
+                                SKYChatTypingIndicatorUserInfoKey : indicator,
+                            }];
+        }];
+    } else if ([SKYChatRecordChange isRecordChangeEventType:dictionaryEventType]) {
+        SKYChatRecordChange *recordChange = [[SKYChatRecordChange alloc] initWithDictionary:data];
+        if (!recordChange) {
+            return;
+        }
+
+        [[NSNotificationCenter defaultCenter]
+            postNotificationName:SKYChatDidReceiveRecordChangeNotification
+                          object:self
+                        userInfo:@{
+                            SKYChatRecordChangeUserInfoKey : recordChange,
+                        }];
+    }
+
+    if (self.userChannelMessageHandler) {
+        self.userChannelMessageHandler(dict);
+    }
 }
 
-- (void)subscribeToUserChannelWithHandler:(void (^)(NSDictionary<NSString *,id> * _Nonnull))messageHandler
-                               completion:(void (^)(NSError *error))completion
+- (void)subscribeToUserChannelWithCompletion:(void (^)(NSError *error))completion
 {
+    if (subscribedUserChannel) {
+        // Already subscribed. Do nothing except to call the completion handler.
+        if (completion) {
+            completion(nil);
+        }
+        return;
+    }
+
     [self fetchOrCreateUserChannelWithCompletion:^(SKYUserChannel *userChannel, NSError *error) {
-        if (error) {
+        if (error || !userChannel) {
             if (completion) {
+                if (!error) {
+                    error = [NSError errorWithDomain:SKYOperationErrorDomain
+                                                code:SKYErrorResourceNotFound
+                                            userInfo:nil];
+                }
                 completion(error);
             }
             return;
         }
-        
-        [self subscribeToUserChannel:userChannel
-                             handler:messageHandler];
-    }];
-}
 
-- (void)unsubscribeFromUserChannel:(SKYUserChannel *)userChannel
-{
-    [self.container.pubsubClient unsubscribe:userChannel.name];
-}
+        self->subscribedUserChannel = userChannel;
+        [self.container.pubsubClient subscribeTo:userChannel.name
+                                         handler:^(NSDictionary *data) {
+                                             [self handleUserChannelDictionary:data];
+                                         }];
 
-- (void)unsubscribeFromUserChannelWithCompletion:(void (^)(NSError *error))completion
-{
-    [self fetchUserChannelWithCompletion:^(SKYUserChannel * _Nullable userChannel, NSError * _Nullable error) {
-        if (userChannel) {
-            [self unsubscribeFromUserChannel:userChannel];
-        }
-        
         if (completion) {
-            completion(error);
+            completion(nil);
         }
     }];
+}
+
+- (void)unsubscribeFromUserChannel
+{
+    if (subscribedUserChannel) {
+        [self.container.pubsubClient unsubscribe:subscribedUserChannel.name];
+        subscribedUserChannel = nil;
+    }
+}
+
+- (id)subscribeToTypingIndicatorInConversation:(SKYConversation *)conversation
+                                       handler:(void (^)(SKYChatTypingIndicator *indicator))handler
+{
+    if (!handler) {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:@"must have handler"
+                                     userInfo:nil];
+    }
+
+    [self subscribeToUserChannelWithCompletion:nil];
+
+    NSString *conversationID = conversation.recordID.recordName;
+    return [[NSNotificationCenter defaultCenter]
+        addObserverForName:SKYChatDidReceiveTypingIndicatorNotification
+                    object:self
+                     queue:[NSOperationQueue mainQueue]
+                usingBlock:^(NSNotification *_Nonnull note) {
+                    SKYChatTypingIndicator *indicator =
+                        [note.userInfo objectForKey:SKYChatTypingIndicatorUserInfoKey];
+                    if ([indicator.conversationID isEqualToString:conversationID]) {
+                        handler(indicator);
+                    }
+                }];
+}
+
+- (id)subscribeToMessagesInConversation:(SKYConversation *)conversation
+                                handler:(void (^)(SKYChatRecordChangeEvent event,
+                                                  SKYMessage *record))handler
+{
+    if (!handler) {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:@"must have handler"
+                                     userInfo:nil];
+    }
+
+    [self subscribeToUserChannelWithCompletion:nil];
+
+    SKYRecordID *conversationID = conversation.recordID;
+    return [[NSNotificationCenter defaultCenter]
+        addObserverForName:SKYChatDidReceiveRecordChangeNotification
+                    object:self
+                     queue:[NSOperationQueue mainQueue]
+                usingBlock:^(NSNotification *_Nonnull note) {
+                    SKYChatRecordChange *recordChange =
+                        [note.userInfo objectForKey:SKYChatRecordChangeUserInfoKey];
+                    if (![recordChange.recordType isEqualToString:@"message"]) {
+                        return;
+                    }
+
+                    SKYReference *ref = recordChange.record[@"conversation_id"];
+                    if (![ref isKindOfClass:[SKYReference class]]) {
+                        return;
+                    }
+
+                    if (![ref.recordID isEqualToRecordID:conversationID]) {
+                        return;
+                    }
+
+                    handler(recordChange.event, [SKYMessage recordWithRecord:recordChange.record]);
+                }];
 }
 
 @end
