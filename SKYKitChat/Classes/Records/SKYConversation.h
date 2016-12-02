@@ -56,7 +56,7 @@
  Gets or sets whether this conversation is distinct. A distinct conversation will
  be returned whenever a conversation is needed with the same participant list.
  */
-@property (assign, nonatomic) BOOL distinctByParticipants;
+@property (assign, nonatomic, getter=isDistinctByParticipants) BOOL distinctByParticipants;
 
 - (NSString *_Nonnull)toString;
 
