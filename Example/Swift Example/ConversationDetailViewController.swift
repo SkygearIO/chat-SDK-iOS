@@ -66,7 +66,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
     }
 
     func refreshConversation() {
-        SKYContainer.default().chatExtension().fetchUserConversation(id: self.userCon.conversation.recordID.recordName) { (conversation, error) in
+        SKYContainer.default().chatExtension().fetchUserConversation(conversationID: self.userCon.conversation.recordID.recordName) { (conversation, error) in
             self.userCon = conversation
             self.tableView.reloadData()
         }

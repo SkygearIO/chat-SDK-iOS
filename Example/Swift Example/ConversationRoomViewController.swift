@@ -66,7 +66,7 @@ class ConversationRoomViewController:
 
         // subscribe chat messages
         // FIXME: SDK should help deserialize SKYMessage?
-        chat.subscribeHandler({ (dict) in
+        chat.subscribe(handler: { (dict) in
             if let recordType = dict["record_type"] as? String, recordType == "message",
                 let recordDic = dict["record"] as? [AnyHashable: Any],
                 let record = SKYRecordDeserializer().record(with: recordDic),
@@ -75,7 +75,7 @@ class ConversationRoomViewController:
                 self.messages.insert(message, at: 0)
                 self.tableView.insertRows(at: [IndexPath.init(row: 0, section: 0)], with: .automatic)
             }
-        })
+        }, completion: nil)
         
         // get conversation messages
         chat.fetchMessages(conversation: userCon.conversation, limit: 100, beforeTime: Date()) { (messages, error) in
@@ -214,7 +214,7 @@ class ConversationRoomViewController:
     }
     
     func refreshConversation() {
-        SKYContainer.default().chatExtension().fetchUserConversation(id: self.userCon.conversation.recordID.recordName) { (conversation, error) in
+        SKYContainer.default().chatExtension().fetchUserConversation(conversationID: self.userCon.conversation.recordID.recordName) { (conversation, error) in
             if let conv = conversation {
                 self.userCon = conv
                 self.lastReadMessage = conv.lastReadMessage
