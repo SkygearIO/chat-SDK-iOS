@@ -606,38 +606,172 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
              }];
 }
 
-- (void)getOrCreateUserChannelCompletionHandler:(SKYChatChannelCompletion)completion
+#pragma mark Typing Indicator
+
+- (void)publishTypingEvent:(NSString *)typingEvent
+            inConversation:(SKYConversation *)conversation
 {
-    SKYQuery *query = [SKYQuery queryWithRecordType:@"user_channel" predicate:nil];
-    [self.container.privateCloudDatabase
-             performQuery:query
-        completionHandler:^(NSArray *results, NSError *error) {
-            if ([results count] > 0) {
-                completion([SKYUserChannel recordWithRecord:[results objectAtIndex:0]], error);
-            } else {
-                SKYUserChannel *userChannel = [SKYUserChannel recordWithRecordType:@"user_channel"];
-                userChannel.name = [[NSUUID UUID] UUIDString];
-                [self.container.privateCloudDatabase
-                    saveRecord:userChannel
-                    completion:^(SKYRecord *record, NSError *error) {
-                        SKYUserChannel *channel = [SKYUserChannel recordWithRecord:record];
-                        completion(channel, error);
-                    }];
-            }
-        }];
+    [self publishTypingEvent:typingEvent
+              inConversation:conversation
+                        date:[NSDate date]
+                  completion:nil];
+}
+
+- (void)publishTypingEvent:(NSString *)typingEvent
+            inConversation:(SKYConversation *)conversation
+                      date:(NSDate *)date
+                completion:(void (^)(NSError *error))completion
+{
+    [self.container callLambda:@"chat:typing"
+                     arguments:@[
+                                 conversation.recordID.recordName,
+                                 typingEvent,
+                                 [SKYDataSerialization stringFromDate:date],
+                                 ]
+             completionHandler:^(NSDictionary *dict, NSError *error) {
+                 if (completion) {
+                     completion(error);
+                 }
+             }];
 }
 
 #pragma mark - Subscriptions
 
-- (void)subscribeHandler:(void (^)(NSDictionary *))messageHandler
+- (void)fetchOrCreateUserChannelWithCompletion:(SKYChatChannelCompletion)completion
 {
-    [self getOrCreateUserChannelCompletionHandler:^(SKYUserChannel *userChannel, NSError *error) {
-        if (!error) {
-            NSLog(@"subscribeHandler :%@", userChannel.name);
-            [self.container.pubsubClient subscribeTo:userChannel.name
-                                             handler:^(NSDictionary *data) {
-                                                 messageHandler(data);
-                                             }];
+    [self fetchUserChannelWithCompletion:^(SKYUserChannel * _Nullable userChannel, NSError * _Nullable error) {
+        if (error) {
+            if (completion) {
+                completion(nil, error);
+            }
+            return;
+        }
+        
+        if (!userChannel) {
+            [self createUserChannelWithCompletion:completion];
+            return;
+        }
+        
+        if (completion) {
+            completion(userChannel, nil);
+        }
+    }];
+}
+
+- (void)fetchUserChannelWithCompletion:(SKYChatChannelCompletion)completion
+{
+    SKYQuery *query = [SKYQuery queryWithRecordType:@"user_channel" predicate:nil];
+    query.limit = 1;
+    [self.container.privateCloudDatabase
+     performQuery:query
+     completionHandler:^(NSArray *results, NSError *error) {
+         if (!completion) {
+             return;
+         }
+         
+         if (error || results.count == 0) {
+             completion(nil, error);
+         }
+         
+         completion([SKYUserChannel recordWithRecord:results.firstObject], error);
+     }];
+}
+
+- (void)createUserChannelWithCompletion:(SKYChatChannelCompletion)completion
+{
+    SKYUserChannel *userChannel = [SKYUserChannel recordWithRecordType:@"user_channel"];
+    userChannel.name = [[NSUUID UUID] UUIDString];
+    [self.container.privateCloudDatabase
+     saveRecord:userChannel
+     completion:^(SKYRecord *record, NSError *error) {
+         if (!completion) {
+             return;
+         }
+         
+         if (error) {
+             completion(nil, error);
+             return;
+         }
+         
+         SKYUserChannel *channel = [SKYUserChannel recordWithRecord:record];
+         completion(channel, error);
+     }];
+}
+
+- (void)deleteAllUserChannelsWithCompletion:(void (^)(NSError *error))completion
+{
+    SKYQuery *query = [SKYQuery queryWithRecordType:@"user_channel" predicate:nil];
+    [self.container.privateCloudDatabase
+     performQuery:query
+     completionHandler:^(NSArray *results, NSError *error) {
+         if (error) {
+             if (completion) {
+                 completion(error);
+             }
+             return;
+         }
+         
+         NSMutableArray *recordIDsToDelete = [NSMutableArray array];
+         [results enumerateObjectsUsingBlock:^(SKYRecord *record, NSUInteger idx, BOOL * _Nonnull stop) {
+             [recordIDsToDelete addObject:record.recordID];
+         }];
+         
+         if (!recordIDsToDelete.count) {
+             if (completion) {
+                 completion(nil);
+             }
+             return;
+         }
+         
+         [self.container.privateCloudDatabase
+          deleteRecordsWithIDs:recordIDsToDelete
+          completionHandler:^(NSArray *deletedRecordIDs, NSError *error) {
+              if (completion) {
+                  completion(error);
+              }
+          } perRecordErrorHandler:nil];
+     }];
+}
+
+- (void)subscribeToUserChannel:(SKYUserChannel *)userChannel
+                       handler:(void (^)(NSDictionary<NSString *,id> * _Nonnull))messageHandler
+{
+    [self.container.pubsubClient subscribeTo:userChannel.name
+                                     handler:^(NSDictionary *data) {
+                                         messageHandler(data);
+                                     }];
+}
+
+- (void)subscribeToUserChannelWithHandler:(void (^)(NSDictionary<NSString *,id> * _Nonnull))messageHandler
+                               completion:(void (^)(NSError *error))completion
+{
+    [self fetchOrCreateUserChannelWithCompletion:^(SKYUserChannel *userChannel, NSError *error) {
+        if (error) {
+            if (completion) {
+                completion(error);
+            }
+            return;
+        }
+        
+        [self subscribeToUserChannel:userChannel
+                             handler:messageHandler];
+    }];
+}
+
+- (void)unsubscribeFromUserChannel:(SKYUserChannel *)userChannel
+{
+    [self.container.pubsubClient unsubscribe:userChannel.name];
+}
+
+- (void)unsubscribeFromUserChannelWithCompletion:(void (^)(NSError *error))completion
+{
+    [self fetchUserChannelWithCompletion:^(SKYUserChannel * _Nullable userChannel, NSError * _Nullable error) {
+        if (userChannel) {
+            [self unsubscribeFromUserChannel:userChannel];
+        }
+        
+        if (completion) {
+            completion(error);
         }
     }];
 }

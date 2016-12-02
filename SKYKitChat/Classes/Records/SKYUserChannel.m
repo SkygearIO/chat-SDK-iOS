@@ -21,14 +21,14 @@
 
 @implementation SKYUserChannel
 
-+ (instancetype)recordWithUserChannelRecordType
++ (instancetype)userChannel
 {
     return [[self alloc] initWithRecordType:@"user_channel"];
 }
 
 - (void)setName:(NSString *)name
 {
-    self[@"name"] = name;
+    self[@"name"] = [name copy];
 }
 
 - (NSString *)name

@@ -453,10 +453,55 @@ NS_SWIFT_NAME(leave(conversationID:completion:));
 - (void)fetchTotalUnreadCount:(SKYChatUnreadCountCompletion _Nullable)completion
     NS_SWIFT_NAME(fetchTotalUnreadCount(completion:));
 
-- (void)getOrCreateUserChannelCompletionHandler:(SKYChatChannelCompletion _Nullable)completion;
+#pragma mark Typing Indicator
+
+- (void)publishTypingEvent:(NSString *_Nonnull)typingEvent
+            inConversation:(SKYConversation *_Nonnull)conversation
+NS_SWIFT_NAME(publishTypingEvent(_:in:));
+
+- (void)publishTypingEvent:(NSString *_Nonnull)typingEvent
+            inConversation:(SKYConversation *_Nonnull)conversation
+                      date:(NSDate *_Nonnull)date
+                completion:(void (^_Nullable)(NSError *_Nullable error))completion
+NS_SWIFT_NAME(publishTypingEvent(_:in:at:completion:));
 
 #pragma mark - Subscriptions
 
-- (void)subscribeHandler:(void (^_Nonnull)(NSDictionary<NSString *, id> *_Nonnull))messageHandler;
+/**
+ Obtains the user channel.
+ 
+ If no user channel exists, a new user channel will be created.
+ */
+- (void)fetchOrCreateUserChannelWithCompletion:(SKYChatChannelCompletion _Nullable)completion
+NS_SWIFT_NAME(fetchOrCreateUserChannel(completion:));
+
+/**
+ Deletes all user channels.
+ */
+- (void)deleteAllUserChannelsWithCompletion:(void (^_Nullable)(NSError *_Nullable error))completion
+NS_SWIFT_NAME(deleteAllUserChannels(completion:));
+
+/**
+ Subscribe a message handler to the specified user channel.
+ */
+- (void)subscribeToUserChannel:(SKYUserChannel *_Nonnull)userChannel
+                       handler:(void (^_Nonnull)(NSDictionary<NSString *, id> *_Nonnull))messageHandler
+NS_SWIFT_NAME(subscribe(toUserChannel:handler:));
+
+/**
+ Subscribe a message handler to a user channel.
+ 
+ The channel for the current user will be fetched from the server. If no user channel exists,
+ a new one will be created.
+ */
+- (void)subscribeToUserChannelWithHandler:(void (^_Nonnull)(NSDictionary<NSString *, id> *_Nonnull))messageHandler
+                               completion:(void (^_Nullable)(NSError *_Nullable error))completion
+NS_SWIFT_NAME(subscribe(handler:completion:));
+
+- (void)unsubscribeFromUserChannel:(SKYUserChannel *_Nonnull)userChannel
+NS_SWIFT_NAME(unsubscribeFromUserChannel(_:));
+
+- (void)unsubscribeFromUserChannelWithCompletion:(void (^_Nullable)(NSError *_Nullable error))completion
+NS_SWIFT_NAME(unsubscribeFromUserChannel(completion:));
 
 @end

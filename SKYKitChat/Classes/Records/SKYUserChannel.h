@@ -20,9 +20,20 @@
 #import "SKYChatRecord.h"
 #import <SKYKit/SKYKit.h>
 
+/**
+ SKYUserChannel is a record containing information of the pubsub channel where
+ server-side notifications are sent.
+ */
 @interface SKYUserChannel : SKYChatRecord
-@property (strong, nonatomic) NSString *name;
 
-+ (instancetype)recordWithUserChannelRecordType;
+/**
+ Gets or sets the name of the user channel.
+ */
+@property (copy, nonatomic, nullable) NSString *name;
+
+/**
+ Creates an instance of user channel.
+ */
++ (instancetype _Nullable)userChannel;
 
 @end
