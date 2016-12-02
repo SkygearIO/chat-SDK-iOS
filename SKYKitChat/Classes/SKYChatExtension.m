@@ -391,7 +391,7 @@ NSString *const SKYChatMetaDataAssetNameText = @"message-text";
 
 - (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
 {
-    SKYDatabase *database = self.container.publicCloudDatabase;
+    SKYDatabase *database = self.container.privateCloudDatabase;
     [database saveRecord:message
               completion:^(SKYRecord *record, NSError *error) {
                   SKYMessage *msg = nil;
