@@ -651,18 +651,18 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 #pragma mark Typing Indicator
 
 - (void)sendTypingIndicator:(SKYChatTypingEvent)typingEvent
-            inConversation:(SKYConversation *)conversation
+             inConversation:(SKYConversation *)conversation
 {
     [self sendTypingIndicator:typingEvent
-              inConversation:conversation
-                        date:[NSDate date]
-                  completion:nil];
+               inConversation:conversation
+                         date:[NSDate date]
+                   completion:nil];
 }
 
 - (void)sendTypingIndicator:(SKYChatTypingEvent)typingEvent
-            inConversation:(SKYConversation *)conversation
-                      date:(NSDate *)date
-                completion:(void (^)(NSError *error))completion
+             inConversation:(SKYConversation *)conversation
+                       date:(NSDate *)date
+                 completion:(void (^)(NSError *error))completion
 {
     [self.container callLambda:@"chat:typing"
                      arguments:@[

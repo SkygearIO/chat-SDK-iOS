@@ -24,10 +24,11 @@
 @interface SKYContainer (Chat)
 
 /**
- Returns a SKYChatExtension object that is associated with this SKYContainer.
- */
-- (SKYChatExtension *_Nullable)chatExtension;
+ Returns a SKYChatExtension object that is associated with the specified SKYContainer.
 
+ To use the chat extension, you should get an object of the chat extension using this
+ property. The chat extension object is created once for each SKYContainer.
+ */
 @property (nonatomic, readonly, nullable) SKYChatExtension *chatExtension;
 
 @end

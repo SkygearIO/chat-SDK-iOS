@@ -39,6 +39,9 @@ typedef NS_ENUM(NSInteger, SKYChatTypingEvent) {
     SKYChatTypingEventFinished,
 };
 
+/**
+ Returns the string representation of the typing event.
+ */
 extern NSString *_Nonnull SKYChatTypingEventToString(SKYChatTypingEvent event);
 
 /**

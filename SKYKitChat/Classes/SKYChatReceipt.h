@@ -68,7 +68,7 @@ typedef NS_ENUM(NSInteger, SKYChatReceiptStatus) {
 @property (nonatomic, readonly) SKYChatReceiptStatus status;
 
 /**
- Instantiate an instance of SKYChatReceipt.
+ Instantiates an instance of SKYChatReceipt.
 
  Most developer do not need to create an instance of SKYChatReceipt. The SDK creates instances
  of this class to provide information of message receipt.
