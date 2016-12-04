@@ -1,6 +1,6 @@
 //
 //  SKYContainer+Chat.m
-//  SKYKit
+//  SKYKitChat
 //
 //  Copyright 2016 Oursky Ltd.
 //
