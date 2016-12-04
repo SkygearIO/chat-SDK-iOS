@@ -18,6 +18,7 @@
 //
 
 #import "SKYChatExtension.h"
+#import "SKYChatExtension_Private.h"
 
 #import <SKYKit/SKYKit.h>
 

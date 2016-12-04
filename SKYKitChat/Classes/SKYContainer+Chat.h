@@ -26,6 +26,8 @@
 /**
  Returns a SKYChatExtension object that is associated with this SKYContainer.
  */
-- (SKYChatExtension *)chatExtension;
+- (SKYChatExtension *_Nullable)chatExtension;
+
+@property (nonatomic, readonly, nullable) SKYChatExtension *chatExtension;
 
 @end

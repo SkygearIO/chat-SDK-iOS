@@ -19,13 +19,21 @@
 
 #import "SKYContainer+Chat.h"
 
-#import "SKYChatExtension.h"
+#import <objc/runtime.h>
+
+#import "SKYChatExtension_Private.h"
 
 @implementation SKYContainer (Chat)
 
 - (SKYChatExtension *)chatExtension
 {
-    return [[SKYChatExtension alloc] initWithContainer:self];
+    SKYChatExtension *extension = objc_getAssociatedObject(self, @selector(chatExtension));
+    if (!extension) {
+        extension = [[SKYChatExtension alloc] initWithContainer:self];
+        objc_setAssociatedObject(self, @selector(chatExtension), extension,
+                                 OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return extension;
 }
 
 @end

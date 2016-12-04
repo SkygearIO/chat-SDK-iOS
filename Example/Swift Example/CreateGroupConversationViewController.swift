@@ -68,7 +68,7 @@ class CreateGroupConversationViewController:
         // let ids be unique
         userIds = Array(Set(userIds))
         
-        SKYContainer.default().chatExtension().createConversation(participantIDs: userIds, title: titleTextField.text, metadata: nil) { (conversation, error) in
+        SKYContainer.default().chatExtension?.createConversation(participantIDs: userIds, title: titleTextField.text, metadata: nil) { (conversation, error) in
             if let err = error {
                 let alert = UIAlertController(title: "Unable to create group conversation", message: err.localizedDescription, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))

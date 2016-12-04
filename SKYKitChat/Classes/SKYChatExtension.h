@@ -57,27 +57,11 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                                               NSError *_Nullable error);
 
 /**
- Gets an instance of SKYContainer used by this SKYChatExtension.
- */
-@property (strong, nonatomic, readonly, nonnull) SKYContainer *container;
-
-/**
  Gets or sets whether messages fetched from server are automatically marked as delivered.
 
  The SDK automatically mark messages as delivered by default.
  */
 @property (assign, nonatomic) bool automaticallyMarkMessagesAsDelivered;
-
-/**
- Creates an instance of SKYChatExtension.
-
- For most user of the chat extension, get an instance of SKYChatExtension by using the category
- method called `-[SKYContainer chatExtension]`.
-
- @param container the SKYContainer that contains user credentials and server configuration
- @return an instance of SKYChatExtension
- */
-- (nullable instancetype)initWithContainer:(nonnull SKYContainer *)container;
 
 #pragma mark - Conversations
 

@@ -31,7 +31,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
     // MARK: - Action
     @IBAction func addParticipant(_ sender: AnyObject) {
         if let id = participantTextField.text, !id.isEmpty {
-            SKYContainer.default().chatExtension().addParticipants(
+            SKYContainer.default().chatExtension?.addParticipants(
                 userIDs: [id],
                 to: userCon.conversation
             ){ (conversation, error) in
@@ -49,7 +49,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
 
     @IBAction func removeParticipant(_ sender: AnyObject) {
         if let id = participantTextField.text, !id.isEmpty {
-            SKYContainer.default().chatExtension().removeParticipants(
+            SKYContainer.default().chatExtension?.removeParticipants(
                 userIDs: [id],
                 from: userCon.conversation
             ){ (conversation, error) in
@@ -66,7 +66,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
     }
 
     func refreshConversation() {
-        SKYContainer.default().chatExtension().fetchUserConversation(conversationID: self.userCon.conversation.recordID.recordName) { (conversation, error) in
+        SKYContainer.default().chatExtension?.fetchUserConversation(conversationID: self.userCon.conversation.recordID.recordName) { (conversation, error) in
             self.userCon = conversation
             self.tableView.reloadData()
         }
