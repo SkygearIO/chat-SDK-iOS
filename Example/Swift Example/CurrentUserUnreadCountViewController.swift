@@ -24,7 +24,7 @@ class CurrentUserUnreadCountViewController: UITableViewController {
         super.viewDidLoad()
         
         // SDK should implement get total unread
-        SKYContainer.default().chatExtension().fetchTotalUnreadCount { (response, error) in
+        SKYContainer.default().chatExtension?.fetchTotalUnreadCount { (response, error) in
             if let err = error {
                 let alert = UIAlertController(title: "Unable to get unread count", message: err.localizedDescription, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))

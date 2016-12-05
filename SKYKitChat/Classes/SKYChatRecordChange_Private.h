@@ -1,5 +1,5 @@
 //
-//  SKYChatRecord.h
+//  SKYChatRecordChange_Private.h
 //  SKYKitChat
 //
 //  Copyright 2016 Oursky Ltd.
@@ -17,10 +17,15 @@
 //  limitations under the License.
 //
 
-#import <SKYKit/SKYKit.h>
+#import "SKYChatRecordChange.h"
 
-@interface SKYChatRecord : SKYRecord
+@interface SKYChatRecordChange ()
 
-+ (instancetype)recordWithRecord:(SKYRecord *)record;
+/**
+ Returns whether the specified string is the name of the event type for record change.
+
+ App developer should not call this method.
+ */
++ (BOOL)isRecordChangeEventType:(NSString *_Nullable)eventType;
 
 @end

@@ -59,23 +59,18 @@ class ConversationRoomViewController:
             
         }
         
-        guard let chat = SKYContainer.default().chatExtension() else {
+        guard let chat = SKYContainer.default().chatExtension else {
             NSLog("No chat extension")
             return
         }
 
         // subscribe chat messages
-        // FIXME: SDK should help deserialize SKYMessage?
-        chat.subscribe(handler: { (dict) in
-            if let recordType = dict["record_type"] as? String, recordType == "message",
-                let recordDic = dict["record"] as? [AnyHashable: Any],
-                let record = SKYRecordDeserializer().record(with: recordDic),
-                let message = SKYMessage(record: record), message.conversationID == self.userCon.conversation.recordID {
-                
+        chat.subscribeToMessages(in: userCon.conversation) { (event, message) in
+            if event == .create {
                 self.messages.insert(message, at: 0)
                 self.tableView.insertRows(at: [IndexPath.init(row: 0, section: 0)], with: .automatic)
             }
-        }, completion: nil)
+        };
         
         // get conversation messages
         chat.fetchMessages(conversation: userCon.conversation, limit: 100, beforeTime: Date()) { (messages, error) in
@@ -121,7 +116,7 @@ class ConversationRoomViewController:
         message.body = messaegBodyTextField.text
         message.metadata = metadateDic
         message.attachment = chosenAsset
-        SKYContainer.default().chatExtension().addMessage(message, to: userCon.conversation) { (message, error) in
+        SKYContainer.default().chatExtension?.addMessage(message, to: userCon.conversation) { (message, error) in
                 if let err = error {
                     let alert = UIAlertController(title: "Unable to send message", message: err.localizedDescription, preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -177,7 +172,7 @@ class ConversationRoomViewController:
         let unreadAction = UITableViewRowAction(style: UITableViewRowActionStyle.normal , title: "mark as unread") { (action, indexPath) in
             
             let message = self.messages[indexPath.row]
-            SKYContainer.default().chatExtension().markLastReadMessage(message,
+            SKYContainer.default().chatExtension?.markLastReadMessage(message,
                                                             in: self.userCon) { (userCon, error) in
                     
                     if let err = error {
@@ -214,7 +209,7 @@ class ConversationRoomViewController:
     }
     
     func refreshConversation() {
-        SKYContainer.default().chatExtension().fetchUserConversation(conversationID: self.userCon.conversation.recordID.recordName) { (conversation, error) in
+        SKYContainer.default().chatExtension?.fetchUserConversation(conversationID: self.userCon.conversation.recordID.recordName) { (conversation, error) in
             if let conv = conversation {
                 self.userCon = conv
                 self.lastReadMessage = conv.lastReadMessage

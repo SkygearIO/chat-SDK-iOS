@@ -1,6 +1,6 @@
 //
 //  SKYKitChat.h
-//  SKYKit
+//  SKYKitChat
 //
 //  Copyright 2016 Oursky Ltd.
 //
@@ -18,11 +18,13 @@
 //
 
 #import "SKYChatExtension.h"
-#import "SKYContainer+Chat.h"
-
-// record classes
+#import "SKYChatReceipt.h"
 #import "SKYChatRecord.h"
+#import "SKYChatRecordChange.h"
+#import "SKYChatTypingIndicator.h"
+#import "SKYContainer+Chat.h"
 #import "SKYConversation.h"
+#import "SKYKitChat.h"
 #import "SKYMessage.h"
 #import "SKYUserChannel.h"
 #import "SKYUserConversation.h"

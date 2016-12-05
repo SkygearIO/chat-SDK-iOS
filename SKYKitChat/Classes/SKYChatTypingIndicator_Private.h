@@ -1,5 +1,5 @@
 //
-//  SKYChatRecord.h
+//  SKYChatTypingIndicator_Private.h
 //  SKYKitChat
 //
 //  Copyright 2016 Oursky Ltd.
@@ -17,10 +17,15 @@
 //  limitations under the License.
 //
 
-#import <SKYKit/SKYKit.h>
+#import "SKYChatTypingIndicator.h"
 
-@interface SKYChatRecord : SKYRecord
+@interface SKYChatTypingIndicator ()
 
-+ (instancetype)recordWithRecord:(SKYRecord *)record;
+/**
+ Returns whether the specified string is the name of the event type for typing indicator.
+
+ App developer should not call this method.
+ */
++ (BOOL)isTypingIndicatorEventType:(NSString *_Nullable)typingIndicator;
 
 @end
