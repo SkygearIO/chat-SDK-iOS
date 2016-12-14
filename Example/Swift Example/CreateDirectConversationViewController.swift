@@ -10,23 +10,22 @@ import UIKit
 import SKYKit
 
 class CreateDirectConversationViewController: UIViewController {
-    
+
     @IBOutlet var userIdTextField: UITextField!
     @IBOutlet var createdConversationTextView: UITextView!
-    
+
     // MARK: - Lifecycle
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
+
     }
-    
+
     // MARK: - Actions
-    
+
     @IBAction func createConversation(_ sneder: AnyObject!) {
         if var id = userIdTextField.text, !id.isEmpty {
-            
+
             if id.hasPrefix("user/") {
                 id = id.substring(from: "user/".endIndex)
             }

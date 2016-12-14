@@ -11,18 +11,18 @@ import SKYKit
 import SKYKitChat
 
 class CurrentUserUnreadCountViewController: UITableViewController {
-    
+
     let unreadConversationCountRowIndex = 0
     let unreadMessageCountRowIndex = 1
-    
-    var unreadConversationCount:Int?
-    var unreadMessageCount:Int?
-    
+
+    var unreadConversationCount: Int?
+    var unreadMessageCount: Int?
+
     // MARK: - Lifecycle
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         // SDK should implement get total unread
         SKYContainer.default().chatExtension?.fetchTotalUnreadCount { (response, error) in
             if let err = error {
@@ -41,17 +41,17 @@ class CurrentUserUnreadCountViewController: UITableViewController {
 
         }
     }
-    
+
     // MARK: - Table view data source
-    
+
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
-    
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 2
     }
-    
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "plain", for: indexPath)
         switch indexPath.row {

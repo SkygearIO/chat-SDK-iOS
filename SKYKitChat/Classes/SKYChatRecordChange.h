@@ -70,6 +70,7 @@ typedef NS_ENUM(NSInteger, SKYChatRecordChangeEvent) {
 /**
  Instantiates an instance of SKYChatRecordChange.
  */
-- (instancetype _Nullable)initWithDictionary:(NSDictionary<NSString *, id> *_Nonnull)dict eventType:(NSString * _Nullable)eventType;
+- (instancetype _Nullable)initWithDictionary:(NSDictionary<NSString *, id> *_Nonnull)dict
+                                   eventType:(NSString *_Nullable)eventType;
 
 @end

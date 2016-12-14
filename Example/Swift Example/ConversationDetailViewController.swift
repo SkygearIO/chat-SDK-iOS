@@ -11,30 +11,30 @@ import SKYKit
 import SKYKitChat
 
 class ConversationDetailViewController: UITableViewController, UITextFieldDelegate {
-    
+
     @IBOutlet var participantTextField: UITextField!
-    
+
     let unreadMessageCount = 0
     let participantIdsSection = 1
     let adminIdsSection = 2
-    
+
     var userCon: SKYUserConversation!
-    
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         refreshConversation()
     }
-    
+
     // MARK: - Action
     @IBAction func addParticipant(_ sender: AnyObject) {
         if let id = participantTextField.text, !id.isEmpty {
             SKYContainer.default().chatExtension?.addParticipants(
                 userIDs: [id],
                 to: userCon.conversation
-            ){ (conversation, error) in
+            ) { (conversation, error) in
                 if let err = error {
                     let alert = UIAlertController(title: "Unable to add user to participant.", message: err.localizedDescription, preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -52,7 +52,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
             SKYContainer.default().chatExtension?.removeParticipants(
                 userIDs: [id],
                 from: userCon.conversation
-            ){ (conversation, error) in
+            ) { (conversation, error) in
                 if let err = error {
                     let alert = UIAlertController(title: "Unable to remove user from participant.", message: err.localizedDescription, preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -103,7 +103,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
             return nil
         }
     }
-    
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch indexPath.section {
         case unreadMessageCount:
@@ -122,7 +122,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
             return UITableViewCell()
         }
     }
-    
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch indexPath.section {
         case participantIdsSection:
@@ -132,14 +132,14 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
         default: break
         }
     }
-    
+
     // MARK: - Text Field delegate
-    
+
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
     }
-    
+
     // MARK: - Navigation
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

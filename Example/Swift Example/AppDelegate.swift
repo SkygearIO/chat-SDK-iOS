@@ -44,7 +44,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             types: [.alert, .badge, .sound],
             categories: nil
         ))
-        
+
         return true
     }
 
@@ -95,4 +95,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         print("Fail to get remote notification device token: \(error.localizedDescription)")
     }
 }
-

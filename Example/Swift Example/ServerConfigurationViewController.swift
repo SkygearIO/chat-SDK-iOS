@@ -10,26 +10,26 @@ import UIKit
 import SKYKit
 
 class ServerConfigurationViewController: UITableViewController {
-    
+
     // MARK: - Lifecycle
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
     }
-    
+
     // MARK: - Table view data source
-    
+
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
-    
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 2
     }
-    
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "plainTableViewCell", for: indexPath)
-        
+
         if indexPath.row == 0 {
             cell.textLabel?.text = "Endpoint"
             cell.detailTextLabel?.text = UserDefaults.standard.string(forKey: "SkygearEndpoint")
@@ -39,7 +39,7 @@ class ServerConfigurationViewController: UITableViewController {
         }
         return cell
     }
-    
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 {
             let alert = UIAlertController(title: "Endpoint", message: "Enter the Skygear Endpoint (you can obtained this from portal)", preferredStyle: .alert)
@@ -76,4 +76,3 @@ class ServerConfigurationViewController: UITableViewController {
         }
     }
 }
-

@@ -11,9 +11,9 @@ import SKYKit
 import SKYKitChat
 
 class ConversationsViewController: UITableViewController {
-    
+
     var userCons = [SKYUserConversation]()
-    
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
@@ -33,16 +33,15 @@ class ConversationsViewController: UITableViewController {
             }
         }
     }
-    
+
     // MARK: - Navigation
-    
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "conversation_room" {
             let controller = segue.destination as! ConversationRoomViewController
             controller.userCon = sender as! SKYUserConversation
         }
     }
-
 
     // MARK: - Table view data source
 
@@ -63,7 +62,7 @@ class ConversationsViewController: UITableViewController {
 
         return cell
     }
-    
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.performSegue(withIdentifier: "conversation_room", sender: userCons[indexPath.row])
     }

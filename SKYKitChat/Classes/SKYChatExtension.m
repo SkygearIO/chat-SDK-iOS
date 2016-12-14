@@ -801,8 +801,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                             }];
         }];
     } else if ([SKYChatRecordChange isRecordChangeEventType:dictionaryEventType]) {
-        SKYChatRecordChange *recordChange = [[SKYChatRecordChange alloc] initWithDictionary:data
-                                                                                  eventType:dictionaryEventType];
+        SKYChatRecordChange *recordChange =
+            [[SKYChatRecordChange alloc] initWithDictionary:data eventType:dictionaryEventType];
         if (!recordChange) {
             return;
         }

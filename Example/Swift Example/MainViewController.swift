@@ -9,7 +9,7 @@
 import UIKit
 
 class MainViewController: UITableViewController {
-    
+
     var hasPromptedForConfiguration: Bool {
         get {
             return UserDefaults.standard.bool(forKey: "HasPromptedForConfiguration")
@@ -19,12 +19,12 @@ class MainViewController: UITableViewController {
             UserDefaults.standard.synchronize()
         }
     }
-    
+
     // MARK: - Lifecycle
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         if !self.hasPromptedForConfiguration {
             let alert = UIAlertController(title: "Configuration Required",
                                           message: "The app does not know how to connect to your Skygear Server. Configure the app now?",
@@ -39,18 +39,17 @@ class MainViewController: UITableViewController {
             alert.preferredAction = alert.actions.last
             self.present(alert, animated: true, completion: nil)
         }
-        
+
     }
-    
+
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
+
     // MARK: - Navigation
-    
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     }
-    
-}
 
+}

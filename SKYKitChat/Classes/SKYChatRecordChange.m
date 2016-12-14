@@ -28,7 +28,8 @@
     return [@[ @"update", @"create", @"delete" ] containsObject:eventType];
 }
 
-- (instancetype)initWithDictionary:(NSDictionary<NSString *, id> *)dict eventType:(NSString *)eventType
+- (instancetype)initWithDictionary:(NSDictionary<NSString *, id> *)dict
+                         eventType:(NSString *)eventType
 {
     if ((self = [super init])) {
         if ([eventType isEqualToString:@"create"]) {
