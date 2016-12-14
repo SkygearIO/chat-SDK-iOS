@@ -28,10 +28,9 @@
     return [@[ @"update", @"create", @"delete" ] containsObject:eventType];
 }
 
-- (instancetype)initWithDictionary:(NSDictionary<NSString *, id> *)dict
+- (instancetype)initWithDictionary:(NSDictionary<NSString *, id> *)dict eventType:(NSString *)eventType
 {
     if ((self = [super init])) {
-        NSString *eventType = dict[@"event_type"];
         if ([eventType isEqualToString:@"create"]) {
             _event = SKYChatRecordChangeEventCreate;
         } else if ([eventType isEqualToString:@"update"]) {
