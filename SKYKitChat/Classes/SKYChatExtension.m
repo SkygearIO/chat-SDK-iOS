@@ -591,7 +591,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
          inUserConversation:(SKYUserConversation *)userConversation
                  completion:(SKYChatUserConversationCompletion)completion
 {
-    userConversation.lastReadMessageID = [SKYReference referenceWithRecord:message];
+    userConversation.lastReadMessageID = message.recordID.recordName;
 
     SKYDatabase *database = self.container.publicCloudDatabase;
     [database saveRecord:userConversation
