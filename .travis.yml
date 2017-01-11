@@ -9,6 +9,7 @@ before_install:
 - brew install clang-format
 - brew install swiftlint
 - sudo pip install lizard
+- pod repo update
 - pod install --project-directory=Example
 script:
 - xcodebuild -scheme "$SCHEME" -workspace "$WORKSPACE" -sdk "$SDK" -destination "$DESTINATION" build test | xcpretty
