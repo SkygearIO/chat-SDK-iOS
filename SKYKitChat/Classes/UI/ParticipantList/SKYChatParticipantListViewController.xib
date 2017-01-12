@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SKYChatParticipantListViewController">
+            <connections>
+                <outlet property="searchBar" destination="RB3-pa-ikC" id="kEP-zF-JHj"/>
+                <outlet property="tableView" destination="prT-kQ-ggE" id="f9g-Uw-nrB"/>
+                <outlet property="view" destination="UE1-RB-fha" id="CRu-Ib-Kaa"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="UE1-RB-fha">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <searchBar contentMode="redraw" translatesAutoresizingMaskIntoConstraints="NO" id="RB3-pa-ikC">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                    <textInputTraits key="textInputTraits"/>
+                </searchBar>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="prT-kQ-ggE">
+                    <rect key="frame" x="0.0" y="44" width="375" height="623"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="Zuz-Hb-0bG"/>
+                        <outlet property="delegate" destination="-1" id="Ckn-QN-MIw"/>
+                    </connections>
+                </tableView>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="RB3-pa-ikC" firstAttribute="top" secondItem="UE1-RB-fha" secondAttribute="top" id="0m2-Y5-G8t"/>
+                <constraint firstItem="prT-kQ-ggE" firstAttribute="leading" secondItem="UE1-RB-fha" secondAttribute="leading" id="8MC-RN-R6A"/>
+                <constraint firstItem="prT-kQ-ggE" firstAttribute="top" secondItem="RB3-pa-ikC" secondAttribute="bottom" id="ID7-YC-MM7"/>
+                <constraint firstItem="RB3-pa-ikC" firstAttribute="leading" secondItem="UE1-RB-fha" secondAttribute="leading" id="KVt-mK-LH1"/>
+                <constraint firstAttribute="trailing" secondItem="RB3-pa-ikC" secondAttribute="trailing" id="fwx-rQ-eFX"/>
+                <constraint firstAttribute="trailing" secondItem="prT-kQ-ggE" secondAttribute="trailing" id="vId-3m-Czq"/>
+                <constraint firstAttribute="bottom" secondItem="prT-kQ-ggE" secondAttribute="bottom" id="vIu-Jz-MCd"/>
+            </constraints>
+            <nil key="simulatedStatusBarMetrics"/>
+            <point key="canvasLocation" x="-290.5" y="-131.5"/>
+        </view>
+    </objects>
+</document>
