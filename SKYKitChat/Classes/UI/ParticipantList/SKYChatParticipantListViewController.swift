@@ -18,10 +18,17 @@
 //
 
 public enum SKYChatParticipantQueryMethod: UInt {
+    // Initial value for the enum, for compatible with objective-c
     case Undefined
+
+    // By username of the user, supposed to be unique
     case ByUsername
+
+    // By email of the user, supposed to be unique
     case ByEmail
-    case Custom
+
+    // By name of the user, can limit the searching scope by setting participantScope
+    case ByName
 }
 
 open class SKYChatParticipantListViewController: UIViewController {
@@ -29,11 +36,28 @@ open class SKYChatParticipantListViewController: UIViewController {
     static let queryMethodCoderKey = "QUERY_METHOD"
 
     public var skygear: SKYContainer?
-    public var queryMethod: SKYChatParticipantQueryMethod = .Undefined
-    public var participantScope: SKYQuery?
+    public var queryMethod: SKYChatParticipantQueryMethod = .Undefined {
+        didSet {
+            self.searchBar.keyboardType = .default
 
-    @IBOutlet var searchBar: UISearchBar!
-    @IBOutlet var tableView: UITableView!
+            switch self.queryMethod {
+            case .ByEmail:
+                self.searchBar.placeholder = "Search for user email"
+                self.searchBar.keyboardType = .emailAddress
+            case .ByUsername:
+                self.searchBar.placeholder = "Search for username"
+            case .ByName:
+                self.searchBar.placeholder = "Search for name of user"
+            default:
+                self.searchBar.placeholder = nil
+            }
+        }
+    }
+    public var participantScope: SKYQuery?
+    internal(set) public var searchTerm: String?
+
+    @IBOutlet public var searchBar: UISearchBar!
+    @IBOutlet public var tableView: UITableView!
 
     var participants: [SKYRecord] = []
 
@@ -84,19 +108,19 @@ extension SKYChatParticipantListViewController {
 
         guard self.skygear != nil else {
             print("Missing required settings: skygear")
-
+            self.dismiss(animated: animated)
             return
         }
 
         guard self.queryMethod != .Undefined else {
             print("Missing required settings: queryMethod")
-
+            self.dismiss(animated: animated)
             return
         }
 
-        guard self.queryMethod != .Custom || self.participantScope != nil else {
-            print("Missing required settings: participantScope")
-
+        guard self.participantScope == nil || self.participantScope?.recordType == "user" else {
+            print("Participant Scope should only for user records")
+            self.dismiss(animated: animated)
             return
         }
 
@@ -104,10 +128,29 @@ extension SKYChatParticipantListViewController {
             self.edgesForExtendedLayout = [.left, .right, .bottom]
         }
 
-//        self.performUserQuery()
+        if self.queryMethod == .ByName {
+            // show all users under the scope
+            self.performUserQuery()
+        }
+
+        self.searchBar.becomeFirstResponder()
+
     }
 
+    func dismiss(animated: Bool) {
+        if let nc = self.navigationController, let topVC = nc.topViewController {
+            guard self == topVC else {
+                // I am not the top view controller
+                return
+            }
+
+            nc.popViewController(animated: animated)
+        } else {
+            self.dismiss(animated: animated, completion: nil)
+        }
+    }
 }
+
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
@@ -118,13 +161,54 @@ extension SKYChatParticipantListViewController: UITableViewDelegate, UITableView
     }
 
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        // TODO: dequeue reused cell
         let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
-        cell.textLabel?.text = "\(indexPath.row)"
+        let user = self.participants[indexPath.row]
+
+        cell.textLabel?.text = nil
+        switch self.queryMethod {
+        case .ByEmail:
+            if let email = user.transient.object(forKey: "_email") as? String {
+                cell.textLabel?.text = email
+            }
+        case .ByUsername:
+            if let username = user.transient.object(forKey: "_username") as? String {
+                cell.textLabel?.text = username
+            }
+        case .ByName:
+            if let name = user.object(forKey: "name") as? String {
+                cell.textLabel?.text = name
+            }
+        default:
+            break
+        }
 
         return cell
     }
 
+}
+
+// MARK: - UISearchBarDelegate
+
+extension SKYChatParticipantListViewController: UISearchBarDelegate {
+
+    public func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        if let text = searchBar.text {
+            if text.characters.count > 0 {
+                self.searchTerm = text
+            } else {
+                self.searchTerm = nil
+            }
+        } else {
+            self.searchTerm = nil
+        }
+
+        self.performUserQuery()
+    }
+
+    public func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        self.searchTerm = nil
+
+    }
 }
 
 // MARK: - Utility Methods
@@ -135,9 +219,73 @@ extension SKYChatParticipantListViewController {
         return self.participants
     }
 
+    var queryPredicate: NSPredicate? {
+        switch self.queryMethod {
+        case .ByEmail:
+            if let term = self.searchTerm {
+                return SKYUserDiscoverPredicate(emails: [term])
+            } else {
+                print("Cannot search for an empty email")
+                return nil
+            }
 
-//    open func performUserQuery() {
-//        // TODO: perform query
-//    }
+        case .ByUsername:
+            if let term = self.searchTerm {
+                return SKYUserDiscoverPredicate(usernames: [term])
+            } else {
+                print("Cannot search for an empty email")
+                return nil
+            }
+
+        case .ByName:
+            var predicate: NSPredicate
+            if let term = self.searchTerm {
+                predicate = NSPredicate(format: "name LIKE[c] %@", argumentArray: ["*\(term)*"])
+            } else {
+                predicate = NSPredicate(format: "name != nil")
+            }
+
+            if let scope = self.participantScope {
+                predicate = NSCompoundPredicate(
+                    andPredicateWithSubpredicates: [predicate, scope.predicate])
+            }
+
+            return predicate
+
+        default:
+            return nil
+        }
+
+
+    }
+
+    open func performUserQuery() {
+        let predicate = self.queryPredicate
+
+        guard predicate != nil else {
+            self.participants = []
+            self.tableView.reloadData()
+            return
+        }
+
+        let query = SKYQuery(recordType: "user", predicate: self.queryPredicate)
+
+        self.skygear?.publicCloudDatabase.perform(query, completionHandler: { (result, error) in
+            guard error == nil else {
+                print("Query Error: \(error?.localizedDescription)")
+                // TODO: error handling
+                return
+            }
+
+            if let users = result as? [SKYRecord] {
+                print("Got \(users.count) users")
+                self.participants = users
+                self.tableView.reloadData()
+            } else {
+                // TODO: error handling
+                print("Invalid query result")
+            }
+        })
+    }
 
 }

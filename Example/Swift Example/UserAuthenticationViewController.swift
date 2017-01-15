@@ -123,6 +123,7 @@ class UserAuthenticationViewController: UITableViewController {
                     return
                 }
 
+                self.updateUserRecord(by: user!)
                 self.lastUsername = username
             }
         }))
@@ -145,6 +146,40 @@ class UserAuthenticationViewController: UITableViewController {
             alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
             self.present(alert, animated: true, completion: nil)
         }
+    }
+
+    func updateUserRecord(by user: SKYUser) {
+        let skygear = SKYContainer.default()!
+        let userQuery = SKYQuery(recordType: "user",
+                                 predicate: NSPredicate(format: "_id = %@",
+                                                        argumentArray:[user.userID!]))
+        skygear.publicCloudDatabase.perform(
+            userQuery, completionHandler: { (results, queryError) in
+                guard queryError == nil else {
+                    print("Failed to get the user record: \(queryError?.localizedDescription)")
+                    return
+                }
+
+                if let userRecords = results as? [SKYRecord] {
+                    guard userRecords.count > 0 else {
+                        print("Cannot get any user records")
+                        return
+                    }
+
+                    let theUser = userRecords[0]
+                    theUser.setValue(user.username, forKey: "name")
+
+                    skygear.publicCloudDatabase.save(theUser, completion: { (savedRecord, saveError) in
+                        guard saveError == nil else {
+                            print("Failed to save the user record: \(saveError?.localizedDescription)")
+                            return
+                        }
+
+                        print("Name of the user record updated.")
+                    })
+                }
+        })
+
     }
 
     // MARK: - Table view data source
