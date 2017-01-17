@@ -17,8 +17,10 @@ PODS:
   - SKYKitChat/UI (0.0.1):
     - JSQMessagesViewController (~> 7.3.0)
     - SKYKit (~> 0.21.0)
+    - SVProgressHUD (~> 2.1.0)
   - SocketRocket (0.5.1)
   - Specta (1.0.5)
+  - SVProgressHUD (2.1.2)
 
 DEPENDENCIES:
   - Expecta
@@ -35,9 +37,10 @@ SPEC CHECKSUMS:
   JSQMessagesViewController: 39fed975e3c9f8eba7292071e29eeb541d105e66
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
   SKYKit: 189ca397d45c08d9559d744c2ac0640a13b41072
-  SKYKitChat: bfbe072f09f8094765c20875984752c5445efdc9
+  SKYKitChat: f5f2856595cd624c4e2a6c86f948eef847e49275
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   Specta: ac94d110b865115fe60ff2c6d7281053c6f8e8a2
+  SVProgressHUD: c404a55d78acbeb7ebb78b76d3faf986475a6994
 
 PODFILE CHECKSUM: 0f877176ad79030d5e2cc0bc0dc18670a146ff37
 

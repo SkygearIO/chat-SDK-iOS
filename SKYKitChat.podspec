@@ -20,6 +20,7 @@ This is the client library for the Skygear Chat extension.
   s.subspec 'UI' do |sp|
     sp.source_files = 'SKYKitChat/Classes/UI/**/*'
     sp.dependency 'JSQMessagesViewController', '~> 7.3.0'
+    sp.dependency 'SVProgressHUD', '~> 2.1.0'
   end
 
 end

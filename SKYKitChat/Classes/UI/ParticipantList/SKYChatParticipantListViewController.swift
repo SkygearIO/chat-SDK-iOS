@@ -17,6 +17,8 @@
 //  limitations under the License.
 //
 
+import SVProgressHUD
+
 public enum SKYChatParticipantQueryMethod: UInt {
     // Initial value for the enum, for compatible with objective-c
     case Undefined
@@ -263,8 +265,6 @@ extension SKYChatParticipantListViewController {
         default:
             return nil
         }
-
-
     }
 
     open func performUserQuery() {
@@ -278,22 +278,30 @@ extension SKYChatParticipantListViewController {
 
         let query = SKYQuery(recordType: "user", predicate: self.queryPredicate)
 
+        SVProgressHUD.show()
         self.skygear?.publicCloudDatabase.perform(query, completionHandler: { (result, error) in
-            guard error == nil else {
-                print("Query Error: \(error?.localizedDescription)")
-                // TODO: error handling
+            SVProgressHUD.dismiss()
+            if let err = error {
+                self.handleQueryError(error: err)
                 return
             }
 
-            if let users = result as? [SKYRecord] {
-                print("Got \(users.count) users")
-                self.participants = users
-                self.tableView.reloadData()
+            if let r = result as? [SKYRecord] {
+                self.handleQueryResult(result: r)
             } else {
-                // TODO: error handling
-                print("Invalid query result")
+                let err = SKYErrorCreator().error(with: SKYErrorBadResponse,
+                                                  message: "Query does not response SKYRecord")
+                self.handleQueryError(error: err!)
             }
         })
     }
 
+    open func handleQueryResult(result: [SKYRecord]) {
+        self.participants = result
+        self.tableView.reloadData()
+    }
+
+    open func handleQueryError(error: Error) {
+        SVProgressHUD.showError(withStatus: error.localizedDescription)
+    }
 }
