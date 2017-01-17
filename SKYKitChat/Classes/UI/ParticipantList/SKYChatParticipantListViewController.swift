@@ -54,6 +54,7 @@ open class SKYChatParticipantListViewController: UIViewController {
         }
     }
     public var participantScope: SKYQuery?
+    public var delegate: SKYChatParticipantListViewControllerDelegate?
     internal(set) public var searchTerm: String?
 
     @IBOutlet public var searchBar: UISearchBar!
@@ -183,6 +184,13 @@ extension SKYChatParticipantListViewController: UITableViewDelegate, UITableView
         }
 
         return cell
+    }
+
+    open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let d = self.delegate {
+            let participant = self.participants[indexPath.row]
+            d.listViewController?(self, didSelectParticipant: participant)
+        }
     }
 
 }

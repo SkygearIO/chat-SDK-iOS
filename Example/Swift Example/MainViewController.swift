@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SKYKitChat
 
 class MainViewController: UITableViewController {
 
@@ -42,4 +43,32 @@ class MainViewController: UITableViewController {
 
     }
 
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+
+        if let segueID = segue.identifier {
+            switch segueID {
+            case "ShowUserQueryVew":
+                if let dest = segue.destination as? SKYChatParticipantListViewController {
+                    dest.delegate = self
+                } else {
+                    print("Warning: Destination View Controller is in wrong type")
+                }
+            default:
+                break
+            }
+        }
+    }
+
+}
+
+extension MainViewController: SKYChatParticipantListViewControllerDelegate {
+    public func listViewController(_ controller: SKYChatParticipantListViewController,
+                                   didSelectParticipant user: SKYRecord) {
+        let _ = self.navigationController?.popViewController(animated: true)
+        if let recordName = user.recordID.recordName {
+            print("User \(recordName) is selected.")
+        }
+
+    }
 }
