@@ -9,14 +9,14 @@ before_install:
 - brew install clang-format
 - brew install swiftlint
 - sudo pip install lizard
-- pod repo update
+- pod repo update > /dev/null
 - pod install --project-directory=Example
 script:
 - xcodebuild -scheme "$SCHEME" -workspace "$WORKSPACE" -sdk "$SDK" -destination "$DESTINATION" build test | xcpretty
 - pod lib lint --allow-warnings
 - ./clang-check.sh
 - swiftlint
-- lizard Pod/ -C 15 -w -i 0
+- lizard SKYKitChat/ -C 15 -w -i 0
 env:
   global:
     - LC_CTYPE=en_US.UTF-8
