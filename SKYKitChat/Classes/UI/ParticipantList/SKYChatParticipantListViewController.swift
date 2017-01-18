@@ -20,9 +20,6 @@
 import SVProgressHUD
 
 public enum SKYChatParticipantQueryMethod: UInt {
-    // Initial value for the enum, for compatible with objective-c
-    case Undefined
-
     // By username of the user, supposed to be unique
     case ByUsername
 
@@ -42,8 +39,8 @@ open class SKYChatParticipantListViewController: UIViewController {
 
     static let queryMethodCoderKey = "QUERY_METHOD"
 
-    public var skygear: SKYContainer?
-    public var queryMethod: SKYChatParticipantQueryMethod = .Undefined {
+    public var skygear: SKYContainer = SKYContainer.default()
+    public var queryMethod: SKYChatParticipantQueryMethod = .ByUsername {
         didSet {
             self.searchBar.keyboardType = .default
 
@@ -69,36 +66,20 @@ open class SKYChatParticipantListViewController: UIViewController {
 
     var participants: [SKYRecord] = []
 
-    // MARK: - Initializer
+}
 
-    public init(queryMethod: SKYChatParticipantQueryMethod) {
-        super.init(nibName: "SKYChatParticipantListViewController",
-                   bundle: Bundle(for: SKYChatParticipantListViewController.self))
-        self.queryMethod = queryMethod
+// MARK: - Initializing
+
+extension SKYChatParticipantListViewController {
+    public class var nib: UINib {
+        return UINib(nibName: "SKYChatParticipantListViewController",
+                     bundle: Bundle(for: SKYChatParticipantListViewController.self))
     }
 
-    // MARK: - NSCoding Protocol
-
-    required public init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-
-        if let queryMethod = aDecoder.decodeObject(forKey: SKYChatParticipantListViewController.queryMethodCoderKey)
-            as? SKYChatParticipantQueryMethod
-        {
-            self.queryMethod = queryMethod
-        }
-
-        let nib = UINib(nibName: "SKYChatParticipantListViewController",
-                        bundle: Bundle(for: SKYChatParticipantListViewController.self))
-        nib.instantiate(withOwner: self, options: nil)
+    public class func create() -> SKYChatParticipantListViewController {
+        return SKYChatParticipantListViewController(nibName: "SKYChatParticipantListViewController",
+                                                    bundle: Bundle(for: SKYChatParticipantListViewController.self))
     }
-
-    open override func encode(with aCoder: NSCoder) {
-        super.encode(with: aCoder)
-        aCoder.encode(self.queryMethod,
-                      forKey: SKYChatParticipantListViewController.queryMethodCoderKey)
-    }
-
 }
 
 // MARK: - Lifecycle
@@ -108,23 +89,13 @@ extension SKYChatParticipantListViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
 
+        SKYChatParticipantListViewController.nib.instantiate(withOwner: self, options: nil)
+
         self.searchBar.autocapitalizationType = .none
     }
 
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
-        guard self.skygear != nil else {
-            print("Missing required settings: skygear")
-            self.dismiss(animated: animated)
-            return
-        }
-
-        guard self.queryMethod != .Undefined else {
-            print("Missing required settings: queryMethod")
-            self.dismiss(animated: animated)
-            return
-        }
 
         guard self.participantScope == nil || self.participantScope?.recordType == "user" else {
             print("Participant Scope should only for user records")
@@ -284,7 +255,7 @@ extension SKYChatParticipantListViewController {
         let query = SKYQuery(recordType: "user", predicate: self.queryPredicate)
 
         SVProgressHUD.show()
-        self.skygear?.publicCloudDatabase.perform(query, completionHandler: { (result, error) in
+        self.skygear.publicCloudDatabase.perform(query, completionHandler: { (result, error) in
             SVProgressHUD.dismiss()
             if let err = error {
                 self.handleQueryError(error: err)

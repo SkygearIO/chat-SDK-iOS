@@ -12,7 +12,6 @@ import SKYKitChat
 class UserQueryViewController: SKYChatParticipantListViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.skygear = SKYContainer.default()
         self.queryMethod = .ByName
     }
 }
