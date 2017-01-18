@@ -1,6 +1,6 @@
 //
-//  SKYViewController.h
-//  SKYKitChat
+//  UserQueryViewController.swift
+//  Swift-Example
 //
 //  Copyright 2016 Oursky Ltd.
 //
@@ -17,8 +17,12 @@
 //  limitations under the License.
 //
 
-@import UIKit;
+import Foundation
+import SKYKitChat
 
-@interface SKYViewController : UIViewController
-
-@end
+class UserQueryViewController: SKYChatParticipantListViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.queryMethod = .ByName
+    }
+}

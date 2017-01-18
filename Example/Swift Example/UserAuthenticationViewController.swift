@@ -1,9 +1,20 @@
 //
 //  UserAuthenticationViewController.swift
-//  chat-demo
+//  Swift-Example
 //
-//  Created by Joey on 8/26/16.
-//  Copyright © 2016 Oursky Ltd. All rights reserved.
+//  Copyright 2016 Oursky Ltd.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
 //
 
 import UIKit
@@ -123,6 +134,7 @@ class UserAuthenticationViewController: UITableViewController {
                     return
                 }
 
+                self.updateUserRecord(by: user!)
                 self.lastUsername = username
             }
         }))
@@ -145,6 +157,40 @@ class UserAuthenticationViewController: UITableViewController {
             alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
             self.present(alert, animated: true, completion: nil)
         }
+    }
+
+    func updateUserRecord(by user: SKYUser) {
+        let skygear = SKYContainer.default()!
+        let userQuery = SKYQuery(recordType: "user",
+                                 predicate: NSPredicate(format: "_id = %@",
+                                                        argumentArray:[user.userID!]))
+        skygear.publicCloudDatabase.perform(
+            userQuery, completionHandler: { (results, queryError) in
+                guard queryError == nil else {
+                    print("Failed to get the user record: \(queryError?.localizedDescription)")
+                    return
+                }
+
+                if let userRecords = results as? [SKYRecord] {
+                    guard userRecords.count > 0 else {
+                        print("Cannot get any user records")
+                        return
+                    }
+
+                    let theUser = userRecords[0]
+                    theUser.setValue(user.username, forKey: "name")
+
+                    skygear.publicCloudDatabase.save(theUser, completion: { (savedRecord, saveError) in
+                        guard saveError == nil else {
+                            print("Failed to save the user record: \(saveError?.localizedDescription)")
+                            return
+                        }
+
+                        print("Name of the user record updated.")
+                    })
+                }
+        })
+
     }
 
     // MARK: - Table view data source
