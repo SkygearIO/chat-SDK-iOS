@@ -40,6 +40,10 @@ open class SKYChatParticipantListViewController: UIViewController {
     static let queryMethodCoderKey = "QUERY_METHOD"
 
     public var skygear: SKYContainer = SKYContainer.default()
+
+    /*
+      The method users are being search.
+     */
     public var queryMethod: SKYChatParticipantQueryMethod = .ByUsername {
         didSet {
             self.searchBar.keyboardType = .default
@@ -57,7 +61,12 @@ open class SKYChatParticipantListViewController: UIViewController {
             }
         }
     }
+
+    /*
+      The participant searching scope. (Only available when queryMethod is set to `.ByName`)
+     */
     public var participantScope: SKYQuery?
+
     public var delegate: SKYChatParticipantListViewControllerDelegate?
     internal(set) public var searchTerm: String?
 
