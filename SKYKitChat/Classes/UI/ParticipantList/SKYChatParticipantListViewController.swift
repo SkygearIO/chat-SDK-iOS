@@ -33,6 +33,11 @@ public enum SKYChatParticipantQueryMethod: UInt {
     case ByName
 }
 
+@objc public protocol SKYChatParticipantListViewControllerDelegate: class {
+    @objc optional func listViewController(_ controller: SKYChatParticipantListViewController,
+                                           didSelectParticipant participant: SKYRecord)
+}
+
 open class SKYChatParticipantListViewController: UIViewController {
 
     static let queryMethodCoderKey = "QUERY_METHOD"
