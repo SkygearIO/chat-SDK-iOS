@@ -11,7 +11,6 @@ PODS:
     - SocketRocket (~> 0.4)
   - SKYKitChat (0.0.1):
     - SKYKitChat/Core (= 0.0.1)
-    - SKYKitChat/UI (= 0.0.1)
   - SKYKitChat/Core (0.0.1):
     - SKYKit/Core (~> 0.21.0)
   - SKYKitChat/UI (0.0.1):
@@ -26,6 +25,7 @@ PODS:
 DEPENDENCIES:
   - Expecta
   - SKYKitChat (from `../`)
+  - SKYKitChat/UI (from `../`)
   - Specta
 
 EXTERNAL SOURCES:
@@ -38,11 +38,11 @@ SPEC CHECKSUMS:
   JSQMessagesViewController: 39fed975e3c9f8eba7292071e29eeb541d105e66
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
   SKYKit: 189ca397d45c08d9559d744c2ac0640a13b41072
-  SKYKitChat: 29fd36d92c4b05b64059581507ac86c74b11973d
+  SKYKitChat: d3d5f9034d77c46e0cefd9ec9d9425b7dc2b10c6
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   Specta: ac94d110b865115fe60ff2c6d7281053c6f8e8a2
   SVProgressHUD: c404a55d78acbeb7ebb78b76d3faf986475a6994
 
-PODFILE CHECKSUM: 186ad720b7d7efd915ea963999267a16e05dbe3e
+PODFILE CHECKSUM: 07126219a070fcf55f4cd6058314a32f2cc726e0
 
 COCOAPODS: 1.1.1

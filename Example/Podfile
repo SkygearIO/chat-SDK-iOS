@@ -13,6 +13,7 @@ end
 
 target 'Swift Example' do
   pod 'SKYKitChat', :path => '../'
+  pod 'SKYKitChat/UI', :path => '../'
 end
 
 

@@ -13,6 +13,7 @@ This is the client library for the Skygear Chat extension.
   s.source           = { :git => 'https://github.com/SkygearIO/chat-SDK-iOS.git', :tag => s.version.to_s }
 
   s.ios.deployment_target = '8.0'
+  s.default_subspecs = 'Core'
 
   s.subspec 'Core' do |sp|
     sp.source_files = 'SKYKitChat/Classes/Core/**/*'
