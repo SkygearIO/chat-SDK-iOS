@@ -23,15 +23,14 @@ class ConversationListDemoViewController: SKYChatConversationListViewController 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.dataSource = self
+        self.delegate = self
     }
 }
 
-extension ConversationListDemoViewController: SKYChatConversationListViewControllerDataSource {
+extension ConversationListDemoViewController: SKYChatConversationListViewControllerDelegate {
     func listViewController(_ controller: SKYChatConversationListViewController,
-                            avatarImageForConversation conversation: SKYConversation,
-                            atIndexPath indexPath: IndexPath) -> UIImage?
+                            didSelectConversation conversation: SKYConversation)
     {
-        return UIImage(named: "conversation")
+        print("Conversation \(conversation.recordID.recordName!) is selected")
     }
 }

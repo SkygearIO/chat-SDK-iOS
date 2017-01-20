@@ -29,10 +29,19 @@ import SVProgressHUD
                                            atIndexPath indexPath: IndexPath) -> UIImage?
 }
 
+@objc public protocol SKYChatConversationListViewControllerDelegate: class {
+    /**
+     * Notify the delegate which conversation is selected.
+     **/
+    @objc optional func listViewController(_ controller: SKYChatConversationListViewController,
+                                           didSelectConversation conversation: SKYConversation)
+}
+
 open class SKYChatConversationListViewController: UIViewController {
 
     public var skygear: SKYContainer = SKYContainer.default()
-    public var dataSource: SKYChatConversationListViewControllerDataSource?
+    public weak var delegate: SKYChatConversationListViewControllerDelegate?
+    public weak var dataSource: SKYChatConversationListViewControllerDataSource?
 
     @IBOutlet public var tableView: UITableView!
 
@@ -106,8 +115,8 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let userConversation = self.userConversations[indexPath.row]
         if let cell = tableView.dequeueReusableCell(withIdentifier: "ConversationCell")
-            as? SKYChatConversationTableViewCell
-        {
+            as? SKYChatConversationTableViewCell {
+
             cell.conversation = userConversation.conversation
             cell.unreadMessageCount = userConversation.unreadCount
             cell.avatarImage = self.dataSource?
@@ -132,6 +141,13 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
 
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return CGFloat(75)
+    }
+
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let d = self.delegate {
+            let conv = self.userConversations[indexPath.row]
+            d.listViewController?(self, didSelectConversation: conv.conversation)
+        }
     }
 }
 

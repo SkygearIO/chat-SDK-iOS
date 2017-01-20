@@ -31,6 +31,9 @@ public enum SKYChatParticipantQueryMethod: UInt {
 }
 
 @objc public protocol SKYChatParticipantListViewControllerDelegate: class {
+    /**
+     * Notify the delegate which which participant is selected.
+     **/
     @objc optional func listViewController(_ controller: SKYChatParticipantListViewController,
                                            didSelectParticipant participant: SKYRecord)
 }
@@ -67,7 +70,7 @@ open class SKYChatParticipantListViewController: UIViewController {
      */
     public var participantScope: SKYQuery?
 
-    public var delegate: SKYChatParticipantListViewControllerDelegate?
+    public weak var delegate: SKYChatParticipantListViewControllerDelegate?
     internal(set) public var searchTerm: String?
 
     @IBOutlet public var searchBar: UISearchBar!
@@ -139,7 +142,6 @@ extension SKYChatParticipantListViewController {
         }
     }
 }
-
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
