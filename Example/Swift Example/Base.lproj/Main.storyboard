@@ -206,6 +206,26 @@
                                             <segue destination="e9g-HD-24e" kind="show" identifier="ShowUserQueryVew" id="gao-Fd-AJ3"/>
                                         </connections>
                                     </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" textLabel="cE2-eN-2rp" style="IBUITableViewCellStyleDefault" id="MTN-pD-JZO">
+                                        <rect key="frame" x="0.0" y="396" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="MTN-pD-JZO" id="V1N-NO-GgF">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Conversation List View" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="cE2-eN-2rp">
+                                                    <rect key="frame" x="15" y="0.0" width="345" height="43"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <segue destination="AcV-yx-nZa" kind="show" id="dQB-ap-5q7"/>
+                                        </connections>
+                                    </tableViewCell>
                                 </cells>
                             </tableViewSection>
                         </sections>
@@ -699,6 +719,24 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3oe-Cb-8RC" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1577" y="2829"/>
+        </scene>
+        <!--Conversation List Demo View Controller-->
+        <scene sceneID="E4S-lv-sL4">
+            <objects>
+                <viewController id="AcV-yx-nZa" customClass="ConversationListDemoViewController" customModule="Swift_Example" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="hDj-hF-MRG"/>
+                        <viewControllerLayoutGuide type="bottom" id="GTI-mW-UTN"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="GKD-CW-Bvz">
+                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="NgY-tn-9hF" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3084" y="2096"/>
         </scene>
         <!--Dictionary Detail View Controller-->
         <scene sceneID="U1V-s1-IC4">

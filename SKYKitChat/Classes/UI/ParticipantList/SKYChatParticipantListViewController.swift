@@ -80,6 +80,7 @@ open class SKYChatParticipantListViewController: UIViewController {
 // MARK: - Initializing
 
 extension SKYChatParticipantListViewController {
+
     public class var nib: UINib {
         return UINib(nibName: "SKYChatParticipantListViewController",
                      bundle: Bundle(for: SKYChatParticipantListViewController.self))
@@ -112,7 +113,7 @@ extension SKYChatParticipantListViewController {
             return
         }
 
-        if let nc = self.navigationController {
+        if let _ = self.navigationController {
             self.edgesForExtendedLayout = [.left, .right, .bottom]
         }
 
