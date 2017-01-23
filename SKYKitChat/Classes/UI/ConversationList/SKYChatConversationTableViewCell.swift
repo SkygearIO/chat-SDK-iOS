@@ -59,6 +59,7 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
             self.layoutSubviews(conversation: conv)
         } else {
             self.conversationTitleLabel?.text = untitledConversation
+            self.conversationTitleLabel?.textColor = UIColor.lightGray
             self.conversationInformationLabel?.text = nil
             self.unreadCountLabel?.text = nil
         }
@@ -72,8 +73,10 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
         // title
         if let title = conversation.title {
             self.conversationTitleLabel?.text = title
+            self.conversationTitleLabel?.textColor = self.conversationTitleLabel?.tintColor
         } else {
             self.conversationTitleLabel?.text = untitledConversation
+            self.conversationTitleLabel?.textColor = UIColor.lightGray
         }
 
         // extra info

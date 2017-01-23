@@ -24,20 +24,6 @@ class ConversationListDemoViewController: SKYChatConversationListViewController 
         super.viewDidLoad()
 
         self.delegate = self
-        self.dataSource = self
-    }
-}
-
-extension ConversationListDemoViewController: SKYChatConversationListViewControllerDataSource {
-    func listViewController(_ controller: SKYChatConversationListViewController,
-                            avatarImageForConversation conversation: SKYConversation,
-                            atIndexPath indexPath: IndexPath) -> UIImage?
-    {
-        if let title = conversation.title {
-            return UIImage.avatarImage(forInitialsOfName: title)
-        } else {
-            return UIImage.avatarImage(forInitialsOfName: "")
-        }
     }
 }
 

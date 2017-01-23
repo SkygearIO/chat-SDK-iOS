@@ -119,10 +119,15 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
 
             cell.conversation = userConversation.conversation
             cell.unreadMessageCount = userConversation.unreadCount
-            cell.avatarImage = self.dataSource?
-                .listViewController?(self,
-                                     avatarImageForConversation: userConversation.conversation,
-                                     atIndexPath: indexPath)
+
+            if let ds = self.dataSource {
+                cell.avatarImage = ds.listViewController?(self,
+                                                          avatarImageForConversation: userConversation.conversation,
+                                                          atIndexPath: indexPath)
+            } else {
+                let title = userConversation.conversation.title ?? ""
+                cell.avatarImage = UIImage.avatarImage(forInitialsOfName: title)
+            }
 
             return cell
         } else {
