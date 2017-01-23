@@ -158,6 +158,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     adminIDs = [[NSSet setWithArray:adminIDs] allObjects];
 
     SKYConversation *newConversation = [SKYConversation recordWithRecordType:@"conversation"];
+    newConversation.title = title;
     newConversation.participantIds = participantIDs;
     newConversation.adminIds = adminIDs;
     newConversation.metadata = metadata;

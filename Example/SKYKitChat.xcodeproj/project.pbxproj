@@ -37,6 +37,7 @@
 		6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
 		6003F5BA195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5B8195388D20070C39A /* InfoPlist.strings */; };
 		6003F5BC195388D20070C39A /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5BB195388D20070C39A /* Tests.m */; };
+		6072233A1E2E28BE0074AF53 /* ConversationListDemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607223391E2E28BE0074AF53 /* ConversationListDemoViewController.swift */; };
 		60C135971E2766B100F91903 /* UserQueryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C135961E2766B100F91903 /* UserQueryViewController.swift */; };
 		873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 873B8AEA1B1F5CCA007FD442 /* Main.storyboard */; };
 		AAA7068232A089DB513A0578 /* Pods_SKYKitChat_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45EA3ADFF482E1C38691B2B5 /* Pods_SKYKitChat_Example.framework */; };
@@ -98,6 +99,7 @@
 		6003F5B9195388D20070C39A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		6003F5BB195388D20070C39A /* Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tests.m; sourceTree = "<group>"; };
 		606FC2411953D9B200FFA9A0 /* Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Prefix.pch"; sourceTree = "<group>"; };
+		607223391E2E28BE0074AF53 /* ConversationListDemoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversationListDemoViewController.swift; sourceTree = "<group>"; };
 		60C135961E2766B100F91903 /* UserQueryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserQueryViewController.swift; sourceTree = "<group>"; };
 		63DF270E18DD1BAA3F08B34B /* Pods-SKYKitChat_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SKYKitChat_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-SKYKitChat_Tests/Pods-SKYKitChat_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		873B8AEA1B1F5CCA007FD442 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 				38BA24AE1DED659C00DFD045 /* UsersViewController.swift */,
 				38BA249D1DED657D00DFD045 /* Swift Example-Bridging-Header.h */,
 				60C135961E2766B100F91903 /* UserQueryViewController.swift */,
+				607223391E2E28BE0074AF53 /* ConversationListDemoViewController.swift */,
 			);
 			path = "Swift Example";
 			sourceTree = "<group>";
@@ -751,6 +754,7 @@
 				60C135971E2766B100F91903 /* UserQueryViewController.swift in Sources */,
 				38BA24BD1DED659C00DFD045 /* UsersViewController.swift in Sources */,
 				38BA24B51DED659C00DFD045 /* CreateGroupConversationViewController.swift in Sources */,
+				6072233A1E2E28BE0074AF53 /* ConversationListDemoViewController.swift in Sources */,
 				38BA24BC1DED659C00DFD045 /* UserAuthenticationViewController.swift in Sources */,
 				38BA24B21DED659C00DFD045 /* ConversationRoomViewController.swift in Sources */,
 				38BA24B11DED659C00DFD045 /* ConversationDetailViewController.swift in Sources */,
@@ -842,6 +846,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "Swift Example/Info.plist";
@@ -871,6 +876,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "Swift Example/Info.plist";
@@ -976,6 +982,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				DEVELOPMENT_TEAM = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "SKYKitChat/SKYKitChat-Prefix.pch";
 				INFOPLIST_FILE = "SKYKitChat/SKYKitChat-Info.plist";
@@ -993,6 +1000,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				DEVELOPMENT_TEAM = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "SKYKitChat/SKYKitChat-Prefix.pch";
 				INFOPLIST_FILE = "SKYKitChat/SKYKitChat-Info.plist";
