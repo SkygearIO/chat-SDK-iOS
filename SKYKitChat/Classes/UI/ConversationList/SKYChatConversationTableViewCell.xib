@@ -17,7 +17,7 @@
             <rect key="frame" x="0.0" y="0.0" width="375" height="75"/>
             <autoresizingMask key="autoresizingMask"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="pqv-c2-GoS" id="dMD-pz-C9e">
-                <rect key="frame" x="0.0" y="0.0" width="342" height="75"/>
+                <rect key="frame" x="0.0" y="0.0" width="342" height="74"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="0aw-Mg-lw4">
@@ -43,10 +43,10 @@
                         <nil key="highlightedColor"/>
                     </label>
                     <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="501-cv-oeZ" userLabel="Unread Count View">
-                        <rect key="frame" x="306.5" y="28.5" width="27.5" height="18"/>
+                        <rect key="frame" x="306" y="29" width="28" height="18"/>
                         <subviews>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="752" verticalCompressionResistancePriority="752" text="999" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XZH-vE-vra">
-                                <rect key="frame" x="4" y="3" width="19.5" height="12"/>
+                                <rect key="frame" x="4" y="3" width="20" height="12"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
@@ -82,6 +82,7 @@
                     <constraint firstItem="501-cv-oeZ" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="ipl-3M-ZFp" secondAttribute="trailing" priority="751" id="xJK-Dy-vE2"/>
                 </constraints>
             </tableViewCellContentView>
+            <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
             <connections>
                 <outlet property="avatarImageView" destination="0aw-Mg-lw4" id="Irf-jx-QVO"/>
                 <outlet property="conversationInformationLabel" destination="a08-81-6Yo" id="6nS-5F-7Jx"/>

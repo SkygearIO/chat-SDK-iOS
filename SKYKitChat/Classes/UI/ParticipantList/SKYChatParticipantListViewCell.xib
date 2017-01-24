@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="62" id="HbH-oo-SXS" customClass="SKYChatParticipantListViewCell" customModule="SKYKitChat" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="380" height="62"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="HbH-oo-SXS" id="cRG-od-Ndn">
+                <rect key="frame" x="0.0" y="0.0" width="380" height="62"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="908-GG-JKp">
+                        <rect key="frame" x="8" y="8" width="45.5" height="45.5"/>
+                        <constraints>
+                            <constraint firstAttribute="width" secondItem="908-GG-JKp" secondAttribute="height" multiplier="1:1" id="wuq-h4-5e9"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="752" text="Participant Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="8tO-3K-Zds">
+                        <rect key="frame" x="61.5" y="13.5" width="132" height="21"/>
+                        <constraints>
+                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="21" id="H5k-aB-p7p"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="751" text="Participant Info." textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="ryB-vb-rh3">
+                        <rect key="frame" x="61.5" y="34.5" width="89.5" height="15"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                        <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="ryB-vb-rh3" secondAttribute="trailing" id="BUe-2Q-Ofh"/>
+                    <constraint firstItem="8tO-3K-Zds" firstAttribute="leading" secondItem="cRG-od-Ndn" secondAttribute="leadingMargin" priority="750" constant="8" id="CJy-j8-DHR"/>
+                    <constraint firstAttribute="bottomMargin" secondItem="908-GG-JKp" secondAttribute="bottom" id="CxA-dq-HNx"/>
+                    <constraint firstItem="ryB-vb-rh3" firstAttribute="leading" secondItem="cRG-od-Ndn" secondAttribute="leadingMargin" priority="750" constant="8" id="HsT-B5-Dvu"/>
+                    <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="8tO-3K-Zds" secondAttribute="trailing" id="XTn-Ih-M7i"/>
+                    <constraint firstItem="ryB-vb-rh3" firstAttribute="top" secondItem="8tO-3K-Zds" secondAttribute="bottom" id="YCi-K9-hmr"/>
+                    <constraint firstItem="908-GG-JKp" firstAttribute="top" secondItem="cRG-od-Ndn" secondAttribute="topMargin" id="aXm-qS-BUI"/>
+                    <constraint firstItem="8tO-3K-Zds" firstAttribute="centerY" secondItem="cRG-od-Ndn" secondAttribute="centerY" priority="750" id="iRl-69-4NO"/>
+                    <constraint firstItem="ryB-vb-rh3" firstAttribute="leading" secondItem="908-GG-JKp" secondAttribute="trailing" constant="8" id="oUu-pB-u31"/>
+                    <constraint firstAttribute="bottomMargin" relation="greaterThanOrEqual" secondItem="ryB-vb-rh3" secondAttribute="bottom" constant="4" id="rGL-G4-vCp"/>
+                    <constraint firstItem="8tO-3K-Zds" firstAttribute="top" relation="greaterThanOrEqual" secondItem="cRG-od-Ndn" secondAttribute="topMargin" id="sSn-gf-NxA"/>
+                    <constraint firstAttribute="leadingMargin" secondItem="908-GG-JKp" secondAttribute="leading" id="xIy-Ou-72D"/>
+                    <constraint firstItem="8tO-3K-Zds" firstAttribute="leading" secondItem="908-GG-JKp" secondAttribute="trailing" constant="8" id="z0q-8M-PBe"/>
+                </constraints>
+            </tableViewCellContentView>
+            <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+            <connections>
+                <outlet property="avatarImageView" destination="908-GG-JKp" id="RlY-q0-008"/>
+                <outlet property="participantInfoLabel" destination="ryB-vb-rh3" id="hLW-hg-WbO"/>
+                <outlet property="participantNameLabel" destination="8tO-3K-Zds" id="qU0-8m-nG0"/>
+            </connections>
+            <point key="canvasLocation" x="-122" y="-202"/>
+        </tableViewCell>
+    </objects>
+</document>

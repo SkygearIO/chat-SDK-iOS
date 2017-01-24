@@ -32,7 +32,7 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
     @IBOutlet public weak var unreadCountView: UIView!
 
     public class var nib: UINib {
-        return  UINib(nibName: "SKYChatConversationTableViewCell",
+        return UINib(nibName: "SKYChatConversationTableViewCell",
                       bundle: Bundle(for: SKYChatConversationTableViewCell.self))
     }
 
@@ -49,6 +49,7 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
     open override func layoutSubviews() {
         super.layoutSubviews()
 
+        // avatar image
         if let img = self.avatarImage {
             self.avatarImageView?.image = img
         } else {
@@ -94,6 +95,7 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
             self.conversationInformationLabel?.text = info
         }
 
+        // unread count
         if let unreadCount = self.unreadMessageCount, unreadCount > 0 {
             self.unreadCountLabel?.text = String(unreadCount)
         } else {
