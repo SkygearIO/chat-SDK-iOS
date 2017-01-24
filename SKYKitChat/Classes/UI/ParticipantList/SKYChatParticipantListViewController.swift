@@ -167,24 +167,7 @@ extension SKYChatParticipantListViewController: UITableViewDelegate, UITableView
 
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let participantRecord = self.participants[indexPath.row]
-        var participantInfo: String? = nil
-
-        switch self.queryMethod {
-        case .ByEmail:
-            if let email = participantRecord.transient.object(forKey: "_email") as? String {
-                participantInfo = email
-            }
-        case .ByUsername:
-            if let username = participantRecord.transient.object(forKey: "_username") as? String {
-                participantInfo = username
-            }
-        case .ByName:
-            if let name = participantRecord.object(forKey: "name") as? String {
-                participantInfo = name
-            }
-        default:
-            break
-        }
+        var participantInfo: String? = self.getParticipantInformation(atIndex: indexPath.row)
 
         if let cell = tableView.dequeueReusableCell(withIdentifier: "ParticipantCell")
             as? SKYChatParticipantListViewCell {
@@ -262,6 +245,30 @@ extension SKYChatParticipantListViewController {
 
     open func getParticipants() -> [SKYRecord] {
         return self.participants
+    }
+
+    open func getParticipantInformation(atIndex index: Int) -> String? {
+        let participantRecord = self.participants[index]
+
+        var participantInfo: String? = nil
+        switch self.queryMethod {
+        case .ByEmail:
+            if let email = participantRecord.transient.object(forKey: "_email") as? String {
+                participantInfo = email
+            }
+        case .ByUsername:
+            if let username = participantRecord.transient.object(forKey: "_username") as? String {
+                participantInfo = username
+            }
+        case .ByName:
+            if let name = participantRecord.object(forKey: "name") as? String {
+                participantInfo = name
+            }
+        default:
+            break
+        }
+
+        return participantInfo
     }
 
     var queryPredicate: NSPredicate? {

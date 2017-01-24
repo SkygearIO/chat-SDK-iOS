@@ -55,7 +55,7 @@ public extension UIImage {
 
         // convert to NSString in order to get the correct NSRange
         let str = joinedInitials as NSString
-        let fullRange = NSMakeRange(0, str.length)
+        let fullRange = NSRange(location: 0, length: str.length)
 
         let aString = NSMutableAttributedString(string: joinedInitials)
         aString.setAttributes([
@@ -90,9 +90,9 @@ public extension UIImage {
 
             image = UIGraphicsGetImageFromCurrentImageContext()
         }
-        
+
         UIGraphicsEndImageContext()
-        
+
         return image
     }
 }

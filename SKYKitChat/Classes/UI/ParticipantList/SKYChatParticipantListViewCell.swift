@@ -33,7 +33,6 @@ open class SKYChatParticipantListViewCell: UITableViewCell {
                      bundle: Bundle(for: SKYChatParticipantListViewCell.self))
     }
 
-
     open override func awakeFromNib() {
         if let img = self.avatarImageView {
             img.layer.cornerRadius = CGFloat(0.5 * img.frame.height)
