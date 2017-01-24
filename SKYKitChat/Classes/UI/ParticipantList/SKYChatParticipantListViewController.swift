@@ -38,6 +38,17 @@ public enum SKYChatParticipantQueryMethod: UInt {
                                            didSelectParticipant participant: SKYRecord)
 }
 
+@objc public protocol SKYChatParticipantListViewControllerDataSource: class {
+    /**
+     * Return the avatar image for a participant. Returning nil will remove the avatar image view
+     * when displaying the participant.
+     **/
+
+    @objc optional func listViewController(_ controller: SKYChatParticipantListViewController,
+                                           avatarImageForParticipant participant: SKYRecord,
+                                           atIndexPath indexPath: IndexPath) -> UIImage?
+}
+
 open class SKYChatParticipantListViewController: UIViewController {
 
     static let queryMethodCoderKey = "QUERY_METHOD"
@@ -71,6 +82,7 @@ open class SKYChatParticipantListViewController: UIViewController {
     public var participantScope: SKYQuery?
 
     public weak var delegate: SKYChatParticipantListViewControllerDelegate?
+    public weak var dataSource: SKYChatParticipantListViewControllerDataSource?
     internal(set) public var searchTerm: String?
 
     @IBOutlet public var searchBar: UISearchBar!
@@ -189,7 +201,11 @@ extension SKYChatParticipantListViewController: UITableViewDelegate, UITableView
 
             // avatar
             var avatarImage: UIImage?
-            if let name = participantRecord.object(forKey: "name") as? String {
+            if let ds = self.dataSource {
+                avatarImage = ds.listViewController?(self,
+                                                     avatarImageForParticipant: participantRecord,
+                                                     atIndexPath: indexPath)
+            } else if let name = participantRecord.object(forKey: "name") as? String {
                 avatarImage = UIImage.avatarImage(forInitialsOfName: name)
             }
             cell.avatarImage = avatarImage
