@@ -77,6 +77,8 @@ extension SKYChatConversationListViewController {
     }
 
     open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
         guard self.skygear.chatExtension != nil else {
             print("Missing chat extension in Skygear container")
             self.dismiss(animated: animated)
