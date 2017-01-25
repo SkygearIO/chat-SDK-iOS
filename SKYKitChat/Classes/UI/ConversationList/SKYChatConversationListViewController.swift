@@ -118,6 +118,7 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
             as? SKYChatConversationTableViewCell {
 
             cell.conversation = userConversation.conversation
+            cell.conversationMessage = userConversation.conversation.lastMessage?.body
             cell.unreadMessageCount = userConversation.unreadCount
 
             if let ds = self.dataSource {
@@ -166,7 +167,7 @@ extension SKYChatConversationListViewController {
 
     open func performQuery() {
         SVProgressHUD.show()
-        self.skygear.chatExtension?.fetchUserConversations(completion: { (userConversations, error) in
+        self.skygear.chatExtension?.fetchUserConversations(fetchLastMessage: true, completion: { (userConversations, error) in
             SVProgressHUD.dismiss()
             if let err = error {
                 self.handleQueryError(error: err)
