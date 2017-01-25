@@ -338,6 +338,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                                                code:SKYErrorResourceNotFound
                                                            userInfo:nil];
                                        completion(@[], error);
+                                       return;
                                    }
 
                                    SKYUserConversation *con = conversationList.firstObject;
