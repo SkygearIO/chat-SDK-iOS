@@ -20,10 +20,29 @@
 import SKYKitChat
 
 class ConversationListDemoViewController: SKYChatConversationListViewController {
+    let showConversationSegueIdentifier: String = "ShowConversationSegue"
+
+    var selectedConversation: SKYConversation?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         self.delegate = self
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let segueID = segue.identifier else {
+            return
+        }
+
+        switch segueID {
+        case showConversationSegueIdentifier:
+            if let dest = segue.destination as? ConversationDemoViewController {
+                dest.conversation = self.selectedConversation
+            }
+        default:
+            break
+        }
     }
 }
 
@@ -32,5 +51,8 @@ extension ConversationListDemoViewController: SKYChatConversationListViewControl
                             didSelectConversation conversation: SKYConversation)
     {
         print("Conversation \(conversation.recordID.recordName!) is selected")
+
+        self.selectedConversation = conversation
+        self.performSegue(withIdentifier: showConversationSegueIdentifier, sender: self)
     }
 }

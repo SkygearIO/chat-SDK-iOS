@@ -95,4 +95,33 @@ public extension UIImage {
 
         return image
     }
+
+    class func circleImage(fromImage image: UIImage) -> UIImage? {
+        let size = image.size
+        var result: UIImage?
+
+        UIGraphicsBeginImageContext(size)
+
+        if let ctx = UIGraphicsGetCurrentContext() {
+            let radius = min(size.width, size.height) / 2
+            let center = CGPoint(x: size.width / 2, y: size.height / 2)
+
+            ctx.beginPath()
+            ctx.addArc(center: center,
+                       radius: radius,
+                       startAngle: 0,
+                       endAngle: 2 * CGFloat.pi,
+                       clockwise: false)
+            ctx.closePath()
+            ctx.clip()
+
+            image.draw(in: CGRect(origin: CGPoint.zero, size: size))
+
+            result = UIGraphicsGetImageFromCurrentImageContext()
+        }
+
+        UIGraphicsEndImageContext()
+
+        return result
+    }
 }

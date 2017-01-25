@@ -19,11 +19,30 @@
 
 import JSQMessagesViewController
 
-class SKYChatConversationViewController: JSQMessagesViewController {
+open class SKYChatConversationViewController: JSQMessagesViewController {
     public var skygear: SKYContainer = SKYContainer.default()
     public var conversation: SKYConversation?
     public var participants: [String: SKYRecord] = [:]
     public var messages: [SKYMessage] = []
+    public var messagesFetchLimit: UInt = 25
+
+    public var bubbleFactory: JSQMessagesBubbleImageFactory? = JSQMessagesBubbleImageFactory()
+    public var incomingMessageBubble: JSQMessagesBubbleImage?
+    public var outgoingMessageBubble: JSQMessagesBubbleImage?
+
+    public var incomingMessageBubbleColor: UIColor? {
+        didSet {
+            self.incomingMessageBubble = self.bubbleFactory?
+                .incomingMessagesBubbleImage(with: self.incomingMessageBubbleColor)
+        }
+    }
+
+    public var outgoingMessageBubbleColor: UIColor? {
+        didSet {
+            self.outgoingMessageBubble = self.bubbleFactory?
+                .outgoingMessagesBubbleImage(with: self.outgoingMessageBubbleColor)
+        }
+    }
 
     static let errorDomain: String = "SKYChatConversationViewControllerErrorDomain"
     var errorCreator: SKYErrorCreator {
@@ -45,26 +64,36 @@ extension SKYChatConversationViewController {
 
 extension SKYChatConversationViewController {
 
-    override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
 
-        SKYChatConversationViewController.nib().instantiate(withOwner: self, options: nil)
+        self.senderId = self.skygear.currentUserRecordID
+
+        // update the display name after fetching participants
+        self.senderDisplayName = "me"
+
+        self.incomingMessageBubbleColor = UIColor.lightGray
+        self.outgoingMessageBubbleColor = UIColor.jsq_messageBubbleBlue()
     }
 
-    override func viewWillAppear(_ animated: Bool) {
+    override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
         guard self.conversation != nil else {
-            print("Conversation is not set")
+            print("Error: Conversation is not set")
             self.dismiss(animated: animated)
             return
+        }
+
+        if let title = self.conversation?.title {
+            self.navigationItem.title = title
         }
 
         self.fetchParticipants(completion: nil)
         self.fetchMessages(before: nil, completion: nil)
     }
 
-    override func viewDidDisappear(_ animated: Bool) {
+    override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
     }
@@ -80,6 +109,178 @@ extension SKYChatConversationViewController {
         } else {
             self.dismiss(animated: animated, completion: nil)
         }
+    }
+}
+
+// MARK: - Rendering
+
+extension SKYChatConversationViewController {
+
+    open func reloadViews() {
+        self.collectionView?.reloadData()
+        self.collectionView?.layoutIfNeeded()
+    }
+
+    open override func collectionView(_ collectionView: UICollectionView,
+                                      numberOfItemsInSection section: Int) -> Int {
+        return self.messages.count
+    }
+
+    open override func collectionView(_ collectionView: JSQMessagesCollectionView!,
+                                      messageDataForItemAt indexPath: IndexPath!) -> JSQMessageData! {
+        let msg = self.messages[indexPath.row]
+
+        var msgSenderName: String = ""
+        if let sender = self.getSender(forMessage: msg),
+            let senderName = sender.object(forKey: "name") as? String {
+
+            msgSenderName = senderName
+        }
+
+        return JSQMessage(senderId: msg.creatorUserRecordID,
+                          senderDisplayName: msgSenderName,
+                          date: msg.creationDate,
+                          text: msg.body)
+    }
+
+    open override func collectionView(
+        _ collectionView: JSQMessagesCollectionView!,
+        messageBubbleImageDataForItemAt indexPath: IndexPath!
+    ) -> JSQMessageBubbleImageDataSource! {
+
+        let msg = self.messages[indexPath.row]
+        if msg.creatorUserRecordID == self.senderId {
+            return self.outgoingMessageBubble
+        }
+
+        return self.incomingMessageBubble
+    }
+
+    open override func collectionView(
+        _ collectionView: JSQMessagesCollectionView!,
+        attributedTextForCellBottomLabelAt indexPath: IndexPath!
+    ) -> NSAttributedString! {
+
+        let msg = self.messages[indexPath.row]
+
+        if msg.creatorUserRecordID != self.senderId {
+            return nil
+        }
+
+        switch msg.conversationStatus {
+        case .allRead:
+            return NSAttributedString(string: "All read")
+        case .someRead:
+            return NSAttributedString(string: "Some read")
+        case .delivered:
+            return NSAttributedString(string: "Delivered")
+        case .delivering:
+            return NSAttributedString(string: "Delivering")
+        }
+    }
+
+    open override func collectionView(
+        _ collectionView: JSQMessagesCollectionView!,
+        layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!,
+        heightForCellBottomLabelAt indexPath: IndexPath!
+    ) -> CGFloat {
+        return CGFloat(14)
+    }
+
+    open override func collectionView(
+        _ collectionView: JSQMessagesCollectionView!,
+        avatarImageDataForItemAt indexPath: IndexPath!
+    ) -> JSQMessageAvatarImageDataSource! {
+
+        let msg = self.messages[indexPath.row]
+        var senderName: String = ""
+        if let user = self.getSender(forMessage: msg),
+            let userName = user.object(forKey: "name") as? String {
+
+            senderName = userName
+        }
+
+        if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName),
+            let roundedImage = UIImage.circleImage(fromImage: avatarImage) {
+
+            return JSQMessagesAvatarImage.avatar(with: roundedImage)
+        }
+
+        print("Error: Cannot generate avatar image")
+        return nil
+    }
+}
+
+// MARK: - Actions
+
+extension SKYChatConversationViewController {
+    open override func textViewDidChange(_ textView: UITextView) {
+        super.textViewDidChange(textView)
+
+        // TODO: trigger start typing event
+    }
+
+    open override func textViewDidEndEditing(_ textView: UITextView) {
+        super.textViewDidEndEditing(textView)
+
+        // TODO: trigger pause typing event
+    }
+
+    open override func didPressAccessoryButton(_ sender: UIButton!) {
+        // TODO: handle press event of accessory button
+    }
+
+    open override func didPressSend(
+        _ button: UIButton!,
+        withMessageText text: String!,
+        senderId: String!,
+        senderDisplayName: String!,
+        date: Date!
+    ) {
+        // TODO: error handling
+
+        guard let msg = SKYMessage() else {
+            print("Error: Failed to create new message")
+            return
+        }
+
+        guard let conv = self.conversation else {
+            print("Error: Cannot send message to nil conversation")
+            return
+        }
+
+        msg.body = text
+        msg.creatorUserRecordID = self.senderId
+        msg.creationDate = date
+
+        self.skygear.chatExtension?.addMessage(
+            msg,
+            to: conv,
+            completion: { (result, error) in
+                guard error == nil else {
+                    print("Failed to sent message: \(error?.localizedDescription)")
+                    return
+                }
+
+                guard let sentMsg = result else {
+                    print("Error: Got nil sent message")
+                    return
+                }
+
+                // find the index for the "sending" message
+                guard let idx = self.messages.index(of: msg) else {
+                    return
+                }
+
+                self.messages[idx] = sentMsg
+                self.collectionView?.reloadData()
+            }
+        )
+
+        self.messages.append(msg)
+        self.finishSendingMessage(animated: true)
+
+        // TODO: trigger finish typing event
     }
 }
 
@@ -120,8 +321,15 @@ extension SKYChatConversationViewController {
                     participants.append(v)
                 }
 
-                // TODO: need a reload here
+                if let senderRecord = self.participants[self.senderId],
+                    let senderName = senderRecord.object(forKey: "name") as? String {
+
+                    self.senderDisplayName = senderName
+                }
+
                 completion?(participants, nil)
+
+                self.reloadViews()
 
             }, perRecordErrorHandler: nil)
     }
@@ -134,16 +342,16 @@ extension SKYChatConversationViewController {
 
         self.skygear.chatExtension?.fetchMessages(
             conversation: self.conversation!,
-            limit: 100,
+            limit: Int(self.messagesFetchLimit),
             beforeTime: before,
-            completion: { (messages, error) in
+            completion: { (msgs, error) in
                 guard error == nil else {
                     print("Failed to fetch messages: \(error?.localizedDescription)")
                     completion?(nil, error)
                     return
                 }
 
-                guard messages != nil else {
+                guard msgs != nil else {
                     print("Failed to get any messages")
                     let err = self.errorCreator.error(with: SKYErrorBadResponse,
                                                       message: "Failed to get any messages")
@@ -151,10 +359,22 @@ extension SKYChatConversationViewController {
                     return
                 }
 
-                self.messages.append(contentsOf: messages!)
+                let reversed = Array(msgs!.reversed())
+                self.messages.append(contentsOf: reversed)
 
-                // TODO: need a reload here
-                completion?(messages!, nil)
+                completion?(reversed, nil)
+
+                self.reloadViews()
+                self.scrollToBottom(animated: true)
         })
+    }
+
+    open func getSender(forMessage message: SKYMessage) -> SKYRecord? {
+        guard self.participants.count > 0 else {
+            print("Warning: No participants are fetched")
+            return nil
+        }
+
+        return self.participants[message.creatorUserRecordID]
     }
 }
