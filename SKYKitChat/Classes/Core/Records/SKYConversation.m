@@ -24,6 +24,7 @@ NSString *const SKYConversationAdminsKey = @"admin_ids";
 NSString *const SKYConversationTitleKey = @"title";
 NSString *const SKYConversationDistinctByParticipantsKey = @"distinct_by_participants";
 NSString *const SKYConversationMetadataKey = @"metadata";
+NSString *const SKYConversationLastMessageKey = @"last_message";
 
 @implementation SKYConversation
 
@@ -82,6 +83,14 @@ NSString *const SKYConversationMetadataKey = @"metadata";
 - (BOOL)isDistinctByParticipants
 {
     return [self[SKYConversationDistinctByParticipantsKey] boolValue];
+}
+
+- (NSString *)lastMessageID {
+    return [[self[SKYConversationLastMessageKey] recordID] recordName];
+}
+
+- (void)setLastMessage:(SKYMessage * _Nullable)lastMessage {
+    _lastMessage = lastMessage;
 }
 
 - (NSString *)toString

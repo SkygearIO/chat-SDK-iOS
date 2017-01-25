@@ -20,6 +20,7 @@
 #import <SKYKit/SKYKit.h>
 
 #import "SKYChatRecord.h"
+#import "SKYMessage.h"
 
 /**
  SKYConversation contains information of a conversation that is shared among all participants.
@@ -57,6 +58,12 @@
  be returned whenever a conversation is needed with the same participant list.
  */
 @property (assign, nonatomic, getter=isDistinctByParticipants) BOOL distinctByParticipants;
+
+/**
+ The ID of the last message in this conversation.
+ */
+@property (readonly, nonatomic, nullable) NSString *lastMessageID;
+@property (readonly, nonatomic, nullable) SKYMessage *lastMessage;
 
 - (NSString *_Nonnull)toString;
 
