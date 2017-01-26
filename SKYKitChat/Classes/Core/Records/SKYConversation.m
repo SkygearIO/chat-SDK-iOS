@@ -85,11 +85,13 @@ NSString *const SKYConversationLastMessageKey = @"last_message";
     return [self[SKYConversationDistinctByParticipantsKey] boolValue];
 }
 
-- (NSString *)lastMessageID {
+- (NSString *)lastMessageID
+{
     return [[self[SKYConversationLastMessageKey] recordID] recordName];
 }
 
-- (void)setLastMessage:(SKYMessage * _Nullable)lastMessage {
+- (void)setLastMessage:(SKYMessage *_Nullable)lastMessage
+{
     _lastMessage = lastMessage;
 }
 

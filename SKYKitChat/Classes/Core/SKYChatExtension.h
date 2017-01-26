@@ -199,14 +199,15 @@ NS_SWIFT_NAME(fetchUserConversations(completion:));
 
 /**
  Fetches user conversations with optional last message in conversation.
- 
+
  @param fetchLastMessage whether to fetch the last message
  @param completion completion block
  */
 - (void)fetchUserConversationsWithFetchLastMessage:(BOOL)fetchLastMessage
                                         completion:
-    (SKYChatFetchUserConversationListCompletion _Nullable)completion
-NS_SWIFT_NAME(fetchUserConversations(fetchLastMessage:completion:));
+                                            (SKYChatFetchUserConversationListCompletion _Nullable)
+                                                completion
+    NS_SWIFT_NAME(fetchUserConversations(fetchLastMessage:completion:));
 
 /**
  Fetches a user conversation by conversation ID.
@@ -219,7 +220,7 @@ NS_SWIFT_NAME(fetchUserConversations(fetchLastMessage:completion:));
                                fetchLastMessage:(BOOL)fetchLastMessage
                                      completion:
                                          (SKYChatUserConversationCompletion _Nullable)completion
-NS_SWIFT_NAME(fetchUserConversation(conversationID:fetchLastMessage:completion:));
+    NS_SWIFT_NAME(fetchUserConversation(conversationID:fetchLastMessage:completion:));
 
 /**
  Fetches a user conversation by conversation.
@@ -232,7 +233,7 @@ NS_SWIFT_NAME(fetchUserConversation(conversationID:fetchLastMessage:completion:)
                              fetchLastMessage:(BOOL)fetchLastMessage
                                    completion:
                                        (SKYChatUserConversationCompletion _Nullable)completion
-NS_SWIFT_NAME(fetchUserConversation(conversation:fetchLastMessage:completion:));
+    NS_SWIFT_NAME(fetchUserConversation(conversation:fetchLastMessage:completion:));
 
 ///---------------------------------------
 /// @name Adding and removing participants

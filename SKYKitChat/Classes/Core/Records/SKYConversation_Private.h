@@ -21,6 +21,6 @@
 
 @interface SKYConversation ()
 
-- (void)setLastMessage:(SKYMessage * _Nullable)lastMessage;
+- (void)setLastMessage:(SKYMessage *_Nullable)lastMessage;
 
 @end
