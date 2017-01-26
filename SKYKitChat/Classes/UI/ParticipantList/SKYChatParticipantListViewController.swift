@@ -38,6 +38,17 @@ public enum SKYChatParticipantQueryMethod: UInt {
                                            didSelectParticipant participant: SKYRecord)
 }
 
+@objc public protocol SKYChatParticipantListViewControllerDataSource: class {
+    /**
+     * Return the avatar image for a participant. Returning nil will remove the avatar image view
+     * when displaying the participant.
+     **/
+
+    @objc optional func listViewController(_ controller: SKYChatParticipantListViewController,
+                                           avatarImageForParticipant participant: SKYRecord,
+                                           atIndexPath indexPath: IndexPath) -> UIImage?
+}
+
 open class SKYChatParticipantListViewController: UIViewController {
 
     static let queryMethodCoderKey = "QUERY_METHOD"
@@ -71,6 +82,7 @@ open class SKYChatParticipantListViewController: UIViewController {
     public var participantScope: SKYQuery?
 
     public weak var delegate: SKYChatParticipantListViewControllerDelegate?
+    public weak var dataSource: SKYChatParticipantListViewControllerDataSource?
     internal(set) public var searchTerm: String?
 
     @IBOutlet public var searchBar: UISearchBar!
@@ -104,6 +116,8 @@ extension SKYChatParticipantListViewController {
 
         SKYChatParticipantListViewController.nib.instantiate(withOwner: self, options: nil)
 
+        self.tableView.register(SKYChatParticipantListViewCell.nib,
+                                forCellReuseIdentifier: "ParticipantCell")
         self.searchBar.autocapitalizationType = .none
     }
 
@@ -152,28 +166,40 @@ extension SKYChatParticipantListViewController: UITableViewDelegate, UITableView
     }
 
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
-        let user = self.participants[indexPath.row]
+        let participantRecord = self.participants[indexPath.row]
+        var participantInfo: String? = self.getParticipantInformation(atIndex: indexPath.row)
 
-        cell.textLabel?.text = nil
-        switch self.queryMethod {
-        case .ByEmail:
-            if let email = user.transient.object(forKey: "_email") as? String {
-                cell.textLabel?.text = email
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "ParticipantCell")
+            as? SKYChatParticipantListViewCell {
+
+            // record
+            cell.participantRecord = participantRecord
+
+            // extra info
+            if self.queryMethod == .ByEmail || self.queryMethod == .ByUsername {
+                cell.participantInformation = participantInfo
+            } else {
+                cell.participantInformation = nil
             }
-        case .ByUsername:
-            if let username = user.transient.object(forKey: "_username") as? String {
-                cell.textLabel?.text = username
+
+            // avatar
+            var avatarImage: UIImage?
+            if let ds = self.dataSource {
+                avatarImage = ds.listViewController?(self,
+                                                     avatarImageForParticipant: participantRecord,
+                                                     atIndexPath: indexPath)
+            } else if let name = participantRecord.object(forKey: "name") as? String {
+                avatarImage = UIImage.avatarImage(forInitialsOfName: name)
             }
-        case .ByName:
-            if let name = user.object(forKey: "name") as? String {
-                cell.textLabel?.text = name
-            }
-        default:
-            break
+            cell.avatarImage = avatarImage
+
+            return cell
+        } else {
+            let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
+            cell.textLabel?.text = participantInfo
+
+            return cell
         }
-
-        return cell
     }
 
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -181,6 +207,10 @@ extension SKYChatParticipantListViewController: UITableViewDelegate, UITableView
             let participant = self.participants[indexPath.row]
             d.listViewController?(self, didSelectParticipant: participant)
         }
+    }
+
+    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return CGFloat(62)
     }
 
 }
@@ -215,6 +245,30 @@ extension SKYChatParticipantListViewController {
 
     open func getParticipants() -> [SKYRecord] {
         return self.participants
+    }
+
+    open func getParticipantInformation(atIndex index: Int) -> String? {
+        let participantRecord = self.participants[index]
+
+        var participantInfo: String? = nil
+        switch self.queryMethod {
+        case .ByEmail:
+            if let email = participantRecord.transient.object(forKey: "_email") as? String {
+                participantInfo = email
+            }
+        case .ByUsername:
+            if let username = participantRecord.transient.object(forKey: "_username") as? String {
+                participantInfo = username
+            }
+        case .ByName:
+            if let name = participantRecord.object(forKey: "name") as? String {
+                participantInfo = name
+            }
+        default:
+            break
+        }
+
+        return participantInfo
     }
 
     var queryPredicate: NSPredicate? {

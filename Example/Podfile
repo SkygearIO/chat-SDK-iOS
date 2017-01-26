@@ -14,6 +14,7 @@ end
 target 'Swift Example' do
   pod 'SKYKitChat', :path => '../'
   pod 'SKYKitChat/UI', :path => '../'
+  pod 'Kingfisher', '~> 3.0'
 end
 
 
