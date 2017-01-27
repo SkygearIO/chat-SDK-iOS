@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11542" systemVersion="15G1004" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -37,7 +37,7 @@
                         <nil key="highlightedColor"/>
                     </label>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="751" text="Conversation Info." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="a08-81-6Yo">
-                        <rect key="frame" x="72" y="29" width="110" height="16"/>
+                        <rect key="frame" x="72" y="47" width="110" height="16"/>
                         <fontDescription key="fontDescription" type="system" pointSize="13"/>
                         <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                         <nil key="highlightedColor"/>
@@ -62,15 +62,23 @@
                             <constraint firstItem="XZH-vE-vra" firstAttribute="centerY" secondItem="501-cv-oeZ" secondAttribute="centerY" id="t5E-hv-7X6"/>
                         </constraints>
                     </view>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Dummy Message" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6A5-8e-j2C">
+                        <rect key="frame" x="72" y="30" width="104" height="16"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                        <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                        <nil key="highlightedColor"/>
+                    </label>
                 </subviews>
                 <constraints>
+                    <constraint firstItem="XZH-vE-vra" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="6A5-8e-j2C" secondAttribute="trailing" priority="751" id="05k-Ow-XVa"/>
                     <constraint firstAttribute="bottomMargin" relation="greaterThanOrEqual" secondItem="0aw-Mg-lw4" secondAttribute="bottom" id="06h-PR-8jQ"/>
                     <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="ipl-3M-ZFp" secondAttribute="trailing" priority="751" id="8h0-I2-yDc"/>
                     <constraint firstItem="a08-81-6Yo" firstAttribute="leading" secondItem="0aw-Mg-lw4" secondAttribute="trailing" constant="8" id="EWK-Mz-nVE"/>
+                    <constraint firstItem="a08-81-6Yo" firstAttribute="top" secondItem="6A5-8e-j2C" secondAttribute="bottom" constant="1" id="Epp-w4-sMi"/>
                     <constraint firstItem="ipl-3M-ZFp" firstAttribute="leading" secondItem="dMD-pz-C9e" secondAttribute="leadingMargin" priority="750" constant="8" id="KDQ-bc-5g8"/>
-                    <constraint firstItem="a08-81-6Yo" firstAttribute="top" secondItem="ipl-3M-ZFp" secondAttribute="bottom" id="LOn-EN-U4F"/>
                     <constraint firstAttribute="topMargin" secondItem="ipl-3M-ZFp" secondAttribute="top" id="M9T-UX-w0k"/>
                     <constraint firstItem="0aw-Mg-lw4" firstAttribute="top" secondItem="dMD-pz-C9e" secondAttribute="topMargin" id="MhH-Fk-rfx"/>
+                    <constraint firstItem="6A5-8e-j2C" firstAttribute="leading" secondItem="0aw-Mg-lw4" secondAttribute="trailing" constant="8" id="RyR-hS-iR8"/>
                     <constraint firstItem="501-cv-oeZ" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="a08-81-6Yo" secondAttribute="trailing" priority="751" id="T80-He-JsZ"/>
                     <constraint firstItem="0aw-Mg-lw4" firstAttribute="leading" secondItem="dMD-pz-C9e" secondAttribute="leadingMargin" id="blZ-qb-tjO"/>
                     <constraint firstItem="a08-81-6Yo" firstAttribute="leading" secondItem="dMD-pz-C9e" secondAttribute="leadingMargin" priority="750" constant="8" id="cMU-uq-ma3"/>
@@ -78,14 +86,17 @@
                     <constraint firstItem="501-cv-oeZ" firstAttribute="centerY" secondItem="dMD-pz-C9e" secondAttribute="centerY" id="kut-xW-VYw"/>
                     <constraint firstAttribute="bottomMargin" relation="greaterThanOrEqual" secondItem="a08-81-6Yo" secondAttribute="bottom" priority="752" id="pzb-52-Q2D"/>
                     <constraint firstItem="ipl-3M-ZFp" firstAttribute="leading" secondItem="0aw-Mg-lw4" secondAttribute="trailing" constant="8" id="tTW-NW-Owm"/>
+                    <constraint firstItem="6A5-8e-j2C" firstAttribute="top" secondItem="ipl-3M-ZFp" secondAttribute="bottom" constant="1" id="uEf-BG-oqh"/>
                     <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="a08-81-6Yo" secondAttribute="trailing" priority="751" id="wx2-xh-xlM"/>
                     <constraint firstItem="501-cv-oeZ" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="ipl-3M-ZFp" secondAttribute="trailing" priority="751" id="xJK-Dy-vE2"/>
+                    <constraint firstItem="6A5-8e-j2C" firstAttribute="leading" secondItem="dMD-pz-C9e" secondAttribute="leadingMargin" priority="750" constant="8" id="zvH-i8-fR4"/>
                 </constraints>
             </tableViewCellContentView>
             <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
             <connections>
                 <outlet property="avatarImageView" destination="0aw-Mg-lw4" id="Irf-jx-QVO"/>
                 <outlet property="conversationInformationLabel" destination="a08-81-6Yo" id="6nS-5F-7Jx"/>
+                <outlet property="conversationMessageLabel" destination="6A5-8e-j2C" id="jeS-B5-HvF"/>
                 <outlet property="conversationTitleLabel" destination="ipl-3M-ZFp" id="9xO-Tf-l30"/>
                 <outlet property="unreadCountLabel" destination="XZH-vE-vra" id="tP6-fL-jJw"/>
                 <outlet property="unreadCountView" destination="501-cv-oeZ" id="T6K-Oi-IFi"/>

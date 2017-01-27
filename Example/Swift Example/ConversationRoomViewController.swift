@@ -219,13 +219,15 @@ class ConversationRoomViewController: UIViewController,
     }
 
     func refreshConversation() {
-        SKYContainer.default().chatExtension?.fetchUserConversation(conversationID: self.userCon.conversation.recordID.recordName) { (conversation, error) in
-            if let conv = conversation {
-                self.userCon = conv
-                self.lastReadMessage = conv.lastReadMessage
-                self.tableView.reloadData()
+        SKYContainer.default().chatExtension?.fetchUserConversation(
+            conversationID: self.userCon.conversation.recordID.recordName,
+            fetchLastMessage: false) { (conversation, error) in
+                if let conv = conversation {
+                    self.userCon = conv
+                    self.lastReadMessage = conv.lastReadMessage
+                    self.tableView.reloadData()
+                }
             }
-        }
     }
 
     // MARK: - UIImagePickerControllerDelegate

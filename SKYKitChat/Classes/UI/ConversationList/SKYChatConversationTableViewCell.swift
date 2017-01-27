@@ -21,12 +21,14 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
     let untitledConversation: String = "Untitled Conversation"
 
     public var conversation: SKYConversation?
+    public var conversationMessage: String?
     public var conversationInformation: String?
     public var unreadMessageCount: Int?
     public var avatarImage: UIImage?
 
     @IBOutlet public weak var avatarImageView: UIImageView!
     @IBOutlet public weak var conversationTitleLabel: UILabel!
+    @IBOutlet public weak var conversationMessageLabel: UILabel!
     @IBOutlet public weak var conversationInformationLabel: UILabel!
     @IBOutlet public weak var unreadCountLabel: UILabel!
     @IBOutlet public weak var unreadCountView: UIView!
@@ -78,6 +80,13 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
         } else {
             self.conversationTitleLabel?.text = untitledConversation
             self.conversationTitleLabel?.textColor = UIColor.lightGray
+        }
+        
+        // message
+        if let message = self.conversationMessage {
+            self.conversationMessageLabel.text = message
+        } else {
+            self.conversationMessageLabel.text = ""
         }
 
         // extra info

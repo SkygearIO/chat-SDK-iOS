@@ -194,31 +194,46 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 
  @param completion completion block
  */
-- (void)fetchUserConversationsWithCompletion:
-    (SKYChatFetchUserConversationListCompletion _Nullable)completion
-    NS_SWIFT_NAME(fetchUserConversations(completion:));
+- (void)fetchUserConversationsWithCompletion:(SKYChatFetchUserConversationListCompletion _Nullable)completion
+NS_SWIFT_NAME(fetchUserConversations(completion:));
+
+/**
+ Fetches user conversations with optional last message in conversation.
+
+ @param fetchLastMessage whether to fetch the last message
+ @param completion completion block
+ */
+- (void)fetchUserConversationsWithFetchLastMessage:(BOOL)fetchLastMessage
+                                        completion:
+                                            (SKYChatFetchUserConversationListCompletion _Nullable)
+                                                completion
+    NS_SWIFT_NAME(fetchUserConversations(fetchLastMessage:completion:));
 
 /**
  Fetches a user conversation by conversation ID.
 
  @param conversationID ID of conversation
+ @param fetchLastMessage whether to fetch the last message
  @param completion completion block
  */
 - (void)fetchUserConversationWithConversationID:(NSString *_Nonnull)conversationID
+                               fetchLastMessage:(BOOL)fetchLastMessage
                                      completion:
                                          (SKYChatUserConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(fetchUserConversation(conversationID:completion:));
+    NS_SWIFT_NAME(fetchUserConversation(conversationID:fetchLastMessage:completion:));
 
 /**
  Fetches a user conversation by conversation.
 
  @param conversation conversation object
+ @param fetchLastMessage whether to fetch the last message
  @param completion completion block
  */
 - (void)fetchUserConversationWithConversation:(SKYConversation *_Nonnull)conversation
+                             fetchLastMessage:(BOOL)fetchLastMessage
                                    completion:
                                        (SKYChatUserConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(fetchUserConversation(conversation:completion:));
+    NS_SWIFT_NAME(fetchUserConversation(conversation:fetchLastMessage:completion:));
 
 ///---------------------------------------
 /// @name Adding and removing participants
