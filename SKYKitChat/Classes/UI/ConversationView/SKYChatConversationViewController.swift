@@ -26,8 +26,11 @@ open class SKYChatConversationViewController: JSQMessagesViewController {
     public var participants: [String: SKYRecord] = [:]
     public var messages: [SKYMessage] = []
     public var messagesFetchLimit: UInt = 25
+    public var typingIndicatorShowDuration: TimeInterval = TimeInterval(5)
 
     public var messageChangeHandler: ((SKYChatRecordChangeEvent, SKYMessage) -> Void)?
+    public var typingIndicatorChangeHandler: ((SKYChatTypingIndicator) -> Void)?
+    public var typingIndicatorPromptTimer: Timer?
 
     public var bubbleFactory: JSQMessagesBubbleImageFactory? = JSQMessagesBubbleImageFactory()
     public var incomingMessageBubble: JSQMessagesBubbleImage?
@@ -111,6 +114,7 @@ extension SKYChatConversationViewController {
         }
 
         self.subscribeMessageChanges()
+        self.subscribeTypingIndicatorChanges()
     }
 
     override open func viewDidDisappear(_ animated: Bool) {
@@ -225,6 +229,29 @@ extension SKYChatConversationViewController {
         print("Error: Cannot generate avatar image")
         return nil
     }
+
+    // Subclasses can override this method to render a custom typing indicator
+    open func displayTypingIndicator() {
+        guard self.showTypingIndicator == false else {
+            // no need to update
+            return
+        }
+
+        self.showTypingIndicator = true
+        if self.automaticallyScrollsToMostRecentMessage {
+            self.scrollToBottom(animated: true)
+        }
+    }
+
+    // Subclasses can override this method to render a custom typing indicator
+    open func hideTypingIndicator() {
+        guard self.showTypingIndicator == true else {
+            // no need to update
+            return
+        }
+
+        self.showTypingIndicator = false
+    }
 }
 
 // MARK: - Actions
@@ -233,13 +260,13 @@ extension SKYChatConversationViewController {
     open override func textViewDidChange(_ textView: UITextView) {
         super.textViewDidChange(textView)
 
-        // TODO: trigger start typing event
+        self.skygear.chatExtension?.sendTypingIndicator(.begin, in: self.conversation!)
     }
 
     open override func textViewDidEndEditing(_ textView: UITextView) {
         super.textViewDidEndEditing(textView)
 
-        // TODO: trigger pause typing event
+        self.skygear.chatExtension?.sendTypingIndicator(.pause, in: self.conversation!)
     }
 
     open override func didPressAccessoryButton(_ sender: UIButton!) {
@@ -296,6 +323,7 @@ extension SKYChatConversationViewController {
         self.messages.append(msg)
         self.finishSendingMessage(animated: true)
 
+        self.skygear.chatExtension?.sendTypingIndicator(.finished, in: self.conversation!)
     }
 }
 
@@ -342,6 +370,46 @@ extension SKYChatConversationViewController {
 
         self.skygear.chatExtension?.subscribeToMessages(in: self.conversation!,
                                                         handler: self.messageChangeHandler!)
+
+    }
+
+    open func subscribeTypingIndicatorChanges() {
+        if self.typingIndicatorChangeHandler == nil {
+            self.typingIndicatorChangeHandler = {(indicator) in
+                // invalidate the existing timer
+                if let timer = self.typingIndicatorPromptTimer {
+                    timer.invalidate()
+                    self.typingIndicatorPromptTimer = nil
+                }
+
+                switch indicator.userIDs.count {
+                case 0:
+                    self.hideTypingIndicator()
+                case 1:
+                    // Show indicator if not I am typing
+                    if let typingID = SKYRecordID(canonicalString: indicator.userIDs.first!) {
+                        if typingID.recordName != self.senderId {
+                            self.displayTypingIndicator()
+                        }
+                    }
+                    break
+                default:
+                    self.displayTypingIndicator()
+                }
+
+                // schedule a timer to hide the typing indicator
+                self.typingIndicatorPromptTimer =
+                    Timer.scheduledTimer(timeInterval: self.typingIndicatorShowDuration,
+                                         target: self,
+                                         selector: #selector(self.hideTypingIndicator),
+                                         userInfo: nil,
+                                         repeats: false)
+            }
+        }
+
+        self.skygear.chatExtension?
+            .subscribeToTypingIndicator(in: self.conversation!,
+                                        handler: self.typingIndicatorChangeHandler!)
     }
 }
 
