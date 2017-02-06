@@ -18,11 +18,13 @@
 //
 
 import SKYKitChat
+import SVProgressHUD
 
 class ConversationListDemoViewController: SKYChatConversationListViewController {
     let showConversationSegueIdentifier: String = "ShowConversationSegue"
 
     var selectedConversation: SKYConversation?
+    var selectedUserConversation: SKYUserConversation?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,6 +41,7 @@ class ConversationListDemoViewController: SKYChatConversationListViewController 
         case showConversationSegueIdentifier:
             if let dest = segue.destination as? ConversationDemoViewController {
                 dest.conversation = self.selectedConversation
+                dest.userConversation = self.selectedUserConversation
             }
         default:
             break
@@ -52,7 +55,28 @@ extension ConversationListDemoViewController: SKYChatConversationListViewControl
     {
         print("Conversation \(conversation.recordID.recordName!) is selected")
 
-        self.selectedConversation = conversation
-        self.performSegue(withIdentifier: showConversationSegueIdentifier, sender: self)
+        SVProgressHUD.show()
+        self.skygear.chatExtension?.fetchUserConversation(
+            conversation: conversation, fetchLastMessage: false, completion: { (userConv, error) in
+                SVProgressHUD.dismiss()
+                guard error == nil else {
+                    print("Error: \(error!.localizedDescription)")
+                    SVProgressHUD.showError(withStatus: error!.localizedDescription)
+                    return
+                }
+
+                guard userConv != nil else {
+                    print("Error: Get nil user conversation")
+                    SVProgressHUD.showError(withStatus: "Cannot get conversation information")
+                    return
+                }
+
+                self.selectedConversation = conversation
+                self.selectedUserConversation = userConv!
+                self.performSegue(withIdentifier: self.showConversationSegueIdentifier,
+                                  sender: self)
+            }
+        )
+
     }
 }

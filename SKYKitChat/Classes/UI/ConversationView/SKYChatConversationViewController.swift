@@ -22,6 +22,7 @@ import JSQMessagesViewController
 open class SKYChatConversationViewController: JSQMessagesViewController {
     public var skygear: SKYContainer = SKYContainer.default()
     public var conversation: SKYConversation?
+    public var userConversation: SKYUserConversation?
     public var participants: [String: SKYRecord] = [:]
     public var messages: [SKYMessage] = []
     public var messagesFetchLimit: UInt = 25
@@ -79,10 +80,20 @@ extension SKYChatConversationViewController {
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        guard self.conversation != nil else {
-            print("Error: Conversation is not set")
+        guard self.userConversation != nil else {
+            print("Error: UserConversation is not set")
             self.dismiss(animated: animated)
             return
+        }
+
+        if self.conversation == nil {
+            if let conv = self.userConversation?.conversation {
+                self.conversation = conv
+            } else {
+                print("Error: Conversation is not set")
+                self.dismiss(animated: animated)
+                return
+            }
         }
 
         if let title = self.conversation?.title {
@@ -340,7 +351,9 @@ extension SKYChatConversationViewController {
             return
         }
 
-        self.skygear.chatExtension?.fetchMessages(
+        let chatExt = self.skygear.chatExtension
+
+        chatExt?.fetchMessages(
             conversation: self.conversation!,
             limit: Int(self.messagesFetchLimit),
             beforeTime: before,
@@ -359,10 +372,21 @@ extension SKYChatConversationViewController {
                     return
                 }
 
-                let reversed = Array(msgs!.reversed())
-                self.messages.append(contentsOf: reversed)
+                if self.messages.count == 0 {
+                    // this is the first page
+                    chatExt?.markReadMessages(msgs!, completion: nil)
+                    chatExt?.markLastReadMessage(msgs!.first!,
+                                                 in: self.userConversation!,
+                                                 completion: nil)
+                }
 
-                completion?(reversed, nil)
+                // prepend new messages
+                var newMessages = Array(msgs!.reversed())
+                newMessages.append(contentsOf: self.messages)
+
+                self.messages = newMessages
+
+                completion?(newMessages, nil)
 
                 self.reloadViews()
                 self.scrollToBottom(animated: true)
