@@ -27,6 +27,8 @@ open class SKYChatConversationViewController: JSQMessagesViewController {
     public var messages: [SKYMessage] = []
     public var messagesFetchLimit: UInt = 25
 
+    public var messageChangeHandler: ((SKYChatRecordChangeEvent, SKYMessage) -> Void)?
+
     public var bubbleFactory: JSQMessagesBubbleImageFactory? = JSQMessagesBubbleImageFactory()
     public var incomingMessageBubble: JSQMessagesBubbleImage?
     public var outgoingMessageBubble: JSQMessagesBubbleImage?
@@ -100,13 +102,21 @@ extension SKYChatConversationViewController {
             self.navigationItem.title = title
         }
 
-        self.fetchParticipants(completion: nil)
-        self.fetchMessages(before: nil, completion: nil)
+        if self.participants.count == 0 {
+            self.fetchParticipants(completion: nil)
+        }
+
+        if self.messages.count == 0 {
+            self.fetchMessages(before: nil, completion: nil)
+        }
+
+        self.subscribeMessageChanges()
     }
 
     override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
+        self.skygear.chatExtension?.unsubscribeFromUserChannel()
     }
 
     func dismiss(animated: Bool) {
@@ -126,11 +136,6 @@ extension SKYChatConversationViewController {
 // MARK: - Rendering
 
 extension SKYChatConversationViewController {
-
-    open func reloadViews() {
-        self.collectionView?.reloadData()
-        self.collectionView?.layoutIfNeeded()
-    }
 
     open override func collectionView(_ collectionView: UICollectionView,
                                       numberOfItemsInSection section: Int) -> Int {
@@ -291,7 +296,52 @@ extension SKYChatConversationViewController {
         self.messages.append(msg)
         self.finishSendingMessage(animated: true)
 
-        // TODO: trigger finish typing event
+    }
+}
+
+
+// MARK: - Subscription
+
+extension SKYChatConversationViewController {
+
+    open func subscribeMessageChanges() {
+        if self.messageChangeHandler == nil {
+            self.messageChangeHandler = {(event, msg) in
+                let idx = self.messages
+                    .map({ $0.recordID.recordName! })
+                    .index(of: msg.recordID.recordName)
+
+                switch event {
+                case .create:
+                    if let foundIndex = idx {
+                        self.messages[foundIndex] = msg
+                    } else {
+                        self.messages.append(msg)
+                    }
+
+                    self.skygear.chatExtension?.markReadMessages([msg], completion: nil)
+                    self.skygear.chatExtension?.markLastReadMessage(msg,
+                                                                    in: self.userConversation!,
+                                                                    completion: nil)
+                    self.finishReceivingMessage()
+                case .update:
+                    if let foundIndex = idx {
+                        self.messages[foundIndex] = msg
+                        self.collectionView.reloadData()
+                        self.collectionView.layoutIfNeeded()
+                    }
+                case .delete:
+                    if let foundIndex = idx {
+                        self.messages.remove(at: foundIndex)
+                        self.collectionView.reloadData()
+                        self.collectionView.layoutIfNeeded()
+                    }
+                }
+            }
+        }
+
+        self.skygear.chatExtension?.subscribeToMessages(in: self.conversation!,
+                                                        handler: self.messageChangeHandler!)
     }
 }
 
@@ -340,7 +390,8 @@ extension SKYChatConversationViewController {
 
                 completion?(participants, nil)
 
-                self.reloadViews()
+                self.collectionView?.reloadData()
+                self.collectionView?.layoutIfNeeded()
 
             }, perRecordErrorHandler: nil)
     }
@@ -387,9 +438,7 @@ extension SKYChatConversationViewController {
                 self.messages = newMessages
 
                 completion?(newMessages, nil)
-
-                self.reloadViews()
-                self.scrollToBottom(animated: true)
+                self.finishReceivingMessage()
         })
     }
 
