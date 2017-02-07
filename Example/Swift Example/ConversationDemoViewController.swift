@@ -24,6 +24,44 @@ class ConversationDemoViewController: SKYChatConversationViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        
+        self.delegate = self
+    }
+}
+
+extension ConversationDemoViewController: SKYChatConversationViewControllerDelegate {
+    func incomingMessageColorForConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UIColor
+    {
+        return UIColor.lightGray
+    }
+
+    func accessoryButtonShouldShowInConversationViewController(
+        _ controller: SKYChatConversationViewController) -> Bool
+    {
+        return true
+    }
+
+    func conversationViewController(
+        _ controller: SKYChatConversationViewController,
+        alertControllerForAccessoryButton button: UIButton) -> UIAlertController
+    {
+        let alert = UIAlertController(title: "Accessory Button Action",
+                                      message: nil,
+                                      preferredStyle: .actionSheet)
+
+        alert.addAction(
+            UIAlertAction(title: "Info.", style: .default, handler: { _ in
+                let newAlert =
+                    UIAlertController(title: "Info.",
+                                      message: "Custom action can be added to the Accessory Button",
+                                      preferredStyle: .alert)
+                newAlert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
+                self.present(newAlert, animated: true, completion: nil)
+            })
+        )
+
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
+
+        return alert
     }
 }

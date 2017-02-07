@@ -19,7 +19,30 @@
 
 import JSQMessagesViewController
 
+@objc public protocol SKYChatConversationViewControllerDelegate: class {
+
+    /**
+     * For Customizing the views
+     */
+
+    @objc optional func incomingMessageColorForConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UIColor
+
+    @objc optional func outgoingMessageColorForConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UIColor
+
+    @objc optional func accessoryButtonShouldShowInConversationViewController(
+        _ controller: SKYChatConversationViewController) -> Bool
+
+    @objc optional func conversationViewController(
+        _ controller: SKYChatConversationViewController,
+        alertControllerForAccessoryButton button: UIButton) -> UIAlertController
+}
+
 open class SKYChatConversationViewController: JSQMessagesViewController {
+
+    weak public var delegate: SKYChatConversationViewControllerDelegate?
+
     public var skygear: SKYContainer = SKYContainer.default()
     public var conversation: SKYConversation?
     public var userConversation: SKYUserConversation?
@@ -101,9 +124,8 @@ extension SKYChatConversationViewController {
             }
         }
 
-        if let title = self.conversation?.title {
-            self.navigationItem.title = title
-        }
+        self.customizeViews()
+
 
         if self.participants.count == 0 {
             self.fetchParticipants(completion: nil)
@@ -140,6 +162,28 @@ extension SKYChatConversationViewController {
 // MARK: - Rendering
 
 extension SKYChatConversationViewController {
+
+    open func customizeViews() {
+        if let title = self.conversation?.title {
+            self.navigationItem.title = title
+        }
+
+        if let color = self.delegate?.incomingMessageColorForConversationViewController?(self) {
+            self.incomingMessageBubbleColor = color
+        }
+
+        if let color = self.delegate?.outgoingMessageColorForConversationViewController?(self) {
+            self.outgoingMessageBubbleColor = color
+        }
+
+        var shouldShowAccessoryButton: Bool =
+            self.delegate?.accessoryButtonShouldShowInConversationViewController?(self) ?? false
+
+        if !shouldShowAccessoryButton {
+            self.inputToolbar?.contentView?.leftBarButtonItem?.removeFromSuperview()
+            self.inputToolbar?.contentView?.leftBarButtonItem = nil
+        }
+    }
 
     open override func collectionView(_ collectionView: UICollectionView,
                                       numberOfItemsInSection section: Int) -> Int {
@@ -270,7 +314,12 @@ extension SKYChatConversationViewController {
     }
 
     open override func didPressAccessoryButton(_ sender: UIButton!) {
-        // TODO: handle press event of accessory button
+        if let alert =
+            self.delegate?.conversationViewController?(self,
+                                                       alertControllerForAccessoryButton: sender!)
+        {
+            self.present(alert, animated: true, completion: nil)
+        }
     }
 
     open override func didPressSend(
