@@ -81,7 +81,7 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
             self.conversationTitleLabel?.text = untitledConversation
             self.conversationTitleLabel?.textColor = UIColor.lightGray
         }
-        
+
         // message
         if let message = self.conversationMessage {
             self.conversationMessageLabel.text = message

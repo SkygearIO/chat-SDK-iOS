@@ -50,8 +50,6 @@ import JSQMessagesViewController
 
     @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
                                                    failedToSendMessageText text: String,
-                                                   senderId: String,
-                                                   senderDisplayName: String,
                                                    date: Date,
                                                    error: Error)
 }
@@ -142,7 +140,6 @@ extension SKYChatConversationViewController {
         }
 
         self.customizeViews()
-
 
         if self.participants.count == 0 {
             self.fetchParticipants(completion: nil)
@@ -333,8 +330,7 @@ extension SKYChatConversationViewController {
     open override func didPressAccessoryButton(_ sender: UIButton!) {
         if let alert =
             self.delegate?.conversationViewController?(self,
-                                                       alertControllerForAccessoryButton: sender!)
-        {
+                                                       alertControllerForAccessoryButton: sender!) {
             self.present(alert, animated: true, completion: nil)
         }
     }
@@ -347,33 +343,18 @@ extension SKYChatConversationViewController {
 
         guard let msg = SKYMessage() else {
             print("Error: Failed to create new message")
-            if let err = self.errorCreator.error(with: SKYErrorInvalidArgument,
-                                                 message: "Failed to create new message")
-            {
-                self.delegate?.conversationViewController?(self,
-                                                           failedToSendMessageText: text!,
-                                                           senderId: senderId!,
-                                                           senderDisplayName: senderDisplayName!,
-                                                           date: date!,
-                                                           error: err)
-            }
-
+            self.failedToSendMessage(text,
+                                     date: date!,
+                                     errorCode: SKYErrorInvalidArgument,
+                                     errorMessage: "Failed to create new message")
             return
         }
 
         guard let conv = self.conversation else {
-            print("Error: Cannot send message to nil conversation")
-            if let err = self.errorCreator.error(with: SKYErrorInvalidArgument,
-                                                 message: "Cannot send message to nil conversation")
-            {
-                self.delegate?.conversationViewController?(self,
-                                                           failedToSendMessageText: text!,
-                                                           senderId: senderId!,
-                                                           senderDisplayName: senderDisplayName!,
-                                                           date: date!,
-                                                           error: err)
-            }
-
+            self.failedToSendMessage(text,
+                                     date: date!,
+                                     errorCode: SKYErrorInvalidArgument,
+                                     errorMessage: "Cannot send message to nil conversation")
             return
         }
 
@@ -382,38 +363,25 @@ extension SKYChatConversationViewController {
         msg.creationDate = date
 
         self.delegate?.conversationViewController?(self, readyToSendMessage: msg)
-
         self.skygear.chatExtension?.addMessage(
             msg,
             to: conv,
             completion: { (result, error) in
                 guard error == nil else {
-                    print("Failed to sent message: \(error?.localizedDescription)")
-                    if let err = self.errorCreator.error(with: SKYErrorBadResponse,
-                                                         message: error?.localizedDescription)
-                    {
-                        self.delegate?.conversationViewController?(self,
-                                                                   failedToSendMessageText: text!,
-                                                                   senderId: senderId!,
-                                                                   senderDisplayName: senderDisplayName!,
-                                                                   date: date!,
-                                                                   error: err)
-                    }
+                    print("Failed to sent message: \(error!.localizedDescription)")
+                    self.failedToSendMessage(text,
+                                             date: date!,
+                                             errorCode: SKYErrorBadResponse,
+                                             errorMessage: error!.localizedDescription)
                     return
                 }
 
                 guard let sentMsg = result else {
                     print("Error: Got nil sent message")
-                    if let err = self.errorCreator.error(with: SKYErrorBadResponse,
-                                                         message: "Got nil sent message")
-                    {
-                        self.delegate?.conversationViewController?(self,
-                                                                   failedToSendMessageText: text!,
-                                                                   senderId: senderId!,
-                                                                   senderDisplayName: senderDisplayName!,
-                                                                   date: date!,
-                                                                   error: err)
-                    }
+                    self.failedToSendMessage(text,
+                                             date: date!,
+                                             errorCode: SKYErrorBadResponse,
+                                             errorMessage: "Got nil sent message")
                     return
                 }
 
@@ -435,8 +403,21 @@ extension SKYChatConversationViewController {
 
         self.skygear.chatExtension?.sendTypingIndicator(.finished, in: self.conversation!)
     }
-}
 
+    open func failedToSendMessage(_ messageText: String,
+                                  date: Date,
+                                  errorCode: SKYErrorCode,
+                                  errorMessage: String) {
+
+        if let err = self.errorCreator.error(with: errorCode, message: errorMessage) {
+
+            self.delegate?.conversationViewController?(self,
+                                                       failedToSendMessageText: messageText,
+                                                       date: date,
+                                                       error: err)
+        }
+    }
+}
 
 // MARK: - Subscription
 
