@@ -315,6 +315,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     NSPredicate *predicate =
         [NSPredicate predicateWithFormat:@"user = %@", self.container.currentUserRecordID];
     SKYQuery *query = [SKYQuery queryWithRecordType:@"user_conversation" predicate:predicate];
+    query.sortDescriptors =
+        @[ [NSSortDescriptor sortDescriptorWithKey:@"_updated_at" ascending:NO] ];
     [self fetchUserConversationsWithQuery:query
                          fetchLastMessage:fetchLastMessage
                                completion:completion];

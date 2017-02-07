@@ -194,8 +194,9 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 
  @param completion completion block
  */
-- (void)fetchUserConversationsWithCompletion:(SKYChatFetchUserConversationListCompletion _Nullable)completion
-NS_SWIFT_NAME(fetchUserConversations(completion:));
+- (void)fetchUserConversationsWithCompletion:
+    (SKYChatFetchUserConversationListCompletion _Nullable)completion
+    NS_SWIFT_NAME(fetchUserConversations(completion:));
 
 /**
  Fetches user conversations with optional last message in conversation.
