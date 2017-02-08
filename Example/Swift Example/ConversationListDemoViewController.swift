@@ -57,7 +57,7 @@ extension ConversationListDemoViewController: SKYChatConversationListViewControl
 
         SVProgressHUD.show()
         self.skygear.chatExtension?.fetchUserConversation(
-            conversation: conversation, fetchLastMessage: false, completion: { (userConv, error) in
+            conversation: conversation, fetchLastMessage: false, completion: { (result, error) in
                 SVProgressHUD.dismiss()
                 guard error == nil else {
                     print("Error: \(error!.localizedDescription)")
@@ -65,14 +65,14 @@ extension ConversationListDemoViewController: SKYChatConversationListViewControl
                     return
                 }
 
-                guard userConv != nil else {
+                guard let userConv = result else {
                     print("Error: Get nil user conversation")
                     SVProgressHUD.showError(withStatus: "Cannot get conversation information")
                     return
                 }
 
                 self.selectedConversation = conversation
-                self.selectedUserConversation = userConv!
+                self.selectedUserConversation = userConv
                 self.performSegue(withIdentifier: self.showConversationSegueIdentifier,
                                   sender: self)
             }

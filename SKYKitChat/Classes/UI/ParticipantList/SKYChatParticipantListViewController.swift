@@ -64,12 +64,14 @@ open class SKYChatParticipantListViewController: UIViewController {
 
             switch self.queryMethod {
             case .ByEmail:
-                self.searchBar.placeholder = "Search for user email"
+                self.searchBar.placeholder = NSLocalizedString("Search for user email",
+                                                               comment: "")
                 self.searchBar.keyboardType = .emailAddress
             case .ByUsername:
-                self.searchBar.placeholder = "Search for username"
+                self.searchBar.placeholder = NSLocalizedString("Search for username", comment: "")
             case .ByName:
-                self.searchBar.placeholder = "Search for name of user"
+                self.searchBar.placeholder = NSLocalizedString("Search for name of user",
+                                                               comment: "")
             default:
                 self.searchBar.placeholder = nil
             }

@@ -96,9 +96,9 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
             let participantCount = conversation.participantIds.count
             let info: String
             if participantCount == 1 {
-                info = "1 participant"
+                info = NSLocalizedString("1 participant", comment: "")
             } else {
-                info = "\(participantCount) participants"
+                info = NSLocalizedString("\(participantCount) participants", comment: "")
             }
 
             self.conversationInformationLabel?.text = info

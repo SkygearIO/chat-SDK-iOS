@@ -132,7 +132,7 @@ extension SKYChatConversationViewController {
         self.senderId = self.skygear.currentUserRecordID
 
         // update the display name after fetching participants
-        self.senderDisplayName = "me"
+        self.senderDisplayName = NSLocalizedString("me", comment: "")
 
         self.incomingMessageBubbleColor = UIColor.lightGray
         self.outgoingMessageBubbleColor = UIColor.jsq_messageBubbleBlue()
@@ -267,13 +267,13 @@ extension SKYChatConversationViewController {
 
         switch msg.conversationStatus {
         case .allRead:
-            return NSAttributedString(string: "All read")
+            return NSAttributedString(string: NSLocalizedString("All read", comment: ""))
         case .someRead:
-            return NSAttributedString(string: "Some read")
+            return NSAttributedString(string: NSLocalizedString("Some read", comment: ""))
         case .delivered:
-            return NSAttributedString(string: "Delivered")
+            return NSAttributedString(string: NSLocalizedString("Delivered", comment: ""))
         case .delivering:
-            return NSAttributedString(string: "Delivering")
+            return NSAttributedString(string: NSLocalizedString("Delivering", comment: ""))
         }
     }
 
@@ -609,7 +609,7 @@ extension SKYChatConversationViewController {
             conversation: self.conversation!,
             limit: Int(self.messagesFetchLimit),
             beforeTime: before,
-            completion: { (msgs, error) in
+            completion: { (result, error) in
                 guard error == nil else {
                     print("Failed to fetch messages: \(error?.localizedDescription)")
                     self.delegate?.conversationViewController?(
@@ -618,7 +618,7 @@ extension SKYChatConversationViewController {
                     return
                 }
 
-                guard msgs != nil else {
+                guard let msgs = result else {
                     print("Failed to get any messages")
                     if let err = self.errorCreator.error(
                         with: SKYErrorBadResponse, message: "Failed to get any messages") {
@@ -630,18 +630,17 @@ extension SKYChatConversationViewController {
                     return
                 }
 
-                if self.messages.count == 0 {
+                if self.messages.count == 0, let first = msgs.first {
                     // this is the first page
-                    chatExt?.markReadMessages(msgs!, completion: nil)
-                    chatExt?.markLastReadMessage(msgs!.first!,
+                    chatExt?.markReadMessages(msgs, completion: nil)
+                    chatExt?.markLastReadMessage(first,
                                                  in: self.userConversation!,
                                                  completion: nil)
                 }
 
                 // prepend new messages
-                var newMessages = Array(msgs!.reversed())
+                var newMessages = Array(msgs.reversed())
                 newMessages.append(contentsOf: self.messages)
-
                 self.messages = newMessages
 
                 self.delegate?.conversationViewController?(self, didFetchedMessages: msgs)

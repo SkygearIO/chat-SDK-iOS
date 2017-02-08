@@ -139,7 +139,7 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
                 cell.textLabel?.text = title
                 cell.textLabel?.textColor = UIColor.black
             } else {
-                cell.textLabel?.text = "Untitled"
+                cell.textLabel?.text = NSLocalizedString("Untitled", comment: "")
                 cell.textLabel?.textColor = UIColor.lightGray
             }
 
