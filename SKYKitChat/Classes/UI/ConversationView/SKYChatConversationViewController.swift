@@ -22,7 +22,7 @@ import JSQMessagesViewController
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
     /**
-     * For Customizing the views
+     * For customizing the views
      */
 
     @objc optional func incomingMessageColorForConversationViewController(
@@ -39,7 +39,7 @@ import JSQMessagesViewController
         alertControllerForAccessoryButton button: UIButton) -> UIAlertController
 
     /**
-     * For more control on send message flow
+     * Hooks on send message flow
      */
 
     @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
@@ -52,6 +52,24 @@ import JSQMessagesViewController
                                                    failedToSendMessageText text: String,
                                                    date: Date,
                                                    error: Error)
+
+    /**
+     * Hooks on fetching participants / fetch message flow
+     */
+
+    @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
+                                                   didFetchedParticipants participants: [SKYRecord])
+
+    @objc optional func conversationViewController(
+        _ controller: SKYChatConversationViewController,
+        failedFetchingParticipantWithError error: Error)
+
+    @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
+                                                   didFetchedMessages messages: [SKYMessage])
+
+    @objc optional func conversationViewController(
+        _ controller: SKYChatConversationViewController,
+        failedFetchingMessagesWithError error: Error)
 }
 
 open class SKYChatConversationViewController: JSQMessagesViewController {
@@ -142,11 +160,11 @@ extension SKYChatConversationViewController {
         self.customizeViews()
 
         if self.participants.count == 0 {
-            self.fetchParticipants(completion: nil)
+            self.fetchParticipants()
         }
 
         if self.messages.count == 0 {
-            self.fetchMessages(before: nil, completion: nil)
+            self.fetchMessages(before: nil)
         }
 
         self.subscribeMessageChanges()
@@ -446,6 +464,9 @@ extension SKYChatConversationViewController {
                 self.skygear.chatExtension?.markLastReadMessage(msg,
                                                                 in: self.userConversation!,
                                                                 completion: nil)
+
+                self.delegate?.conversationViewController?(self, didFetchedMessages: [msg])
+
                 self.finishReceivingMessage()
             case .update:
                 if let foundIndex = idx {
@@ -521,7 +542,7 @@ extension SKYChatConversationViewController {
 
 extension SKYChatConversationViewController {
 
-    open func fetchParticipants(completion: (([SKYRecord]?, Error?) -> Void)?) {
+    open func fetchParticipants() {
         guard self.conversation != nil else {
             print("Cannot fetch participants with nil conversation")
             return
@@ -536,15 +557,22 @@ extension SKYChatConversationViewController {
             .fetchRecords(withIDs: participantIDs, completionHandler: { (result, error) in
                 guard error == nil else {
                     print("Failed to fetch participants: \(error?.localizedDescription)")
-                    completion?(nil, error)
+                    self.delegate?.conversationViewController?(
+                        self, failedFetchingParticipantWithError: error!)
+
                     return
                 }
 
                 guard let participantMap = result as? [SKYRecordID: SKYRecord] else {
                     print("Fetched participants are in wrong format")
-                    let err = self.errorCreator.error(with: SKYErrorBadResponse,
-                                                      message: "Fetched participants are in wrong format")
-                    completion?(nil, err)
+                    if let err = self.errorCreator.error(
+                        with: SKYErrorBadResponse,
+                        message: "Fetched participants are in wrong format") {
+
+                        self.delegate?.conversationViewController?(
+                            self, failedFetchingParticipantWithError: err)
+                    }
+
                     return
                 }
 
@@ -560,7 +588,8 @@ extension SKYChatConversationViewController {
                     self.senderDisplayName = senderName
                 }
 
-                completion?(participants, nil)
+                self.delegate?.conversationViewController?(
+                    self, didFetchedParticipants: participants)
 
                 self.collectionView?.reloadData()
                 self.collectionView?.layoutIfNeeded()
@@ -568,7 +597,7 @@ extension SKYChatConversationViewController {
             }, perRecordErrorHandler: nil)
     }
 
-    open func fetchMessages(before: Date?, completion: (([SKYMessage]?, Error?) -> Void)?) {
+    open func fetchMessages(before: Date?) {
         guard self.conversation != nil else {
             print("Cannot fetch messages with nil conversation")
             return
@@ -583,15 +612,21 @@ extension SKYChatConversationViewController {
             completion: { (msgs, error) in
                 guard error == nil else {
                     print("Failed to fetch messages: \(error?.localizedDescription)")
-                    completion?(nil, error)
+                    self.delegate?.conversationViewController?(
+                        self, failedFetchingMessagesWithError: error!)
+
                     return
                 }
 
                 guard msgs != nil else {
                     print("Failed to get any messages")
-                    let err = self.errorCreator.error(with: SKYErrorBadResponse,
-                                                      message: "Failed to get any messages")
-                    completion?(nil, err)
+                    if let err = self.errorCreator.error(
+                        with: SKYErrorBadResponse, message: "Failed to get any messages") {
+
+                        self.delegate?.conversationViewController?(
+                            self, failedFetchingMessagesWithError: err)
+                    }
+
                     return
                 }
 
@@ -609,7 +644,8 @@ extension SKYChatConversationViewController {
 
                 self.messages = newMessages
 
-                completion?(newMessages, nil)
+                self.delegate?.conversationViewController?(self, didFetchedMessages: msgs)
+
                 self.finishReceivingMessage()
         })
     }
