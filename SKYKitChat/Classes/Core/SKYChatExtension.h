@@ -644,4 +644,24 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
                                                                SKYMessage *_Nonnull record))handler
     NS_SWIFT_NAME(subscribeToMessages(in:handler:));
 
+/**
+ Unsubscribe to message events
+
+ This method removes an observer from NSNotificationCenter for message events. The observer can be
+ obtained when subscribing message events.
+
+ @param NSNotification observer
+ */
+- (void)unsubscribeToMessagesWithObserver:(id _Nonnull)observer;
+
+/**
+ Unsubscribe to typing indicator events
+
+ This method removes an observer from NSNotificationCenter for typing indicator events. The
+ observer can be obtained when subscribing typing indicator events.
+
+ @param NSNotification observer
+ */
+- (void)unsubscribeToTypingIndicatorWithObserver:(id _Nonnull)observer;
+
 @end

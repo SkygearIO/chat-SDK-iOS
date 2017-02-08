@@ -66,8 +66,8 @@ open class SKYChatConversationViewController: JSQMessagesViewController {
     public var messagesFetchLimit: UInt = 25
     public var typingIndicatorShowDuration: TimeInterval = TimeInterval(5)
 
-    public var messageChangeHandler: ((SKYChatRecordChangeEvent, SKYMessage) -> Void)?
-    public var typingIndicatorChangeHandler: ((SKYChatTypingIndicator) -> Void)?
+    public var messageChangeObserver: Any?
+    public var typingIndicatorChangeObserver: Any?
     public var typingIndicatorPromptTimer: Timer?
 
     public var bubbleFactory: JSQMessagesBubbleImageFactory? = JSQMessagesBubbleImageFactory()
@@ -156,6 +156,8 @@ extension SKYChatConversationViewController {
     override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
+        self.unsubscribeMessageChanges()
+        self.unsubscribeTypingIndicatorChanges()
         self.skygear.chatExtension?.unsubscribeFromUserChannel()
     }
 
@@ -424,69 +426,72 @@ extension SKYChatConversationViewController {
 extension SKYChatConversationViewController {
 
     open func subscribeMessageChanges() {
-        if self.messageChangeHandler == nil {
-            self.messageChangeHandler = {(event, msg) in
-                let idx = self.messages
-                    .map({ $0.recordID.recordName! })
-                    .index(of: msg.recordID.recordName)
 
-                switch event {
-                case .create:
-                    if let foundIndex = idx {
-                        self.messages[foundIndex] = msg
-                    } else {
-                        self.messages.append(msg)
-                    }
+        self.unsubscribeMessageChanges()
 
-                    self.skygear.chatExtension?.markReadMessages([msg], completion: nil)
-                    self.skygear.chatExtension?.markLastReadMessage(msg,
-                                                                    in: self.userConversation!,
-                                                                    completion: nil)
-                    self.finishReceivingMessage()
-                case .update:
-                    if let foundIndex = idx {
-                        self.messages[foundIndex] = msg
-                        self.collectionView.reloadData()
-                        self.collectionView.layoutIfNeeded()
-                    }
-                case .delete:
-                    if let foundIndex = idx {
-                        self.messages.remove(at: foundIndex)
-                        self.collectionView.reloadData()
-                        self.collectionView.layoutIfNeeded()
-                    }
+        let handler: ((SKYChatRecordChangeEvent, SKYMessage) -> Void) = {(event, msg) in
+            let idx = self.messages
+                .map({ $0.recordID.recordName! })
+                .index(of: msg.recordID.recordName)
+
+            switch event {
+            case .create:
+                if let foundIndex = idx {
+                    self.messages[foundIndex] = msg
+                } else {
+                    self.messages.append(msg)
+                }
+
+                self.skygear.chatExtension?.markReadMessages([msg], completion: nil)
+                self.skygear.chatExtension?.markLastReadMessage(msg,
+                                                                in: self.userConversation!,
+                                                                completion: nil)
+                self.finishReceivingMessage()
+            case .update:
+                if let foundIndex = idx {
+                    self.messages[foundIndex] = msg
+                    self.collectionView.reloadData()
+                    self.collectionView.layoutIfNeeded()
+                }
+            case .delete:
+                if let foundIndex = idx {
+                    self.messages.remove(at: foundIndex)
+                    self.collectionView.reloadData()
+                    self.collectionView.layoutIfNeeded()
                 }
             }
         }
 
-        self.skygear.chatExtension?.subscribeToMessages(in: self.conversation!,
-                                                        handler: self.messageChangeHandler!)
+        self.messageChangeObserver = self.skygear.chatExtension?
+            .subscribeToMessages(in: self.conversation!, handler: handler)
 
     }
 
-    open func subscribeTypingIndicatorChanges() {
-        if self.typingIndicatorChangeHandler == nil {
-            self.typingIndicatorChangeHandler = {(indicator) in
-                // invalidate the existing timer
-                if let timer = self.typingIndicatorPromptTimer {
-                    timer.invalidate()
-                    self.typingIndicatorPromptTimer = nil
-                }
+    open func unsubscribeMessageChanges() {
+        if let observer = self.messageChangeObserver {
+            self.skygear.chatExtension?.unsubscribeToMessages(withObserver: observer)
+            self.messageChangeObserver = nil
+        }
+    }
 
-                switch indicator.userIDs.count {
-                case 0:
-                    self.hideTypingIndicator()
-                case 1:
-                    // Show indicator if not I am typing
-                    if let typingID = SKYRecordID(canonicalString: indicator.userIDs.first!) {
-                        if typingID.recordName != self.senderId {
-                            self.displayTypingIndicator()
-                        }
-                    }
-                    break
-                default:
-                    self.displayTypingIndicator()
-                }
+    open func subscribeTypingIndicatorChanges() {
+
+        self.unsubscribeTypingIndicatorChanges()
+
+        let handler: ((SKYChatTypingIndicator) -> Void) = {(indicator) in
+            // invalidate the existing timer
+            if let timer = self.typingIndicatorPromptTimer {
+                timer.invalidate()
+                self.typingIndicatorPromptTimer = nil
+            }
+
+            let shouldShowIndicator: Bool = indicator.userIDs
+                .flatMap({ SKYRecordID(canonicalString: $0)?.recordName })
+                .filter({ $0 != nil && $0 != self.senderId })
+                .count > 0
+
+            if shouldShowIndicator {
+                self.displayTypingIndicator()
 
                 // schedule a timer to hide the typing indicator
                 self.typingIndicatorPromptTimer =
@@ -495,12 +500,20 @@ extension SKYChatConversationViewController {
                                          selector: #selector(self.hideTypingIndicator),
                                          userInfo: nil,
                                          repeats: false)
+            } else {
+                self.hideTypingIndicator()
             }
         }
 
-        self.skygear.chatExtension?
-            .subscribeToTypingIndicator(in: self.conversation!,
-                                        handler: self.typingIndicatorChangeHandler!)
+        self.typingIndicatorChangeObserver = self.skygear.chatExtension?
+            .subscribeToTypingIndicator(in: self.conversation!, handler: handler)
+    }
+
+    open func unsubscribeTypingIndicatorChanges() {
+        if let observer = self.typingIndicatorChangeObserver {
+            self.skygear.chatExtension?.unsubscribeToTypingIndicator(withObserver: observer)
+            self.typingIndicatorChangeObserver = nil
+        }
     }
 }
 

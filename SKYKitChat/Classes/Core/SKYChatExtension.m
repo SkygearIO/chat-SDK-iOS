@@ -997,4 +997,19 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                 }];
 }
 
+- (void)unsubscribeToMessagesWithObserver:(id _Nonnull)observer
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:observer
+                                                    name:SKYChatDidReceiveRecordChangeNotification
+                                                  object:self];
+}
+
+- (void)unsubscribeToTypingIndicatorWithObserver:(id _Nonnull)observer
+{
+    [[NSNotificationCenter defaultCenter]
+        removeObserver:observer
+                  name:SKYChatDidReceiveTypingIndicatorNotification
+                object:self];
+}
+
 @end
