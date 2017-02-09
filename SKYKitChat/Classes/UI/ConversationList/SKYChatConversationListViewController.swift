@@ -77,6 +77,8 @@ extension SKYChatConversationListViewController {
     }
 
     open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
         guard self.skygear.chatExtension != nil else {
             print("Missing chat extension in Skygear container")
             self.dismiss(animated: animated)
@@ -137,7 +139,7 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
                 cell.textLabel?.text = title
                 cell.textLabel?.textColor = UIColor.black
             } else {
-                cell.textLabel?.text = "Untitled"
+                cell.textLabel?.text = NSLocalizedString("Untitled", comment: "")
                 cell.textLabel?.textColor = UIColor.lightGray
             }
 

@@ -268,7 +268,6 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
              NSMutableArray<SKYUserConversation *> *resultArray = [[NSMutableArray alloc] init];
              NSMutableSet<NSString *> *messageIDs = [[NSMutableSet alloc] init];
              for (SKYRecord *record in results) {
-                 NSLog(@"record :%@", [record transient]);
                  SKYUserConversation *con = [SKYUserConversation recordWithRecord:record];
                  [resultArray addObject:con];
                  NSString *lastMessageRecordID = [con.conversation lastMessageID];
@@ -556,7 +555,6 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                  if (error) {
                      NSLog(@"error calling hello:someone: %@", error);
                  }
-                 NSLog(@"Received response = %@", response);
                  NSArray *resultArray = [response objectForKey:@"results"];
                  if (resultArray.count > 0) {
                      NSMutableArray *returnArray = [[NSMutableArray alloc] init];
@@ -999,6 +997,21 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
                     handler(recordChange.event, [SKYMessage recordWithRecord:recordChange.record]);
                 }];
+}
+
+- (void)unsubscribeToMessagesWithObserver:(id _Nonnull)observer
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:observer
+                                                    name:SKYChatDidReceiveRecordChangeNotification
+                                                  object:self];
+}
+
+- (void)unsubscribeToTypingIndicatorWithObserver:(id _Nonnull)observer
+{
+    [[NSNotificationCenter defaultCenter]
+        removeObserver:observer
+                  name:SKYChatDidReceiveTypingIndicatorNotification
+                object:self];
 }
 
 @end

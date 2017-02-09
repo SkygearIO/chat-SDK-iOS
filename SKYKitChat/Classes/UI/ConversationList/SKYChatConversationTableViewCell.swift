@@ -81,7 +81,7 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
             self.conversationTitleLabel?.text = untitledConversation
             self.conversationTitleLabel?.textColor = UIColor.lightGray
         }
-        
+
         // message
         if let message = self.conversationMessage {
             self.conversationMessageLabel.text = message
@@ -96,9 +96,9 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
             let participantCount = conversation.participantIds.count
             let info: String
             if participantCount == 1 {
-                info = "1 participant"
+                info = NSLocalizedString("1 participant", comment: "")
             } else {
-                info = "\(participantCount) participants"
+                info = String.localizedStringWithFormat("%d participants", participantCount)
             }
 
             self.conversationInformationLabel?.text = info

@@ -18,12 +18,34 @@
 //
 
 import SKYKitChat
+import SVProgressHUD
 
 class ConversationListDemoViewController: SKYChatConversationListViewController {
+    let showConversationSegueIdentifier: String = "ShowConversationSegue"
+
+    var selectedConversation: SKYConversation?
+    var selectedUserConversation: SKYUserConversation?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         self.delegate = self
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let segueID = segue.identifier else {
+            return
+        }
+
+        switch segueID {
+        case showConversationSegueIdentifier:
+            if let dest = segue.destination as? ConversationDemoViewController {
+                dest.conversation = self.selectedConversation
+                dest.userConversation = self.selectedUserConversation
+            }
+        default:
+            break
+        }
     }
 }
 
@@ -32,5 +54,29 @@ extension ConversationListDemoViewController: SKYChatConversationListViewControl
                             didSelectConversation conversation: SKYConversation)
     {
         print("Conversation \(conversation.recordID.recordName!) is selected")
+
+        SVProgressHUD.show()
+        self.skygear.chatExtension?.fetchUserConversation(
+            conversation: conversation, fetchLastMessage: false, completion: { (result, error) in
+                SVProgressHUD.dismiss()
+                guard error == nil else {
+                    print("Error: \(error!.localizedDescription)")
+                    SVProgressHUD.showError(withStatus: error!.localizedDescription)
+                    return
+                }
+
+                guard let userConv = result else {
+                    print("Error: Get nil user conversation")
+                    SVProgressHUD.showError(withStatus: "Cannot get conversation information")
+                    return
+                }
+
+                self.selectedConversation = conversation
+                self.selectedUserConversation = userConv
+                self.performSegue(withIdentifier: self.showConversationSegueIdentifier,
+                                  sender: self)
+            }
+        )
+
     }
 }
