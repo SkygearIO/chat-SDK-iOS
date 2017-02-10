@@ -58,25 +58,7 @@ open class SKYChatParticipantListViewController: UIViewController {
     /*
       The method users are being search.
      */
-    public var queryMethod: SKYChatParticipantQueryMethod = .ByUsername {
-        didSet {
-            self.searchBar.keyboardType = .default
-
-            switch self.queryMethod {
-            case .ByEmail:
-                self.searchBar.placeholder = NSLocalizedString("Search for user email",
-                                                               comment: "")
-                self.searchBar.keyboardType = .emailAddress
-            case .ByUsername:
-                self.searchBar.placeholder = NSLocalizedString("Search for username", comment: "")
-            case .ByName:
-                self.searchBar.placeholder = NSLocalizedString("Search for name of user",
-                                                               comment: "")
-            default:
-                self.searchBar.placeholder = nil
-            }
-        }
-    }
+    public var queryMethod: SKYChatParticipantQueryMethod = .ByUsername
 
     /*
       The participant searching scope. (Only available when queryMethod is set to `.ByName`)
@@ -141,8 +123,8 @@ extension SKYChatParticipantListViewController {
             self.performUserQuery()
         }
 
+        self.customizeSubviews()
         self.searchBar.becomeFirstResponder()
-
     }
 
     func dismiss(animated: Bool) {
@@ -244,6 +226,24 @@ extension SKYChatParticipantListViewController: UISearchBarDelegate {
 // MARK: - Utility Methods
 
 extension SKYChatParticipantListViewController {
+
+    open func customizeSubviews() {
+        self.searchBar.keyboardType = .default
+
+        switch self.queryMethod {
+        case .ByEmail:
+            self.searchBar.placeholder = NSLocalizedString("Search for user email",
+                                                           comment: "")
+            self.searchBar.keyboardType = .emailAddress
+        case .ByUsername:
+            self.searchBar.placeholder = NSLocalizedString("Search for username", comment: "")
+        case .ByName:
+            self.searchBar.placeholder = NSLocalizedString("Search for name of user",
+                                                           comment: "")
+        default:
+            self.searchBar.placeholder = nil
+        }
+    }
 
     open func getParticipants() -> [SKYRecord] {
         return self.participants
