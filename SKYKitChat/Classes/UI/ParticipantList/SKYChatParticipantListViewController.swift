@@ -89,6 +89,10 @@ extension SKYChatParticipantListViewController {
         return SKYChatParticipantListViewController(nibName: "SKYChatParticipantListViewController",
                                                     bundle: Bundle(for: SKYChatParticipantListViewController.self))
     }
+
+    open override var prefersStatusBarHidden: Bool {
+        return true
+    }
 }
 
 // MARK: - Lifecycle
@@ -139,6 +143,7 @@ extension SKYChatParticipantListViewController {
             self.dismiss(animated: animated, completion: nil)
         }
     }
+
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
@@ -190,6 +195,7 @@ extension SKYChatParticipantListViewController: UITableViewDelegate, UITableView
         if let d = self.delegate {
             let participant = self.participants[indexPath.row]
             d.listViewController?(self, didSelectParticipant: participant)
+            self.dismiss(animated: true)
         }
     }
 
