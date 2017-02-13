@@ -539,11 +539,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
     NSMutableArray *arguments = [NSMutableArray arrayWithObjects:conversationId, @(limit), nil];
     if (beforeTime) {
-        NSString *dateString = @"";
-        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-        [formatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
-        [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ"];
-        dateString = [formatter stringFromDate:beforeTime];
+        NSString *dateString = [SKYDataSerialization stringFromDate:beforeTime];
         NSLog(@"dateString :%@", dateString);
 
         [arguments addObject:dateString];
