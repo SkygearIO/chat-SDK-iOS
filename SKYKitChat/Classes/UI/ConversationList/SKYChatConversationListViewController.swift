@@ -169,22 +169,24 @@ extension SKYChatConversationListViewController {
 
     open func performQuery() {
         SVProgressHUD.show()
-        self.skygear.chatExtension?.fetchUserConversations(fetchLastMessage: true, completion: { (userConversations, error) in
-            SVProgressHUD.dismiss()
-            if let err = error {
-                self.handleQueryError(error: err)
-                return
-            }
+        self.skygear.chatExtension?.fetchUserConversations(
+            withFetchLastMessage: true, completion: { (userConversations, error) in
+                SVProgressHUD.dismiss()
+                if let err = error {
+                    self.handleQueryError(error: err)
+                    return
+                }
 
-            if let uc = userConversations {
-                self.handleQueryResult(result: uc)
-            } else {
-                let err = SKYErrorCreator()
-                    .error(with: SKYErrorBadResponse,
-                           message: "Query does not response UserConversation")
-                self.handleQueryError(error: err!)
+                if let uc = userConversations {
+                    self.handleQueryResult(result: uc)
+                } else {
+                    let err = SKYErrorCreator()
+                        .error(with: SKYErrorBadResponse,
+                               message: "Query does not response UserConversation")
+                    self.handleQueryError(error: err!)
+                }
             }
-        })
+        )
     }
 
     open func handleQueryResult(result: [SKYUserConversation]) {

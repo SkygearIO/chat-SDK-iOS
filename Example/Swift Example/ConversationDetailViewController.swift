@@ -43,7 +43,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
     @IBAction func addParticipant(_ sender: AnyObject) {
         if let id = participantTextField.text, !id.isEmpty {
             SKYContainer.default().chatExtension?.addParticipants(
-                userIDs: [id],
+                withUserIDs: [id],
                 to: userCon.conversation
             ) { (conversation, error) in
                 if let err = error {
@@ -61,7 +61,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
     @IBAction func removeParticipant(_ sender: AnyObject) {
         if let id = participantTextField.text, !id.isEmpty {
             SKYContainer.default().chatExtension?.removeParticipants(
-                userIDs: [id],
+                withUserIDs: [id],
                 from: userCon.conversation
             ) { (conversation, error) in
                 if let err = error {
@@ -78,11 +78,13 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
 
     func refreshConversation() {
         SKYContainer.default().chatExtension?.fetchUserConversation(
-            conversationID: self.userCon.conversation.recordID.recordName,
-            fetchLastMessage:false) { (conversation, error) in
+            withConversationID: self.userCon.conversation.recordID.recordName,
+            fetchLastMessage:false,
+            completion: { (conversation, error) in
                 self.userCon = conversation
                 self.tableView.reloadData()
             }
+        )
     }
 
     // MARK: - Table view data source

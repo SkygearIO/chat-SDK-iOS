@@ -383,7 +383,7 @@ extension SKYChatConversationViewController {
         msg.creationDate = date
 
         self.delegate?.conversationViewController?(self, readyToSendMessage: msg)
-        self.skygear.chatExtension?.addMessage(
+        self.skygear.chatExtension?.add(
             msg,
             to: conv,
             completion: { (result, error) in
@@ -460,10 +460,10 @@ extension SKYChatConversationViewController {
                     self.messages.append(msg)
                 }
 
-                self.skygear.chatExtension?.markReadMessages([msg], completion: nil)
-                self.skygear.chatExtension?.markLastReadMessage(msg,
-                                                                in: self.userConversation!,
-                                                                completion: nil)
+                self.skygear.chatExtension?.markRead([msg], completion: nil)
+                self.skygear.chatExtension?.markLastRead(msg,
+                                                         in: self.userConversation!,
+                                                         completion: nil)
 
                 self.delegate?.conversationViewController?(self, didFetchedMessages: [msg])
 
@@ -606,7 +606,7 @@ extension SKYChatConversationViewController {
         let chatExt = self.skygear.chatExtension
 
         chatExt?.fetchMessages(
-            conversation: self.conversation!,
+            with: self.conversation!,
             limit: Int(self.messagesFetchLimit),
             beforeTime: before,
             completion: { (result, error) in
@@ -632,10 +632,10 @@ extension SKYChatConversationViewController {
 
                 if self.messages.count == 0, let first = msgs.first {
                     // this is the first page
-                    chatExt?.markReadMessages(msgs, completion: nil)
-                    chatExt?.markLastReadMessage(first,
-                                                 in: self.userConversation!,
-                                                 completion: nil)
+                    chatExt?.markRead(msgs, completion: nil)
+                    chatExt?.markLastRead(first,
+                                          in: self.userConversation!,
+                                          completion: nil)
                 }
 
                 // prepend new messages

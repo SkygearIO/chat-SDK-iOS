@@ -2,6 +2,7 @@ use_frameworks!
 
 target 'SKYKitChat_Example' do
   pod 'SKYKitChat', :path => '../'
+  pod 'SKYKitChat/UI', :path => '../'
 
   target 'SKYKitChat_Tests' do
     inherit! :search_paths
