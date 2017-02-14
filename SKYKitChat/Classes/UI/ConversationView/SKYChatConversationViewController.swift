@@ -198,9 +198,7 @@ extension SKYChatConversationViewController {
 extension SKYChatConversationViewController {
 
     open func customizeViews() {
-        if let title = self.conversation?.title {
-            self.navigationItem.title = title
-        }
+        self.updateTitle()
 
         if let color = self.delegate?.incomingMessageColorForConversationViewController?(self) {
             self.incomingMessageBubbleColor = color
@@ -216,6 +214,19 @@ extension SKYChatConversationViewController {
         if !shouldShowAccessoryButton {
             self.inputToolbar?.contentView?.leftBarButtonItem?.removeFromSuperview()
             self.inputToolbar?.contentView?.leftBarButtonItem = nil
+        }
+    }
+
+    open func updateTitle() {
+        if let title = self.conversation?.title {
+            self.navigationItem.title = title
+        } else if let namelist
+            = self.conversation?.nameList(fromParticipants: self.participants.map { $0.value },
+                                          currentUserID: self.senderId) {
+
+            self.navigationItem.title = namelist
+        } else {
+            self.navigationItem.title = nil
         }
     }
 
@@ -587,6 +598,8 @@ extension SKYChatConversationViewController {
 
                     self.senderDisplayName = senderName
                 }
+
+                self.updateTitle()
 
                 self.delegate?.conversationViewController?(
                     self, didFetchedParticipants: participants)

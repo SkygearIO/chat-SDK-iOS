@@ -21,6 +21,7 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
     let untitledConversation: String = "Untitled Conversation"
 
     public var conversation: SKYConversation?
+    public var participants: [SKYRecord] = []
     public var conversationMessage: String?
     public var conversationInformation: String?
     public var unreadMessageCount: Int?
@@ -74,9 +75,11 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
      **/
     open func layoutSubviews(conversation: SKYConversation) {
         // title
+        self.conversationTitleLabel?.textColor = self.conversationTitleLabel?.tintColor
         if let title = conversation.title {
             self.conversationTitleLabel?.text = title
-            self.conversationTitleLabel?.textColor = self.conversationTitleLabel?.tintColor
+        } else if let participantsTitle = self.conversation?.nameList(fromParticipants: self.participants) {
+            self.conversationTitleLabel?.text = participantsTitle
         } else {
             self.conversationTitleLabel?.text = untitledConversation
             self.conversationTitleLabel?.textColor = UIColor.lightGray

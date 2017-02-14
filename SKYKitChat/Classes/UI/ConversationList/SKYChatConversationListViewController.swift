@@ -46,6 +46,7 @@ open class SKYChatConversationListViewController: UIViewController {
     @IBOutlet public var tableView: UITableView!
 
     var userConversations: [SKYUserConversation] = []
+    var users: [String: SKYRecord] = [:]
 }
 
 // MARK: - Initializing
@@ -122,6 +123,20 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
             cell.conversation = userConversation.conversation
             cell.conversationMessage = userConversation.conversation.lastMessage?.body
             cell.unreadMessageCount = userConversation.unreadCount
+            cell.participants = []
+
+            // add all participant records for display
+            userConversation.conversation.participantIds.forEach({ (eachParticipantID) in
+                guard eachParticipantID != self.skygear.currentUserRecordID! else {
+                    // no need to show current user's name
+                    return
+                }
+
+                if let eachParticipant = self.users[eachParticipantID] {
+                    cell.participants.append(eachParticipant)
+                }
+            })
+
 
             if let ds = self.dataSource {
                 cell.avatarImage = ds.listViewController?(self,
@@ -163,7 +178,15 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
 
 extension SKYChatConversationListViewController {
 
-    open func getUserConversations() -> [SKYUserConversation] {
+    public func getUsers() -> [String: SKYRecord] {
+        return self.users
+    }
+
+    public func getUser(byUserID userID: String) -> SKYRecord? {
+        return self.users[userID]
+    }
+
+    public func getUserConversations() -> [SKYUserConversation] {
         return self.userConversations
     }
 
@@ -187,12 +210,57 @@ extension SKYChatConversationListViewController {
         })
     }
 
+    open func performUserQuery(byIDs userIDs: [String]) {
+        let predicate = NSPredicate(format: "_id IN %@", userIDs)
+        let query = SKYQuery(recordType: "user", predicate: predicate)
+
+        self.skygear.publicCloudDatabase.perform(query) { (result, error) in
+            guard error == nil else {
+                self.handleUserQueryError(error: error!)
+                return
+            }
+
+            guard let users = result as? [SKYRecord] else {
+                let err = SKYErrorCreator()
+                    .error(with: SKYErrorBadResponse,
+                           message: NSLocalizedString("Cannot get any users", comment: ""))
+                self.handleUserQueryError(error: err!)
+                return
+            }
+
+            self.handleUserQueryResult(result: users)
+        }
+    }
+
     open func handleQueryResult(result: [SKYUserConversation]) {
         self.userConversations = result
         self.tableView.reloadData()
+
+        let currentCachedUserKeys = self.users.keys
+        let userIDs = result
+            .reduce(Set([])) { return $0.union(Set($1.conversation.participantIds))}
+            .filter { !currentCachedUserKeys.contains($0) }
+
+        if userIDs.count > 0 {
+            self.performUserQuery(byIDs: userIDs)
+        }
     }
 
     open func handleQueryError(error: Error) {
+        SVProgressHUD.showError(withStatus: error.localizedDescription)
+    }
+
+    open func handleUserQueryResult(result: [SKYRecord]) {
+        result.forEach { (eachUser) in
+            if let eachUserID = eachUser.recordID.recordName {
+                self.users[eachUserID] = eachUser
+            }
+        }
+
+        self.tableView.reloadData()
+    }
+
+    open func handleUserQueryError(error: Error) {
         SVProgressHUD.showError(withStatus: error.localizedDescription)
     }
 }
