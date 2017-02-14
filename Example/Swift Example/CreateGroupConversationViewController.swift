@@ -78,17 +78,16 @@ class CreateGroupConversationViewController: UIViewController,
         // let ids be unique
         userIds = Array(Set(userIds))
 
-        SKYContainer.default().chatExtension?.createConversation(
-            withParticipantIDs: userIds, title: titleTextField.text, metadata: nil) { (conversation, error) in
-                if let err = error {
-                    let alert = UIAlertController(title: "Unable to create group conversation", message: err.localizedDescription, preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(alert, animated: true, completion: nil)
-                    return
-                }
-
-                self.createdConversationTextView.text = conversation?.recordID.canonicalString
+        SKYContainer.default().chatExtension?.createConversation(participantIDs: userIds, title: titleTextField.text, metadata: nil) { (conversation, error) in
+            if let err = error {
+                let alert = UIAlertController(title: "Unable to create group conversation", message: err.localizedDescription, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+                return
             }
+
+            self.createdConversationTextView.text = conversation?.recordID.canonicalString
+        }
     }
 
     // MARK: - Table view data source

@@ -40,19 +40,16 @@ class CreateDirectConversationViewController: UIViewController {
             if id.hasPrefix("user/") {
                 id = id.substring(from: "user/".endIndex)
             }
-            SKYContainer.default().chatExtension?.createDirectConversation(
-                withUserID: id, title: nil, metadata: nil) { (conversation, error) in
-                    if let err = error {
-                        let alert = UIAlertController(title: "Unable to create direct conversation",
-                                                      message: err.localizedDescription,
-                                                      preferredStyle: .alert)
-                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                        self.present(alert, animated: true, completion: nil)
-                        return
-                    }
-
-                    self.createdConversationTextView.text = conversation?.recordID.canonicalString
+            SKYContainer.default().chatExtension?.createDirectConversation(userID: id, title: nil, metadata: nil) { (conversation, error) in
+                if let err = error {
+                    let alert = UIAlertController(title: "Unable to create direct conversation", message: err.localizedDescription, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                    return
                 }
+
+                self.createdConversationTextView.text = conversation?.recordID.canonicalString
+            }
         }
     }
 }

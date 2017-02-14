@@ -30,20 +30,19 @@ class ConversationsViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        SKYContainer.default().chatExtension?.fetchUserConversations(
-            withFetchLastMessage:false) { (userCons, error) in
-                if let err = error {
-                    let alert = UIAlertController(title: "Unable to fetch conversations", message: err.localizedDescription, preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(alert, animated: true, completion: nil)
-                    return
-                }
-
-                if let cons = userCons {
-                    self.userCons = cons.reversed()
-                    self.tableView.reloadData()
-                }
+        SKYContainer.default().chatExtension?.fetchUserConversations(fetchLastMessage:false) { (userCons, error) in
+            if let err = error {
+                let alert = UIAlertController(title: "Unable to fetch conversations", message: err.localizedDescription, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+                return
             }
+
+            if let cons = userCons {
+                self.userCons = cons.reversed()
+                self.tableView.reloadData()
+            }
+        }
     }
 
     // MARK: - Navigation

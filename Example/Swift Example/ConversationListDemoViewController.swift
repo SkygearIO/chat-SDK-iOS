@@ -57,9 +57,7 @@ extension ConversationListDemoViewController: SKYChatConversationListViewControl
 
         SVProgressHUD.show()
         self.skygear.chatExtension?.fetchUserConversation(
-            with: conversation,
-            fetchLastMessage: false,
-            completion: { (result, error) in
+            conversation: conversation, fetchLastMessage: false, completion: { (result, error) in
                 SVProgressHUD.dismiss()
                 guard error == nil else {
                     print("Error: \(error!.localizedDescription)")

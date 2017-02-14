@@ -83,27 +83,22 @@ class ConversationRoomViewController: UIViewController,
         }
 
         // get conversation messages
-        chat.fetchMessages(
-            with: userCon.conversation,
-            limit: 100,
-            beforeTime: Date(),
-            completion: { (messages, error) in
-                if let err = error {
-                    let alert = UIAlertController(title: "Unable to fetch conversations", message: err.localizedDescription, preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(alert, animated: true, completion: nil)
-                    return
-                }
-
-                if let msg = messages {
-                    chat.markDeliveredMessages(msg, completion: nil)
-                    chat.markRead(msg, completion: nil)
-
-                    self.messages = msg
-                    self.tableView.reloadData()
-                }
+        chat.fetchMessages(conversation: userCon.conversation, limit: 100, beforeTime: Date()) { (messages, error) in
+            if let err = error {
+                let alert = UIAlertController(title: "Unable to fetch conversations", message: err.localizedDescription, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+                return
             }
-        )
+
+            if let msg = messages {
+                chat.markDeliveredMessages(msg, completion: nil)
+                chat.markReadMessages(msg, completion: nil)
+
+                self.messages = msg
+                self.tableView.reloadData()
+            }
+        }
     }
 
     // MARK: - Action
@@ -131,8 +126,7 @@ class ConversationRoomViewController: UIViewController,
         message.body = messaegBodyTextField.text
         message.metadata = metadateDic
         message.attachment = chosenAsset
-        SKYContainer.default().chatExtension?.add(
-            message, to: userCon.conversation) { (message, error) in
+        SKYContainer.default().chatExtension?.addMessage(message, to: userCon.conversation) { (message, error) in
                 if let err = error {
                     let alert = UIAlertController(title: "Unable to send message", message: err.localizedDescription, preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -145,7 +139,7 @@ class ConversationRoomViewController: UIViewController,
                     self.messaegBodyTextField.text = ""
                     self.messageMetadataTextField.text = ""
                 }
-            }
+        }
     }
 
     @IBAction func chooseImageAsset(_ sender: AnyObject) {
@@ -188,13 +182,11 @@ class ConversationRoomViewController: UIViewController,
         let unreadAction = UITableViewRowAction(style: UITableViewRowActionStyle.normal, title: "mark as unread") { (action, indexPath) in
 
             let message = self.messages[indexPath.row]
-            SKYContainer.default().chatExtension?.markLastRead(
-                message, in: self.userCon) { (userCon, error) in
+            SKYContainer.default().chatExtension?.markLastReadMessage(message,
+                                                            in: self.userCon) { (userCon, error) in
 
                     if let err = error {
-                        let alert = UIAlertController(title: "Unable to mark last read message",
-                                                      message: err.localizedDescription,
-                                                      preferredStyle: .alert)
+                        let alert = UIAlertController(title: "Unable to mark last read message", message: err.localizedDescription, preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                         self.present(alert, animated: true, completion: nil)
                         return
@@ -228,15 +220,14 @@ class ConversationRoomViewController: UIViewController,
 
     func refreshConversation() {
         SKYContainer.default().chatExtension?.fetchUserConversation(
-            withConversationID: self.userCon.conversation.recordID.recordName,
-            fetchLastMessage: false,
-            completion: { (conversation, error) in
+            conversationID: self.userCon.conversation.recordID.recordName,
+            fetchLastMessage: false) { (conversation, error) in
                 if let conv = conversation {
                     self.userCon = conv
                     self.lastReadMessage = conv.lastReadMessage
                     self.tableView.reloadData()
                 }
-            })
+            }
     }
 
     // MARK: - UIImagePickerControllerDelegate
