@@ -553,7 +553,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      arguments:arguments
              completionHandler:^(NSDictionary *response, NSError *error) {
                  if (error) {
-                     NSLog(@"error calling hello:someone: %@", error);
+                     NSLog(@"error calling chat:get_messages: %@", error);
                  }
                  NSArray *resultArray = [response objectForKey:@"results"];
                  if (resultArray.count > 0) {
