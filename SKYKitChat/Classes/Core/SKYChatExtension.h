@@ -126,10 +126,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                                        title:(NSString *_Nullable)title
                                     metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                                   completion:(SKYChatUserConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(createConversation(participantIDs:title
-:metadata
-:completion
-:));
+    NS_SWIFT_NAME(createConversation(participantIDs:title:metadata:completion:));
 
 /**
  Creates a conversation with the selected participants.
@@ -175,10 +172,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                                      title:(NSString *_Nullable)title
                                   metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                                 completion:(SKYChatUserConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(createDirectConversation(userID:title
-:metadata
-:completion
-:));
+    NS_SWIFT_NAME(createDirectConversation(userID:title:metadata:completion:));
 
 /**
  Saves a conversation.
@@ -193,8 +187,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  */
 - (void)saveConversation:(SKYConversation *_Nonnull)conversation
               completion:(SKYChatConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(saveConversation(_:completion
-:));
+    NS_SWIFT_NAME(saveConversation(_:completion:));
 
 /**
  Fetches user conversations.
@@ -215,8 +208,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                                         completion:
                                             (SKYChatFetchUserConversationListCompletion _Nullable)
                                                 completion
-    NS_SWIFT_NAME(fetchUserConversations(fetchLastMessage:completion
-:));
+    NS_SWIFT_NAME(fetchUserConversations(fetchLastMessage:completion:));
 
 /**
  Fetches a user conversation by conversation ID.
@@ -229,9 +221,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                                fetchLastMessage:(BOOL)fetchLastMessage
                                      completion:
                                          (SKYChatUserConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(fetchUserConversation(conversationID:fetchLastMessage
-:completion
-:));
+    NS_SWIFT_NAME(fetchUserConversation(conversationID:fetchLastMessage:completion:));
 
 /**
  Fetches a user conversation by conversation.
@@ -244,9 +234,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                              fetchLastMessage:(BOOL)fetchLastMessage
                                    completion:
                                        (SKYChatUserConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(fetchUserConversation(conversation:fetchLastMessage
-:completion
-:));
+    NS_SWIFT_NAME(fetchUserConversation(conversation:fetchLastMessage:completion:));
 
 ///---------------------------------------
 /// @name Adding and removing participants
@@ -265,9 +253,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)addParticipantsWithUserIDs:(NSArray<NSString *> *_Nonnull)userIDs
                     toConversation:(SKYConversation *_Nonnull)conversation
                         completion:(SKYChatConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(addParticipants(userIDs:to
-:completion
-:));
+    NS_SWIFT_NAME(addParticipants(userIDs:to:completion:));
 
 /**
  Removes participants from a conversation.
@@ -282,9 +268,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)removeParticipantsWithUserIDs:(NSArray<NSString *> *_Nonnull)userIDs
                      fromConversation:(SKYConversation *_Nonnull)conversation
                            completion:(SKYChatConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(removeParticipants(userIDs:from
-:completion
-:));
+    NS_SWIFT_NAME(removeParticipants(userIDs:from:completion:));
 
 /**
  Adds admins to a conversation.
@@ -299,9 +283,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)addAdminsWithUserIDs:(NSArray<NSString *> *_Nonnull)userIDs
               toConversation:(SKYConversation *_Nonnull)conversation
                   completion:(SKYChatConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(addAdmins(userIDs:to
-:completion
-:));
+    NS_SWIFT_NAME(addAdmins(userIDs:to:completion:));
 
 /**
  Removes admins to a conversation.
@@ -316,9 +298,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)removeAdminsWithUserIDs:(NSArray<NSString *> *_Nonnull)userIDs
                fromConversation:(SKYConversation *_Nonnull)conversation
                      completion:(SKYChatConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(removeAdmins(userIDs:from
-:completion
-:));
+    NS_SWIFT_NAME(removeAdmins(userIDs:from:completion:));
 
 /**
  Remove the current user from the specified conversation.
@@ -339,8 +319,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  */
 - (void)leaveConversationWithConversationID:(NSString *_Nonnull)conversationID
                                  completion:(void (^_Nullable)(NSError *_Nullable error))completion
-    NS_SWIFT_NAME(leave(conversationID:completion
-:));
+    NS_SWIFT_NAME(leave(conversationID:completion:));
 
 ///------------------------
 /// @name Creating messages
@@ -358,10 +337,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                                  body:(NSString *_Nullable)body
                              metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                            completion:(SKYChatMessageCompletion _Nullable)completion
-    NS_SWIFT_NAME(createMessage(conversation:body
-:metadata
-:completion
-:));
+    NS_SWIFT_NAME(createMessage(conversation:body:metadata:completion:));
 
 /**
  Creates a message in the specified conversation with an attachment.
@@ -377,11 +353,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                            attachment:(SKYAsset *_Nullable)attachment
                              metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                            completion:(SKYChatMessageCompletion _Nullable)completion
-    NS_SWIFT_NAME(createMessage(conversation:body
-:attachment
-:metadata
-:completion
-:));
+    NS_SWIFT_NAME(createMessage(conversation:body:attachment:metadata:completion:));
 
 /**
  Adds a message to a conversation.
@@ -396,9 +368,8 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  */
 - (void)addMessage:(SKYMessage *_Nonnull)message
     toConversation:(SKYConversation *_Nonnull)conversation
-        completion:(SKYChatMessageCompletion _Nullable)completion NS_SWIFT_NAME(addMessage(_:to
-:completion
-:));
+        completion:(SKYChatMessageCompletion _Nullable)completion
+    NS_SWIFT_NAME(addMessage(_:to:completion:));
 
 /**
  Fetch messages in a conversation.
@@ -412,10 +383,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                                 limit:(NSInteger)limit
                            beforeTime:(NSDate *_Nullable)beforeTime
                            completion:(SKYChatFetchMessagesListCompletion _Nullable)completion
-    NS_SWIFT_NAME(fetchMessages(conversation:limit
-:beforeTime
-:completion
-:));
+    NS_SWIFT_NAME(fetchMessages(conversation:limit:beforeTime:completion:));
 
 /**
  Fetch messages in a conversation by ID.
@@ -429,10 +397,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                                   limit:(NSInteger)limit
                              beforeTime:(NSDate *_Nullable)beforeTime
                              completion:(SKYChatFetchMessagesListCompletion _Nullable)completion
-    NS_SWIFT_NAME(fetchMessages(conversationID:limit
-:beforeTime
-:completion
-:));
+    NS_SWIFT_NAME(fetchMessages(conversationID:limit:beforeTime:completion:));
 
 ///----------------------------------------------
 /// @name Send message delivery and read receipts
@@ -448,8 +413,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  */
 - (void)markReadMessages:(NSArray<SKYMessage *> *_Nonnull)messages
               completion:(void (^_Nullable)(NSError *_Nullable error))completion
-    NS_SWIFT_NAME(markReadMessages(_:completion
-:));
+    NS_SWIFT_NAME(markReadMessages(_:completion:));
 
 /**
  Marks messages as read.
@@ -461,8 +425,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  */
 - (void)markReadMessagesWithID:(NSArray<NSString *> *_Nonnull)messageIDs
                     completion:(void (^_Nullable)(NSError *_Nullable error))completion
-    NS_SWIFT_NAME(markReadMessages(id:completion
-:));
+    NS_SWIFT_NAME(markReadMessages(id:completion:));
 
 /**
  Marks messages as delivered.
@@ -475,8 +438,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  */
 - (void)markDeliveredMessages:(NSArray<SKYMessage *> *_Nonnull)messages
                    completion:(void (^_Nullable)(NSError *_Nullable error))completion
-    NS_SWIFT_NAME(markDeliveredMessages(_:completion
-:));
+    NS_SWIFT_NAME(markDeliveredMessages(_:completion:));
 
 /**
  Marks messages as delivered.
@@ -489,8 +451,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  */
 - (void)markDeliveredMessagesWithID:(NSArray<NSString *> *_Nonnull)messageIDs
                          completion:(void (^_Nullable)(NSError *_Nullable error))completion
-    NS_SWIFT_NAME(markDeliveredMessages(id:completion
-:));
+    NS_SWIFT_NAME(markDeliveredMessages(id:completion:));
 
 /**
  Fetch delivery and read receipts of a message.
@@ -501,8 +462,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)fetchReceiptsWithMessage:(SKYMessage *_Nonnull)message
                       completion:(void (^_Nullable)(NSArray<SKYChatReceipt *> *_Nullable receipts,
                                                     NSError *_Nullable error))completion
-    NS_SWIFT_NAME(fetchReceipts(message:completion
-:));
+    NS_SWIFT_NAME(fetchReceipts(message:completion:));
 
 ///--------------------------------------------------
 /// @name Modifying read position with message marker
@@ -522,9 +482,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)markLastReadMessage:(SKYMessage *_Nonnull)message
          inUserConversation:(SKYUserConversation *_Nonnull)userConversation
                  completion:(SKYChatUserConversationCompletion _Nullable)completion
-    NS_SWIFT_NAME(markLastReadMessage(_:in
-:completion
-:));
+    NS_SWIFT_NAME(markLastReadMessage(_:in:completion:));
 
 /**
  Fetches unread count of a user conversation
@@ -534,8 +492,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  */
 - (void)fetchUnreadCountWithUserConversation:(SKYUserConversation *_Nonnull)userConversation
                                   completion:(SKYChatUnreadCountCompletion _Nullable)completion
-    NS_SWIFT_NAME(fetchUnreadCount(userConversation:completion
-:));
+    NS_SWIFT_NAME(fetchUnreadCount(userConversation:completion:));
 
 /**
  Fetches the total unread count of conversations and messages.
@@ -560,8 +517,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  */
 - (void)sendTypingIndicator:(SKYChatTypingEvent)typingEvent
              inConversation:(SKYConversation *_Nonnull)conversation
-    NS_SWIFT_NAME(sendTypingIndicator(_:in
-:));
+    NS_SWIFT_NAME(sendTypingIndicator(_:in:));
 
 /**
  Send typing indicator to the specified conversation.
@@ -578,10 +534,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
              inConversation:(SKYConversation *_Nonnull)conversation
                        date:(NSDate *_Nonnull)date
                  completion:(void (^_Nullable)(NSError *_Nullable error))completion
-    NS_SWIFT_NAME(sendTypingIndicator(_:in
-:at
-:completion
-:));
+    NS_SWIFT_NAME(sendTypingIndicator(_:in:at:completion:));
 
 ///-----------------------------------------
 /// @name Subscribing to events using pubsub
@@ -663,10 +616,9 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
  */
 - (id _Nonnull)
 subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
-                                 handler:
-                                     (void (^_Nonnull)(SKYChatTypingIndicator *_Nonnull indicator))
-                                         handler NS_SWIFT_NAME(subscribeToTypingIndicator(in:handler
-:));
+                                 handler:(void (^_Nonnull)(
+                                             SKYChatTypingIndicator *_Nonnull indicator))handler
+    NS_SWIFT_NAME(subscribeToTypingIndicator(in:handler:));
 
 /**
  Subscribe to message events in a conversation.
@@ -690,8 +642,7 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
                                          handler:
                                              (void (^_Nonnull)(SKYChatRecordChangeEvent event,
                                                                SKYMessage *_Nonnull record))handler
-    NS_SWIFT_NAME(subscribeToMessages(in:handler
-:));
+    NS_SWIFT_NAME(subscribeToMessages(in:handler:));
 
 /**
  Unsubscribe to message events
