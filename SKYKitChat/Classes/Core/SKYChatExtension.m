@@ -368,8 +368,10 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      arguments:@[ messageIDs ]
              completionHandler:^(NSDictionary *response, NSError *error) {
                  if (error) {
-                     NSLog(@"error calling chat:getmessages %@", error);
-                     completion(nil, error);
+                     NSLog(@"error calling chat:get_messages_by_ids: %@", error);
+                     if (completion) {
+                         completion(nil, error);
+                     }
                      return;
                  }
                  NSLog(@"Received response = %@", response);
@@ -386,7 +388,9 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                          [returnArray addObject:msg];
                      }
                  }
-                 completion(returnArray, error);
+                 if (completion) {
+                     completion(returnArray, error);
+                 }
              }];
 }
 
@@ -550,34 +554,34 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
              completionHandler:^(NSDictionary *response, NSError *error) {
                  if (error) {
                      NSLog(@"error calling chat:get_messages: %@", error);
+                     if (completion) {
+                         completion(nil, error);
+                     }
+                     return;
                  }
                  NSArray *resultArray = [response objectForKey:@"results"];
-                 if (resultArray.count > 0) {
-                     NSMutableArray *returnArray = [[NSMutableArray alloc] init];
-                     for (NSDictionary *obj in resultArray) {
-                         SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
-                         SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
+                 NSMutableArray *returnArray = [[NSMutableArray alloc] init];
+                 for (NSDictionary *obj in resultArray) {
+                     SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
+                     SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
 
-                         SKYMessage *msg = [SKYMessage recordWithRecord:record];
-                         msg.alreadySyncToServer = true;
-                         msg.fail = false;
-                         if (msg) {
-                             [returnArray addObject:msg];
-                         }
+                     SKYMessage *msg = [SKYMessage recordWithRecord:record];
+                     msg.alreadySyncToServer = true;
+                     msg.fail = false;
+                     if (msg) {
+                         [returnArray addObject:msg];
                      }
+                 }
+                 if (completion) {
                      completion(returnArray, error);
-
-                     // The SDK notifies the server that these messages are received
-                     // from the client side. The app developer is not required
-                     // to call this method.
-                     if (returnArray.count && self.automaticallyMarkMessagesAsDelivered) {
-                         [self markDeliveredMessages:returnArray completion:nil];
-                     }
-
-                 } else {
-                     completion(nil, error);
                  }
 
+                 // The SDK notifies the server that these messages are received
+                 // from the client side. The app developer is not required
+                 // to call this method.
+                 if (returnArray.count && self.automaticallyMarkMessagesAsDelivered) {
+                     [self markDeliveredMessages:returnArray completion:nil];
+                 }
              }];
 }
 
