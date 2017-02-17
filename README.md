@@ -20,6 +20,11 @@ it, simply add the following line to your Podfile:
 pod "SKYKitChat"
 ```
 
+## Documentation
+
+- Core (Coming soon...)
+- [UIKit](https://github.com/SkygearIO/chat-SDK-iOS/blob/master/docs/UIKit/index.md)
+
 ## Author
 
 Kwok-kuen Cheung, cheungpat@oursky.com
