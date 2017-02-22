@@ -1,15 +1,16 @@
-# Documentation of UIKit
+# Documentation of UIKit for Skygear Chat
 =========================
 
-The UIKit for Skygear Chat plugin contains 3 components which developers can
-directly use them to build the common chat UI:
+The UIKit for Skygear Chat plugin is consist of 3 UI components which developers can
+directly use to build a common chat UI:
 
 - [Participant List View](https://github.com/SkygearIO/chat-SDK-iOS/blob/master/docs/UIKit/ParticipantListView.md)
 - [Conversation List View](https://github.com/SkygearIO/chat-SDK-iOS/blob/master/docs/UIKit/ConversationListView.md)
 - [Conversation View](https://github.com/SkygearIO/chat-SDK-iOS/blob/master/docs/UIKit/ConversationView.md)
 
-Please be reminded that the `name` field of the `user` record will be used for
-display. The following snippet shows how to set it after user sign up.
+Please note that the `name` field of the `user` record will be used for
+displaying user name. The following snippet is an example for how to save the name of the user
+to the `user` record:
 
 ```swift
 let skygear = SKYContainer.default()
