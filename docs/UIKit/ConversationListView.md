@@ -1,11 +1,12 @@
 ## Conversation List View
 ==========================
 
-Conversation List View helps to fetch conversations which the user is
-attending.
+Conversation List View displays a list of conversations in which the user is
+participanting.
 
-You can create your View Controller and extending the Conversation List View
-and directly set it as the `Custom Class` in your storyboard.
+You can customize the Conversation List View by creating your own view
+controller that extends the Conversation List View. Make sure you set your own
+view controller as the `Custom Class` in your storyboard.
 
 ```swift
 import SKYKitChat
@@ -24,10 +25,11 @@ To customize the Conversation List View, you can override some of its methods:
 - `handleUserQueryResult(result:)`
 - `handleUserQueryError(error:)`
 
-Besides overriding the methods, you can also implement the Data Source to
+Besides overriding these methods, you can also implement some methods
+of SKYChatConversationListViewControllerDataSource to
 provide extra data for displaying a conversation.
 
-You may provide the avatar of the conversation as followed:
+For example, you may provide custom avatar of the conversation as followed:
 
 ```swift
 class ConversationListDemoViewController: SKYChatConversationListViewController {
@@ -43,20 +45,14 @@ extension ConversationListDemoViewController: SKYChatConversationListViewControl
                             avatarImageForConversation conversation: SKYConversation,
                             atIndexPath indexPath: IndexPath) -> UIImage?
     {
-        // implement a store for conversation store
-        var image = AvatarStore.shared.avatar(forConversation: conversation)
-        if image == nil {
-            image = /* fetch the image */
-            AvatarStore.shared.cache(avatar: image, forConversation: conversation)
-        }
-
-        return image
+        // implement a store for storing conversation data
+        return AvatarStore.shared.avatar(forConversation: conversation)
     }
 }
 ```
 
-To customize the action for selecting a conversation in Conversation List View,
-you can implement the delegate of it.
+To customize the action when user selects a conversation in Conversation List View,
+you can implement a SKYChatConversationListViewControllerDelegate method.
 
 ```swift
 class ConversationListDemoViewController: SKYChatConversationListViewController {
