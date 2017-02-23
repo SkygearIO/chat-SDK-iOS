@@ -4,8 +4,9 @@
 Conversation View fetches messages for a specific conversation and provide UI
 to send messages to the conversation.
 
-You can create your View Controller and extending the Conversation List View
-and directly set it as the `Custom Class` in your storyboard.
+You can customize the Conversation View by create your own view controller
+that extends the Conversation View. Make sure you set your own view controller
+as the `Custom Class` in your storyboard.
 
 ```swift
 import SKYKitChat
@@ -30,12 +31,12 @@ To customize the Conversation View, you can override some of its methods:
 - `fetchMessages(before:)`
 - `getSender(forMessage:) -> SKYRecord?`
 
-Besides overriding the methods, you can also implement the Delegate to
-customize the Conversation View.
+Besides overriding these methods, you can also implement some methods of
+`SKYChatConversationViewControllerDelegate` in order to customize the
+Conversation View.
 
 To set the color of the message bubble (both incoming or outgoing), you may
-implement the following methods from
-`SKYChatConversationViewControllerDelegate`:
+implement the following methods:
 
 - `incomingMessageColorForConversationViewController(_:)`
 - `outgoingMessageColorForConversationViewController(_:)`

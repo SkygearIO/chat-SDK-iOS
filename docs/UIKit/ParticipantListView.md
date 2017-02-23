@@ -41,11 +41,11 @@ class UserQueryViewController: SKYChatParticipantListViewController {
 ```
 
 To provide the avatars of the users being found, you can implement the
-following method in `SKYChatParticipantListViewControllerDataSource`:
+following method of `SKYChatParticipantListViewControllerDataSource`:
 
 - `listViewController(_:avatarImageForParticipant:atIndexPath:)`
 
-Moreover, by implementing the following method in
+Moreover, by implementing the following method of
 `SKYChatParticipantListViewControllerDelegate`, you will be notified when a
 user is selected in Participant List View:
 
