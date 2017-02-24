@@ -7,20 +7,20 @@ You can specify how the user is being queried by setting the query method
 before the Participant List View is shown. Currently, only 3 types of queries
 are supported:
 
-- By Username (the `username` when user sign up)
-- By Email (the `email` when user sign up)
+- By Username (the `username` given by the user when user signed up)
+- By Email (the `email` given by the user when user signed up)
 - By Name (the `name` field of user record)
 
-And user query by username is set by default.
+User query by username is the default.
 
 Since email and username are private information of the user, a user will only
-be found when the email or username is exactly matched.
+be found when the email or username is an exact match.
 
-For querying by name, a user will be found when his name is partially matched
+For querying by name, a user will be found when his name partially matches
 the query string. Also, a scope can be specified to limit the users being
 queried.
 
-The following snippet shows how to specified the query method and provide an
+The following snippet shows how to specify the query method and provide an
 extra query scope:
 
 ```swift
