@@ -39,12 +39,14 @@ import SVProgressHUD
 
 open class SKYChatConversationListViewController: UIViewController {
 
+
     public var skygear: SKYContainer = SKYContainer.default()
     public weak var delegate: SKYChatConversationListViewControllerDelegate?
     public weak var dataSource: SKYChatConversationListViewControllerDataSource?
 
     @IBOutlet public var tableView: UITableView!
 
+    var refreshControl: UIRefreshControl!
     var userConversations: [SKYUserConversation] = []
     var users: [String: SKYRecord] = [:]
 }
@@ -75,6 +77,12 @@ extension SKYChatConversationListViewController {
 
         self.tableView.register(SKYChatConversationTableViewCell.nib,
                                 forCellReuseIdentifier: "ConversationCell")
+        self.refreshControl = UIRefreshControl()
+        self.refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+        self.refreshControl?.addTarget(self, action: #selector(handleRefresh), for: UIControlEvents.valueChanged)
+        self.tableView.addSubview(refreshControl);
+        self.refreshControl.beginRefreshing()
+        self.handleRefresh(refreshControl: self.refreshControl)
     }
 
     open override func viewWillAppear(_ animated: Bool) {
@@ -89,8 +97,6 @@ extension SKYChatConversationListViewController {
         if let _ = self.navigationController {
             self.edgesForExtendedLayout = [.left, .right, .bottom]
         }
-
-        self.performQuery()
     }
 
     func dismiss(animated: Bool) {
@@ -104,6 +110,12 @@ extension SKYChatConversationListViewController {
         } else {
             self.dismiss(animated: animated, completion: nil)
         }
+    }
+    
+    public func handleRefresh(refreshControl: UIRefreshControl) {
+        self.performQuery(callback: {
+            refreshControl.endRefreshing()
+        })
     }
 }
 
@@ -171,6 +183,7 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
             let conv = self.userConversations[indexPath.row]
             d.listViewController?(self, didSelectConversation: conv.conversation)
         }
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
@@ -190,10 +203,9 @@ extension SKYChatConversationListViewController {
         return self.userConversations
     }
 
-    open func performQuery() {
-        SVProgressHUD.show()
+    open func performQuery(callback: (()->())?) {
         self.skygear.chatExtension?.fetchUserConversations(fetchLastMessage: true, completion: { (userConversations, error) in
-            SVProgressHUD.dismiss()
+            callback?()
             if let err = error {
                 self.handleQueryError(error: err)
                 return
