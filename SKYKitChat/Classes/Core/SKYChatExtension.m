@@ -999,6 +999,37 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                 }];
 }
 
+
+- (id _Nonnull)subscribeToConversation:(void (^_Nonnull)(
+                                                         SKYChatRecordChangeEvent event,
+                                                         SKYConversation *_Nonnull conversation))handler
+{
+    [self subscribeToUserChannelWithCompletion:nil];
+
+    return [[NSNotificationCenter defaultCenter]
+            addObserverForName:SKYChatDidReceiveRecordChangeNotification
+            object:self
+            queue:[NSOperationQueue mainQueue]
+            usingBlock:^(NSNotification *_Nonnull note) {
+                SKYChatRecordChange *recordChange =
+                [note.userInfo objectForKey:SKYChatRecordChangeUserInfoKey];
+                if (![recordChange.recordType isEqualToString:@"conversation"]) {
+                    return;
+                }
+                NSLog(@"Got conversation");
+
+                handler(recordChange.event, [SKYConversation recordWithRecord:recordChange.record]);
+            }];
+
+}
+
+- (void)unsubscribeToConversationWithObserver:(id _Nonnull)observer
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:observer
+                                                    name:SKYChatDidReceiveRecordChangeNotification
+                                                  object:self];
+}
+
 - (void)unsubscribeToMessagesWithObserver:(id _Nonnull)observer
 {
     [[NSNotificationCenter defaultCenter] removeObserver:observer

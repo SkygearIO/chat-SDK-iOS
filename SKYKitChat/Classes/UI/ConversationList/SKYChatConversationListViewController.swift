@@ -49,6 +49,7 @@ open class SKYChatConversationListViewController: UIViewController {
     var refreshControl: UIRefreshControl!
     var userConversations: [SKYUserConversation] = []
     var users: [String: SKYRecord] = [:]
+    var conversationChangeObserver: Any?
 }
 
 // MARK: - Initializing
@@ -97,6 +98,13 @@ extension SKYChatConversationListViewController {
         if let _ = self.navigationController {
             self.edgesForExtendedLayout = [.left, .right, .bottom]
         }
+        self.subscribeConversationChanges()
+    }
+    
+    override open func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        self.unsubscribeConversationChanges()
     }
 
     func dismiss(animated: Bool) {
@@ -274,5 +282,34 @@ extension SKYChatConversationListViewController {
 
     open func handleUserQueryError(error: Error) {
         SVProgressHUD.showError(withStatus: error.localizedDescription)
+    }
+    
+    open func subscribeConversationChanges() {
+        
+        self.unsubscribeConversationChanges()
+        
+        let handler: ((SKYChatRecordChangeEvent, SKYConversation) -> Void) = {(event, msg) in
+            switch event {
+            case .create:
+                NSLog("Conversation create")
+            case .update:
+                NSLog("Conversation update")
+            case .delete:
+                NSLog("Conversation delete")
+            }
+            self.performQuery(callback: nil)
+
+        }
+        
+        self.conversationChangeObserver = self.skygear.chatExtension?
+            .subscribeToConversation(handler: handler)
+        
+    }
+    
+    open func unsubscribeConversationChanges() {
+        if let observer = self.conversationChangeObserver {
+            self.skygear.chatExtension?.unsubscribeToConversation(withObserver: observer)
+            self.conversationChangeObserver = nil
+        }
     }
 }

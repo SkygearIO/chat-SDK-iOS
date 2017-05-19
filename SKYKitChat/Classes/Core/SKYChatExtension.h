@@ -643,6 +643,35 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
     /* clang-format off */ NS_SWIFT_NAME(subscribeToMessages(in:handler:)); /* clang-format on */
 
 /**
+ Subscribe to conversation events.
+ 
+ To get conversion event, call this method with a handler that accepts a SKYChatRecordChangeEvent and
+ SKYMessage as parameters.
+ 
+ This method adds an observer to NSNotificationCenter and return the observer to you. If you are no
+ longer interested
+ in updates for a particular conversation. Remove the observer from NSNotificationCenter using the
+ returned object.
+ 
+ @param handler the conversation handler
+ @return NSNotificationCenter observer
+ */
+- (id _Nonnull)subscribeToConversation:
+(void (^_Nonnull)(SKYChatRecordChangeEvent event,
+                  SKYConversation *_Nonnull conversation))handler
+/* clang-format off */ NS_SWIFT_NAME(subscribeToConversation(handler:)); /* clang-format on */
+
+/**
+ Unsubscribe to conversation events
+ 
+ This method removes an observer from NSNotificationCenter for message events. The observer can be
+ obtained when subscribing conversation events.
+ 
+ @param NSNotification observer
+ */
+- (void)unsubscribeToConversationWithObserver:(id _Nonnull)observer;
+
+/**
  Unsubscribe to message events
 
  This method removes an observer from NSNotificationCenter for message events. The observer can be
