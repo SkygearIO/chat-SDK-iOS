@@ -1,6 +1,6 @@
 # SKYKitChat
 
-[![CI Status](http://img.shields.io/travis/Kwok-kuen Cheung/SKYKitChat.svg?style=flat)](https://travis-ci.org/Kwok-kuen Cheung/SKYKitChat)
+[![CI Status](https://img.shields.io/travis/SkygearIO/chat-SDK-iOS.svg?style=flat)](https://travis-ci.org/SkygearIO/chat-SDK-iOS)
 [![Version](https://img.shields.io/cocoapods/v/SKYKitChat.svg?style=flat)](http://cocoapods.org/pods/SKYKitChat)
 [![License](https://img.shields.io/cocoapods/l/SKYKitChat.svg?style=flat)](http://cocoapods.org/pods/SKYKitChat)
 [![Platform](https://img.shields.io/cocoapods/p/SKYKitChat.svg?style=flat)](http://cocoapods.org/pods/SKYKitChat)
@@ -27,7 +27,7 @@ pod "SKYKitChat"
 
 ## Author
 
-Kwok-kuen Cheung, cheungpat@oursky.com
+Oursky Limited, hello@oursky.com
 
 ## License
 
