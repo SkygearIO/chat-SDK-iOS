@@ -63,6 +63,8 @@ import JSQMessagesViewController
     @objc optional func conversationViewController(
         _ controller: SKYChatConversationViewController,
         failedFetchingParticipantWithError error: Error)
+    
+    @objc optional func startFetchingMessages(_ controller: SKYChatConversationViewController)
 
     @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
                                                    didFetchedMessages messages: [SKYMessage])
@@ -618,6 +620,7 @@ extension SKYChatConversationViewController {
 
         let chatExt = self.skygear.chatExtension
 
+        self.delegate?.startFetchingMessages?(self)
         chatExt?.fetchMessages(
             conversation: self.conversation!,
             limit: Int(self.messagesFetchLimit),

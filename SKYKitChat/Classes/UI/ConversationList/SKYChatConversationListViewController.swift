@@ -34,7 +34,8 @@ import SVProgressHUD
      * Notify the delegate which conversation is selected.
      **/
     @objc optional func listViewController(_ controller: SKYChatConversationListViewController,
-                                           didSelectConversation conversation: SKYConversation)
+                                           didSelectConversation conversation: SKYConversation,
+                                           withUserConversation userCOnversation: SKYUserConversation)
 }
 
 open class SKYChatConversationListViewController: UIViewController {
@@ -189,7 +190,9 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let d = self.delegate {
             let conv = self.userConversations[indexPath.row]
-            d.listViewController?(self, didSelectConversation: conv.conversation)
+            d.listViewController?(self,
+                                  didSelectConversation: conv.conversation,
+                                  withUserConversation: conv)
         }
         tableView.deselectRow(at: indexPath, animated: true)
     }
