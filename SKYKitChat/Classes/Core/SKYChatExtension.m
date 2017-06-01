@@ -658,6 +658,48 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
              }];
 }
 
+#pragma mark Message Editing
+
+- (void)editMessage:(SKYMessage *_Nonnull)message
+           withBody:(NSString *_Nonnull)body
+         completion:(SKYChatMessageCompletion _Nullable)completion
+{
+
+    NSLog(@"Edit a message, message ID %@", message.recordID.recordName);
+    message.body = body;
+    [self saveMessage:message completion:completion];
+}
+
+#pragma mark Message Deletion
+
+- (void)deleteMessage:(SKYMessage *_Nonnull)message
+    inUserConversation:(SKYUserConversation *_Nonnull)userConversation
+            completion:(SKYChatUserConversationCompletion _Nullable)completion
+{
+    NSLog(@"Delete a message, messageID %@", message.recordID.recordName);
+    [self.container callLambda:@"chat:delete_message"
+                     arguments:@[ message.recordID.recordName ]
+             completionHandler:^(NSDictionary *response, NSError *error) {
+                 if (!completion) {
+                     return;
+                 }
+                 if (error) {
+                     completion(nil, error);
+                 }
+
+                 // Ensure the dictionary has correct type of classes
+                 NSMutableDictionary *fixedResponse = [NSMutableDictionary dictionary];
+                 [response enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+                     if ([obj isKindOfClass:[NSNumber class]]) {
+                         [fixedResponse setObject:obj forKey:key];
+                     }
+                 }];
+
+                 completion(fixedResponse, error);
+
+             }];
+}
+
 #pragma mark Message Markers
 
 - (void)markLastReadMessage:(SKYMessage *)message
@@ -999,28 +1041,27 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                 }];
 }
 
-
-- (id _Nonnull)subscribeToConversation:(void (^_Nonnull)(
-                                                         SKYChatRecordChangeEvent event,
-                                                         SKYConversation *_Nonnull conversation))handler
+- (id _Nonnull)subscribeToConversation:
+    (void (^_Nonnull)(SKYChatRecordChangeEvent event,
+                      SKYConversation *_Nonnull conversation))handler
 {
     [self subscribeToUserChannelWithCompletion:nil];
 
     return [[NSNotificationCenter defaultCenter]
-            addObserverForName:SKYChatDidReceiveRecordChangeNotification
-            object:self
-            queue:[NSOperationQueue mainQueue]
-            usingBlock:^(NSNotification *_Nonnull note) {
-                SKYChatRecordChange *recordChange =
-                [note.userInfo objectForKey:SKYChatRecordChangeUserInfoKey];
-                if (![recordChange.recordType isEqualToString:@"conversation"]) {
-                    return;
-                }
-                NSLog(@"Got conversation");
+        addObserverForName:SKYChatDidReceiveRecordChangeNotification
+                    object:self
+                     queue:[NSOperationQueue mainQueue]
+                usingBlock:^(NSNotification *_Nonnull note) {
+                    SKYChatRecordChange *recordChange =
+                        [note.userInfo objectForKey:SKYChatRecordChangeUserInfoKey];
+                    if (![recordChange.recordType isEqualToString:@"conversation"]) {
+                        return;
+                    }
+                    NSLog(@"Got conversation");
 
-                handler(recordChange.event, [SKYConversation recordWithRecord:recordChange.record]);
-            }];
-
+                    handler(recordChange.event,
+                            [SKYConversation recordWithRecord:recordChange.record]);
+                }];
 }
 
 - (void)unsubscribeToConversationWithObserver:(id _Nonnull)observer

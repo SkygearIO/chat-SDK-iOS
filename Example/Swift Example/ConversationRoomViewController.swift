@@ -101,6 +101,9 @@ class ConversationRoomViewController: UIViewController,
         }
     }
 
+    
+    
+
     // MARK: - Action
 
     @IBAction func showDetail(_ sender: AnyObject) {
@@ -179,7 +182,7 @@ class ConversationRoomViewController: UIViewController,
     }
 
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        let unreadAction = UITableViewRowAction(style: UITableViewRowActionStyle.normal, title: "mark as unread") { (action, indexPath) in
+        let unreadAction = UITableViewRowAction(style: UITableViewRowActionStyle.normal, title: "Mark as unread") { (action, indexPath) in
 
             let message = self.messages[indexPath.row]
             SKYContainer.default().chatExtension?.markLastReadMessage(message,
@@ -195,10 +198,54 @@ class ConversationRoomViewController: UIViewController,
                     self.refreshConversation()
             }
         }
+        
+        let deleteAction = UITableViewRowAction(style: UITableViewRowActionStyle.normal, title: "Delete") { (action, indexPath) in
+            
+            let message = self.messages[indexPath.row]
+            SKYContainer.default().chatExtension?.deleteMessage(message,
+                                                                in: self.userCon) { (userCon, error) in
+                    if let err = error {
+                        let alert = UIAlertController(title: "Unable to delete message", message: err.localizedDescription, preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                        self.present(alert, animated: true, completion: nil)
+                        return
+                    }
 
-        return [unreadAction]
+                    self.messages.remove(at: indexPath.row)
+                    self.refreshConversation()
+            }
+        }
+        
+        deleteAction.backgroundColor = UIColor.red
+        
+        let editAction = UITableViewRowAction(style: UITableViewRowActionStyle.normal, title: "Edit") { (action, indexPath) in
+            let editMessageController = UIAlertController(title: "Edit Message", message: "", preferredStyle: .alert)
+            editMessageController.addTextField{(textField: UITextField) -> Void in textField.placeholder = "New Message"}
+            editMessageController.addAction(UIAlertAction(title: "Done", style: .default, handler: {
+                (action) in
+                let newMessageBody = editMessageController.textFields?[0].text ?? ""
+                let message = self.messages[indexPath.row]
+                NSLog("New Message Body=%@", newMessageBody)
+                SKYContainer.default().chatExtension?.editMessage(message, with: newMessageBody, completion: { (result, error) in
+                    if let err = error {
+                        NSLog(err.localizedDescription)
+                        let alert = UIAlertController(title: "Unable to edit message", message: err.localizedDescription, preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                        self.present(alert, animated: true, completion: nil)
+                        return
+                    }
+                    message.body = newMessageBody
+                    self.refreshConversation()
+                })
+            }))
+            self.present(editMessageController, animated: true, completion: nil)
+        }
+        
+        editAction.backgroundColor = UIColor.green
+
+        return [unreadAction, editAction, deleteAction]
     }
-
+ 
     // MARK: - Text field delegate
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

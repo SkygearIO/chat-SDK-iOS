@@ -462,6 +462,40 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                                                     NSError *_Nullable error))completion
     /* clang-format off */ NS_SWIFT_NAME(fetchReceipts(message:completion:)); /* clang-format on */
 
+///-----------------------------------------
+/// @name Message Edit & Delete Function
+///-----------------------------------------
+
+/**
+ Delete a message in a user conversation
+
+ The message is soft-deleted in the message. Conversation unread count, last read message and last
+ message are updated.
+
+ @param message the message object
+ @param userConversation the user conversation object
+ @param completion completion block
+ */
+- (void)deleteMessage:(SKYMessage *_Nonnull)message
+    inUserConversation:(SKYUserConversation *_Nonnull)userConversation
+            completion:(SKYChatUserConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(deleteMessage(_:in:completion:)); /* clang-format on */
+
+/**
+ Edit a message in a user conversation
+
+ The message body is updated.
+
+ @param message the message object
+ @param body the new message body
+ @param userConversation the user conversation object
+ @param completion completion block
+ */
+- (void)editMessage:(SKYMessage *_Nonnull)message
+           withBody:(NSString *_Nonnull)body
+         completion:(SKYChatMessageCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(editMessage(_:with:completion:)); /* clang-format on */
+
 ///--------------------------------------------------
 /// @name Modifying read position with message marker
 ///--------------------------------------------------
@@ -644,29 +678,29 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
 
 /**
  Subscribe to conversation events.
- 
- To get conversion event, call this method with a handler that accepts a SKYChatRecordChangeEvent and
- SKYMessage as parameters.
- 
+
+ To get conversion event, call this method with a handler that accepts a SKYChatRecordChangeEvent
+ and SKYMessage as parameters.
+
  This method adds an observer to NSNotificationCenter and return the observer to you. If you are no
  longer interested
  in updates for a particular conversation. Remove the observer from NSNotificationCenter using the
  returned object.
- 
+
  @param handler the conversation handler
  @return NSNotificationCenter observer
  */
 - (id _Nonnull)subscribeToConversation:
-(void (^_Nonnull)(SKYChatRecordChangeEvent event,
-                  SKYConversation *_Nonnull conversation))handler
-/* clang-format off */ NS_SWIFT_NAME(subscribeToConversation(handler:)); /* clang-format on */
+    (void (^_Nonnull)(SKYChatRecordChangeEvent event,
+                      SKYConversation *_Nonnull conversation))handler
+    /* clang-format off */ NS_SWIFT_NAME(subscribeToConversation(handler:)); /* clang-format on */
 
 /**
  Unsubscribe to conversation events
- 
+
  This method removes an observer from NSNotificationCenter for message events. The observer can be
  obtained when subscribing conversation events.
- 
+
  @param NSNotification observer
  */
 - (void)unsubscribeToConversationWithObserver:(id _Nonnull)observer;
@@ -690,5 +724,4 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
  @param NSNotification observer
  */
 - (void)unsubscribeToTypingIndicatorWithObserver:(id _Nonnull)observer;
-
 @end
