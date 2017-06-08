@@ -34,7 +34,7 @@ class ConversationRoomViewController: UIViewController,
     @IBOutlet var messageMetadataTextField: UITextField!
     @IBOutlet var chosenAsseTexttLabel: UILabel!
 
-    var userCon: SKYUserConversation!
+    var conversation: SKYConversation!
     var messages = [SKYMessage]()
     var lastReadMessage: SKYMessage?
     var chosenAsset: SKYAsset?
@@ -44,8 +44,8 @@ class ConversationRoomViewController: UIViewController,
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.navigationItem.title = userCon.conversation.title
-        self.lastReadMessage = userCon.lastReadMessage
+        self.navigationItem.title = conversation.title
+        self.lastReadMessage = conversation.lastReadMessage
 
         // listening keyboard event
         NotificationCenter.default.addObserver(forName: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil, queue: nil) { (note) in
@@ -75,7 +75,7 @@ class ConversationRoomViewController: UIViewController,
         }
 
         // subscribe chat messages
-        chat.subscribeToMessages(in: userCon.conversation) { (event, message) in
+        chat.subscribeToMessages(in: conversation) { (event, message) in
             if event == .create {
                 self.messages.insert(message, at: 0)
                 self.tableView.insertRows(at: [IndexPath.init(row: 0, section: 0)], with: .automatic)
@@ -83,7 +83,7 @@ class ConversationRoomViewController: UIViewController,
         }
 
         // get conversation messages
-        chat.fetchMessages(conversation: userCon.conversation, limit: 100, beforeTime: Date()) { (messages, error) in
+        chat.fetchMessages(conversation: conversation, limit: 100, beforeTime: Date()) { (messages, error) in
             if let err = error {
                 let alert = UIAlertController(title: "Unable to fetch conversations", message: err.localizedDescription, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -107,7 +107,7 @@ class ConversationRoomViewController: UIViewController,
     // MARK: - Action
 
     @IBAction func showDetail(_ sender: AnyObject) {
-        self.performSegue(withIdentifier: "conversation_detail", sender: userCon)
+        self.performSegue(withIdentifier: "conversation_detail", sender: conversation)
     }
 
     @IBAction func sendMessage(_ sender: AnyObject) {
@@ -129,7 +129,7 @@ class ConversationRoomViewController: UIViewController,
         message.body = messaegBodyTextField.text
         message.metadata = metadateDic
         message.attachment = chosenAsset
-        SKYContainer.default().chatExtension?.addMessage(message, to: userCon.conversation) { (message, error) in
+        SKYContainer.default().chatExtension?.addMessage(message, to: conversation) { (message, error) in
                 if let err = error {
                     let alert = UIAlertController(title: "Unable to send message", message: err.localizedDescription, preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -186,7 +186,7 @@ class ConversationRoomViewController: UIViewController,
 
             let message = self.messages[indexPath.row]
             SKYContainer.default().chatExtension?.markLastReadMessage(message,
-                                                            in: self.userCon) { (userCon, error) in
+                                                            in: self.conversation) { (conversation, error) in
 
                     if let err = error {
                         let alert = UIAlertController(title: "Unable to mark last read message", message: err.localizedDescription, preferredStyle: .alert)
@@ -203,7 +203,7 @@ class ConversationRoomViewController: UIViewController,
             
             let message = self.messages[indexPath.row]
             SKYContainer.default().chatExtension?.deleteMessage(message,
-                                                                in: self.userCon) { (userCon, error) in
+                                                                in: self.conversation) { (conv, error) in
                     if let err = error {
                         let alert = UIAlertController(title: "Unable to delete message", message: err.localizedDescription, preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -261,16 +261,16 @@ class ConversationRoomViewController: UIViewController,
             controller.dictionary = sender as! NSDictionary
         } else if segue.identifier == "conversation_detail" {
             let controller = segue.destination as! ConversationDetailViewController
-            controller.userCon = sender as! SKYUserConversation
+            controller.conversation = sender as! SKYConversation
         }
     }
 
     func refreshConversation() {
-        SKYContainer.default().chatExtension?.fetchUserConversation(
-            conversationID: self.userCon.conversation.recordID.recordName,
+        SKYContainer.default().chatExtension?.fetchConversation(
+            conversationID: self.conversation.recordID.recordName,
             fetchLastMessage: false) { (conversation, error) in
                 if let conv = conversation {
-                    self.userCon = conv
+                    self.conversation = conv
                     self.lastReadMessage = conv.lastReadMessage
                     self.tableView.reloadData()
                 }

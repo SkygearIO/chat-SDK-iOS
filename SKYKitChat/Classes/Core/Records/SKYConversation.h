@@ -28,8 +28,6 @@
  Changing the value of the property in this object does not automatically save the changes
  to the server. To change the corresponding record on the server, use methods defined in
  SKYChatExtension.
-
- User-specific information such as unread count are available in SKYUserConversation.
  */
 @interface SKYConversation : SKYChatRecord
 
@@ -65,27 +63,40 @@
 @property (readonly, nonatomic, nullable) NSString *lastMessageID;
 @property (readonly, nonatomic, nullable) SKYMessage *lastMessage;
 
+/**
+ The ID of the last read message in this conversation.
+ */
+@property (nonatomic, nullable) NSString *lastReadMessageID;
+@property (nonatomic, nullable) SKYMessage *lastReadMessage;
+
+/**
+ The total number of unread messages
+ */
+@property (nonatomic) NSInteger unreadCount;
+
 - (NSString *_Nonnull)toString;
 
 /**
  Add participants to the conversation.
  */
-- (void)addParticipantsWithUserIDs:(NSString *_Nonnull)userIDs NS_SWIFT_NAME(addParticipants(_:));
+- (void)addParticipantsWithUserIDs:(NSArray<NSString *> *_Nullable)userIDs
+    NS_SWIFT_NAME(addParticipants(_:));
 
 /**
  Remove participants from the conversation.
  */
-- (void)removeParticipantsWithUserIDs:(NSString *_Nonnull)userIDs
+- (void)removeParticipantsWithUserIDs:(NSArray<NSString *> *_Nullable)userIDs
     NS_SWIFT_NAME(removeParticipants(_:));
 
 /**
  Add admins to the conversation.
  */
-- (void)addAdminsWithUserIDs:(NSString *_Nonnull)userIDs NS_SWIFT_NAME(addAdmins(_:));
+- (void)addAdminsWithUserIDs:(NSArray<NSString *> *_Nullable)userIDs NS_SWIFT_NAME(addAdmins(_:));
 
 /**
  Remove admins from the conversation.
  */
-- (void)removeAdminsWithUserIDs:(NSString *_Nonnull)userIDs NS_SWIFT_NAME(removeAdmins(_:));
+- (void)removeAdminsWithUserIDs:(NSArray<NSString *> *_Nullable)userIDs
+    NS_SWIFT_NAME(removeAdmins(_:));
 
 @end

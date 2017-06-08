@@ -80,7 +80,6 @@ open class SKYChatConversationViewController: JSQMessagesViewController {
 
     public var skygear: SKYContainer = SKYContainer.default()
     public var conversation: SKYConversation?
-    public var userConversation: SKYUserConversation?
     public var participants: [String: SKYRecord] = [:]
     public var messages: [SKYMessage] = []
     public var messagesFetchLimit: UInt = 25
@@ -143,20 +142,10 @@ extension SKYChatConversationViewController {
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        guard self.userConversation != nil else {
-            print("Error: UserConversation is not set")
+        guard self.conversation != nil else {
+            print("Error: Conversation is not set")
             self.dismiss(animated: animated)
             return
-        }
-
-        if self.conversation == nil {
-            if let conv = self.userConversation?.conversation {
-                self.conversation = conv
-            } else {
-                print("Error: Conversation is not set")
-                self.dismiss(animated: animated)
-                return
-            }
         }
 
         self.customizeViews()
@@ -475,7 +464,7 @@ extension SKYChatConversationViewController {
 
                 self.skygear.chatExtension?.markReadMessages([msg], completion: nil)
                 self.skygear.chatExtension?.markLastReadMessage(msg,
-                                                                in: self.userConversation!,
+                                                                in: self.conversation!,
                                                                 completion: nil)
 
                 self.delegate?.conversationViewController?(self, didFetchedMessages: [msg])
@@ -650,7 +639,7 @@ extension SKYChatConversationViewController {
                     // this is the first page
                     chatExt?.markReadMessages(msgs, completion: nil)
                     chatExt?.markLastReadMessage(first,
-                                                 in: self.userConversation!,
+                                                 in: self.conversation!,
                                                  completion: nil)
                 }
 

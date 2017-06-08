@@ -29,8 +29,14 @@ NSString *const SKYConversationLastMessageKey = @"last_message";
 @implementation SKYConversation
 
 + (instancetype)recordWithRecord:(SKYRecord *)record
+                 withUnreadCount:(NSInteger)unreadCount
+           withLastReadMessageId:(NSString *)lastReadMessageID
 {
-    return [super recordWithRecord:record];
+
+    SKYConversation *conversation = [super recordWithRecord:record];
+    conversation.unreadCount = unreadCount;
+    conversation.lastReadMessageID = lastReadMessageID;
+    return conversation;
 }
 
 - (void)setParticipantIds:(NSArray<NSString *> *)participantIds
@@ -104,24 +110,24 @@ NSString *const SKYConversationLastMessageKey = @"last_message";
                                       self.modificationDate];
 }
 
-- (void)addParticipantsWithUserIDs:(NSString *)userIDs
+- (void)addParticipantsWithUserIDs:(NSArray<NSString *> *)userIDs
 {
     [self setParticipantIds:[self.participantIds arrayByAddingObjectsFromArray:userIDs]];
 }
 
-- (void)removeParticipantsWithUserIDs:(NSString *)userIDs
+- (void)removeParticipantsWithUserIDs:(NSArray<NSString *> *)userIDs
 {
     NSMutableArray *participants = [self.participantIds mutableCopy];
     [participants removeObjectsInArray:userIDs];
     [self setParticipantIds:participants];
 }
 
-- (void)addAdminsWithUserIDs:(NSString *)userIDs
+- (void)addAdminsWithUserIDs:(NSArray<NSString *> *)userIDs
 {
     [self setAdminIds:[self.adminIds arrayByAddingObjectsFromArray:userIDs]];
 }
 
-- (void)removeAdminsWithUserIDs:(NSString *)userIDs
+- (void)removeAdminsWithUserIDs:(NSArray<NSString *> *)userIDs
 {
     NSMutableArray *admins = [self.adminIds mutableCopy];
     [admins removeObjectsInArray:userIDs];

@@ -67,10 +67,4 @@ NSString *const SKYUserConversationUnreadCountKey = @"unread_count";
 
     _lastReadMessage = nil;
 }
-
-- (NSInteger)unreadCount
-{
-    return [self[SKYUserConversationUnreadCountKey] integerValue];
-}
-
 @end

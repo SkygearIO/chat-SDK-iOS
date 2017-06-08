@@ -29,7 +29,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
     let participantIdsSection = 1
     let adminIdsSection = 2
 
-    var userCon: SKYUserConversation!
+    var conversation: SKYConversation!
 
     // MARK: - Lifecycle
 
@@ -44,7 +44,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
         if let id = participantTextField.text, !id.isEmpty {
             SKYContainer.default().chatExtension?.addParticipants(
                 userIDs: [id],
-                to: userCon.conversation
+                to: self.conversation
             ) { (conversation, error) in
                 if let err = error {
                     let alert = UIAlertController(title: "Unable to add user to participant.", message: err.localizedDescription, preferredStyle: .alert)
@@ -62,7 +62,7 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
         if let id = participantTextField.text, !id.isEmpty {
             SKYContainer.default().chatExtension?.removeParticipants(
                 userIDs: [id],
-                from: userCon.conversation
+                from: self.conversation
             ) { (conversation, error) in
                 if let err = error {
                     let alert = UIAlertController(title: "Unable to remove user from participant.", message: err.localizedDescription, preferredStyle: .alert)
@@ -77,10 +77,10 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
     }
 
     func refreshConversation() {
-        SKYContainer.default().chatExtension?.fetchUserConversation(
-            conversationID: self.userCon.conversation.recordID.recordName,
+        SKYContainer.default().chatExtension?.fetchConversation(
+            conversationID: self.conversation.recordID.recordName,
             fetchLastMessage:false) { (conversation, error) in
-                self.userCon = conversation
+                self.conversation = conversation
                 self.tableView.reloadData()
             }
     }
@@ -96,9 +96,9 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
         case unreadMessageCount:
             return 1
         case participantIdsSection:
-            return userCon.conversation.participantIds.count
+            return conversation.participantIds.count
         case adminIdsSection:
-            return userCon.conversation.adminIds.count
+            return conversation.adminIds.count
         default:
             return 0
         }
@@ -121,15 +121,15 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
         switch indexPath.section {
         case unreadMessageCount:
             let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-            cell.textLabel?.text = "\(userCon.unreadCount)"
+            cell.textLabel?.text = "\(conversation.unreadCount)"
             return cell
         case participantIdsSection:
             let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-            cell.textLabel?.text = userCon.conversation.participantIds[indexPath.row]
+            cell.textLabel?.text = conversation.participantIds[indexPath.row]
             return cell
         case adminIdsSection:
             let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-            cell.textLabel?.text = userCon.conversation.adminIds[indexPath.row]
+            cell.textLabel?.text = conversation.adminIds[indexPath.row]
             return cell
         default:
             return UITableViewCell()
@@ -139,9 +139,9 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch indexPath.section {
         case participantIdsSection:
-            self.performSegue(withIdentifier: "showDetail", sender: userCon.conversation.participantIds[indexPath.row])
+            self.performSegue(withIdentifier: "showDetail", sender: conversation.participantIds[indexPath.row])
         case adminIdsSection:
-            self.performSegue(withIdentifier: "showDetail", sender: userCon.conversation.adminIds[indexPath.row])
+            self.performSegue(withIdentifier: "showDetail", sender: conversation.adminIds[indexPath.row])
         default: break
         }
     }

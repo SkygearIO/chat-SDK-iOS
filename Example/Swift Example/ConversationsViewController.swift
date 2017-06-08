@@ -23,14 +23,14 @@ import SKYKitChat
 
 class ConversationsViewController: UITableViewController {
 
-    var userCons = [SKYUserConversation]()
+    var conversations = [SKYConversation]()
 
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        SKYContainer.default().chatExtension?.fetchUserConversations(fetchLastMessage:false) { (userCons, error) in
+        SKYContainer.default().chatExtension?.fetchConversations(fetchLastMessage:true) { (conversations, error) in
             if let err = error {
                 let alert = UIAlertController(title: "Unable to fetch conversations", message: err.localizedDescription, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -38,8 +38,8 @@ class ConversationsViewController: UITableViewController {
                 return
             }
 
-            if let cons = userCons {
-                self.userCons = cons.reversed()
+            if let cons = conversations {
+                self.conversations = cons.reversed()
                 self.tableView.reloadData()
             }
         }
@@ -50,7 +50,7 @@ class ConversationsViewController: UITableViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "conversation_room" {
             let controller = segue.destination as! ConversationRoomViewController
-            controller.userCon = sender as! SKYUserConversation
+            controller.conversation = sender as! SKYConversation
         }
     }
 
@@ -61,13 +61,13 @@ class ConversationsViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return userCons.count
+        return conversations.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
 
-        let conversation = userCons[indexPath.row].conversation
+        let conversation = conversations[indexPath.row]
         cell.textLabel?.text = conversation.title
         cell.detailTextLabel?.text = conversation.recordID.canonicalString
 
@@ -75,7 +75,7 @@ class ConversationsViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.performSegue(withIdentifier: "conversation_room", sender: userCons[indexPath.row])
+        self.performSegue(withIdentifier: "conversation_room", sender: conversations[indexPath.row])
     }
 
 }
