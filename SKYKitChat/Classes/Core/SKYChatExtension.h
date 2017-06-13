@@ -196,14 +196,6 @@ typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nulla
     /* clang-format off */ NS_SWIFT_NAME(fetchConversations(completion:)); /* clang-format on */
 
 /**
- Fetches user conversations.
- @param completion completion block
- */
-- (void)fetchUserConversationsWithCompletion:
-    (SKYChatFetchUserConversationListCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchUserConversations(completion:)); /* clang-format on */
-
-/**
  Fetches conversations with optional last message in conversation.
 
  @param fetchLastMessage whether to fetch the last message
@@ -492,7 +484,6 @@ typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nulla
 
  @param message the message object
  @param body the new message body
- @param conversation the conversation object
  @param completion completion block
  */
 - (void)editMessage:(SKYMessage *_Nonnull)message

@@ -28,12 +28,12 @@
 
 - (void)setName:(NSString *)name
 {
-    self[@"name"] = [name copy];
+    self.record[@"name"] = [name copy];
 }
 
 - (NSString *)name
 {
-    return self[@"name"];
+    return self.record[@"name"];
 }
 
 @end

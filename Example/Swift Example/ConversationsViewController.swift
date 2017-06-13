@@ -69,7 +69,7 @@ class ConversationsViewController: UITableViewController {
 
         let conversation = conversations[indexPath.row]
         cell.textLabel?.text = conversation.title
-        cell.detailTextLabel?.text = conversation.recordID.canonicalString
+        cell.detailTextLabel?.text = conversation.recordID().canonicalString
 
         return cell
     }

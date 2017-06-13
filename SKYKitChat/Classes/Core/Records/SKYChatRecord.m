@@ -20,21 +20,52 @@
 #import "SKYChatRecord.h"
 
 @implementation SKYChatRecord
-+ (instancetype)recordWithRecord:(SKYRecord *)record
-{
-    return [[[self alloc] initWithRecordID:record.recordID data:record.dictionary]
-        initWithRecordData:record];
-}
-
 - (id)initWithRecordData:(SKYRecord *)record
 {
-    self.ownerUserRecordID = record.ownerUserRecordID;
-    self.creationDate = record.creationDate;
-    self.creatorUserRecordID = record.creatorUserRecordID;
-    self.modificationDate = record.modificationDate;
-    self.lastModifiedUserRecordID = record.lastModifiedUserRecordID;
-    self.accessControl = record.accessControl;
-    self.recordID = record.recordID;
+    self = [super init];
+    self.record = [[SKYRecord alloc] initWithRecordID:record.recordID data:record.dictionary];
+    self.record.ownerUserRecordID = record.ownerUserRecordID;
+    self.record.creationDate = record.creationDate;
+    self.record.creatorUserRecordID = record.creatorUserRecordID;
+    self.record.modificationDate = record.modificationDate;
+    self.record.lastModifiedUserRecordID = record.lastModifiedUserRecordID;
+    self.record.accessControl = record.accessControl;
+    self.record.recordID = record.recordID;
     return self;
+}
+
+- (NSString *)creatorUserRecordID
+{
+    return self.record.creatorUserRecordID;
+}
+
+- (NSDate *)creationDate
+{
+    return self.record.creationDate;
+}
+
+- (NSDictionary *_Nonnull)dictionary
+{
+    return self.record.dictionary;
+}
+
+- (SKYRecordID *)recordID
+{
+    return self.record.recordID;
+}
+
+- (NSString *_Nonnull)recordType
+{
+    return self.record.recordType;
+}
+
+- (void)setCreatorUserRecordID:(NSString *_Nonnull)recordID
+{
+    self.record.creatorUserRecordID = recordID;
+}
+
+- (void)setCreationDate:(NSDate *_Nonnull)date
+{
+    self.record.creationDate = date;
 }
 @end

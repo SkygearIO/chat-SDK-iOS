@@ -101,13 +101,15 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
          completionHandler:^(NSArray *results, NSError *error) {
              if (!completion) {
                  return;
-             }
-             if (error) {
+             } else if (error) {
                  completion(nil, error);
              } else if (results.count == 0) {
                  completion(nil, nil);
              } else {
-                 SKYConversation *con = [SKYConversation recordWithRecord:results.firstObject];
+
+                 SKYConversation *con = [SKYConversation recordWithRecord:results.firstObject
+                                                          withUnreadCount:0
+                                                    withLastReadMessageId:nil];
                  completion(con, nil);
              }
          }];
@@ -134,16 +136,16 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                   completion:(SKYChatConversationCompletion)completion
 {
     if (!participantIDs || participantIDs.count == 0) {
-        @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                       reason:@"cannot create conversation with no participants"
-                                     userInfo:nil];
-    }
-
-    if (participantIDs.count == 1 &&
-        [participantIDs.firstObject isEqualToString:self.container.currentUserRecordID]) {
-        @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                       reason:@"cannot create conversation with yourself"
-                                     userInfo:nil];
+        if (completion) {
+            completion(nil,
+                       [NSError errorWithDomain:@"SKYChatExtension"
+                                           code:0
+                                       userInfo:@{
+                                           NSLocalizedDescriptionKey :
+                                               @"cannot create conversation with no participants"
+                                       }]);
+        }
+        return;
     }
 
     if (![participantIDs containsObject:self.container.currentUserRecordID]) {
@@ -158,7 +160,11 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     }
     adminIDs = [[NSSet setWithArray:adminIDs] allObjects];
 
-    SKYConversation *newConversation = [SKYConversation recordWithRecordType:@"conversation"];
+    SKYConversation *newConversation =
+        [SKYConversation recordWithRecord:[SKYRecord recordWithRecordType:@"conversation"]
+                          withUnreadCount:0
+                    withLastReadMessageId:nil];
+
     newConversation.title = title;
     newConversation.participantIds = participantIDs;
     newConversation.adminIds = adminIDs;
@@ -213,20 +219,23 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 - (void)saveConversation:(SKYConversation *)conversation
               completion:(SKYChatConversationCompletion)completion
 {
-    [self.container.publicCloudDatabase saveRecord:conversation
-                                        completion:^(SKYRecord *record, NSError *error) {
-                                            if (!completion) {
-                                                return;
-                                            }
+    [self.container.publicCloudDatabase
+        saveRecord:conversation.record
+        completion:^(SKYRecord *record, NSError *error) {
+            if (!completion) {
+                return;
+            }
 
-                                            if (error) {
-                                                completion(nil, error);
-                                            }
+            if (error) {
+                completion(nil, error);
+            }
 
-                                            SKYConversation *newConversation =
-                                                [SKYConversation recordWithRecord:record];
-                                            completion(newConversation, error);
-                                        }];
+            SKYConversation *newConversation =
+                [SKYConversation recordWithRecord:record
+                                  withUnreadCount:conversation.unreadCount
+                            withLastReadMessageId:conversation.lastReadMessageID];
+            completion(newConversation, error);
+        }];
 }
 
 - (void)saveConversation:(SKYConversation *)conversation
@@ -327,7 +336,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                          fetchLastMessage:(BOOL)fetchLastMessage
                                completion:(SKYChatConversationCompletion)completion
 {
-    [self fetchConversationWithConversationID:conversation.recordID.recordName
+    [self fetchConversationWithConversationID:[conversation recordName]
                              fetchLastMessage:fetchLastMessage
                                    completion:completion];
 }
@@ -352,7 +361,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
                      SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
 
-                     SKYMessage *msg = [SKYMessage recordWithRecord:record];
+                     SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
                      msg.alreadySyncToServer = true;
                      msg.fail = false;
                      if (msg) {
@@ -402,8 +411,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 - (void)leaveConversation:(SKYConversation *)conversation
                completion:(void (^)(NSError *error))completion
 {
-    [self leaveConversationWithConversationID:conversation.recordID.recordName
-                                   completion:completion];
+    [self leaveConversationWithConversationID:[conversation recordName] completion:completion];
 }
 
 - (void)leaveConversationWithConversationID:(NSString *)conversationID
@@ -454,14 +462,14 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 - (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
 {
     SKYDatabase *database = self.container.privateCloudDatabase;
-    [database saveRecord:message
+    [database saveRecord:message.record
               completion:^(SKYRecord *record, NSError *error) {
                   SKYMessage *msg = nil;
                   if (error) {
                       message.alreadySyncToServer = false;
                       message.fail = true;
                   } else {
-                      msg = [SKYMessage recordWithRecord:record];
+                      msg = [[SKYMessage alloc] initWithRecordData:record];
                       msg.alreadySyncToServer = true;
                       msg.fail = false;
                   }
@@ -475,7 +483,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     toConversation:(SKYConversation *)conversation
         completion:(SKYChatMessageCompletion)completion
 {
-    message.conversationID = conversation.recordID.recordName;
+    message.conversationID = [conversation recordName];
     if (!message.attachment || message.attachment.url.isFileURL) {
         [self saveMessage:message completion:completion];
         return;
@@ -536,7 +544,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
                      SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
 
-                     SKYMessage *msg = [SKYMessage recordWithRecord:record];
+                     SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
                      msg.alreadySyncToServer = true;
                      msg.fail = false;
                      if (msg) {
@@ -671,8 +679,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 {
     query.transientIncludes = @{
         @"conversation" : [NSExpression expressionForKeyPath:@"conversation"],
-        @"user" : [NSExpression expressionForKeyPath:@"user"],
-        @"last_read_message" : [NSExpression expressionForKeyPath:@"last_read_message"]
+        @"user" : [NSExpression expressionForKeyPath:@"user"]
     };
 
     SKYDatabase *database = self.container.publicCloudDatabase;
@@ -682,7 +689,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
             NSMutableArray<SKYUserConversation *> *resultArray = [[NSMutableArray alloc] init];
             NSMutableSet<NSString *> *messageIDs = [[NSMutableSet alloc] init];
             for (SKYRecord *record in results) {
-                SKYUserConversation *uc = [SKYUserConversation recordWithRecord:record];
+                SKYUserConversation *uc = [[SKYUserConversation alloc] initWithRecordData:record];
                 SKYConversation *c = uc.conversation;
                 c.lastReadMessageID = uc.lastReadMessageID;
                 c.unreadCount = uc.unreadCount;
@@ -760,7 +767,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                              userConversations.firstObject;
                                          userConversation.lastReadMessageID =
                                              conversation.lastReadMessageID;
-                                         [database saveRecord:userConversation
+                                         [database saveRecord:userConversation.record
                                                    completion:^(SKYRecord *record, NSError *error) {
                                                        if (completion) {
                                                            if (error) {
@@ -780,7 +787,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                               completion:(SKYChatUnreadCountCompletion)completion
 {
     [self
-        fetchConversationWithConversationID:conversation.recordID.recordName
+        fetchConversationWithConversationID:[conversation recordName]
                            fetchLastMessage:NO
                                  completion:^(SKYConversation *conversation, NSError *error) {
                                      if (!completion) {
@@ -839,7 +846,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 {
     [self.container callLambda:@"chat:typing"
                      arguments:@[
-                         conversation.recordID.recordName,
+                         [conversation recordName],
                          SKYChatTypingEventToString(typingEvent),
                          [SKYDataSerialization stringFromDate:date],
                      ]
@@ -890,15 +897,15 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                 return;
             }
 
-            completion([SKYUserChannel recordWithRecord:results.firstObject], error);
+            completion([[SKYUserChannel alloc] initWithRecordData:results.firstObject], error);
         }];
 }
 
 - (void)createUserChannelWithCompletion:(SKYChatChannelCompletion)completion
 {
-    SKYUserChannel *userChannel = [SKYUserChannel recordWithRecordType:@"user_channel"];
+    SKYUserChannel *userChannel = [SKYUserChannel userChannel];
     userChannel.name = [[NSUUID UUID] UUIDString];
-    [self.container.privateCloudDatabase saveRecord:userChannel
+    [self.container.privateCloudDatabase saveRecord:userChannel.record
                                          completion:^(SKYRecord *record, NSError *error) {
                                              if (!completion) {
                                                  return;
@@ -910,7 +917,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                              }
 
                                              SKYUserChannel *channel =
-                                                 [SKYUserChannel recordWithRecord:record];
+                                                 [[SKYUserChannel alloc] initWithRecordData:record];
                                              completion(channel, error);
                                          }];
 }
@@ -1047,7 +1054,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
     [self subscribeToUserChannelWithCompletion:nil];
 
-    NSString *conversationID = conversation.recordID.recordName;
+    NSString *conversationID = [conversation recordName];
     return [[NSNotificationCenter defaultCenter]
         addObserverForName:SKYChatDidReceiveTypingIndicatorNotification
                     object:self
@@ -1073,7 +1080,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
     [self subscribeToUserChannelWithCompletion:nil];
 
-    SKYRecordID *conversationID = conversation.recordID;
+    SKYRecordID *conversationID = [conversation recordID];
     return [[NSNotificationCenter defaultCenter]
         addObserverForName:SKYChatDidReceiveRecordChangeNotification
                     object:self
@@ -1094,7 +1101,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                         return;
                     }
 
-                    handler(recordChange.event, [SKYMessage recordWithRecord:recordChange.record]);
+                    handler(recordChange.event,
+                            [[SKYMessage alloc] initWithRecordData:recordChange.record]);
                 }];
 }
 
@@ -1117,7 +1125,9 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                     NSLog(@"Got conversation");
 
                     handler(recordChange.event,
-                            [SKYConversation recordWithRecord:recordChange.record]);
+                            [SKYConversation recordWithRecord:recordChange.record
+                                              withUnreadCount:0
+                                        withLastReadMessageId:nil]);
                 }];
 }
 

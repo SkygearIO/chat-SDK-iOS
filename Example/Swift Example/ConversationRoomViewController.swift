@@ -122,10 +122,7 @@ class ConversationRoomViewController: UIViewController,
             }
         }
 
-        guard let message = SKYMessage() else {
-            print("cannot create message")
-            return
-        }
+        let message = SKYMessage()
         message.body = messaegBodyTextField.text
         message.metadata = metadateDic
         message.attachment = chosenAsset
@@ -167,18 +164,18 @@ class ConversationRoomViewController: UIViewController,
         let message = messages[indexPath.row]
 
         var lastRead = ""
-        if lastReadMessage != nil && lastReadMessage?.recordID.recordName == message.recordID.recordName {
+        if lastReadMessage != nil && lastReadMessage?.recordID().recordName == message.recordID().recordName {
             lastRead = "  === last read message ==="
         }
         let messageBody = message.body != nil ? message.body! : ""
         cell.textLabel?.text = messageBody + lastRead
-        cell.detailTextLabel?.text = message.recordID.canonicalString
+        cell.detailTextLabel?.text = message.recordID().canonicalString
 
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.performSegue(withIdentifier: "message_detail", sender: messages[indexPath.row].dictionary)
+        self.performSegue(withIdentifier: "message_detail", sender: messages[indexPath.row].dictionary())
     }
 
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
@@ -267,7 +264,7 @@ class ConversationRoomViewController: UIViewController,
 
     func refreshConversation() {
         SKYContainer.default().chatExtension?.fetchConversation(
-            conversationID: self.conversation.recordID.recordName,
+            conversationID: self.conversation.recordName(),
             fetchLastMessage: false) { (conversation, error) in
                 if let conv = conversation {
                     self.conversation = conv

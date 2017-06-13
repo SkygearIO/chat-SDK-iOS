@@ -51,7 +51,7 @@ extension ConversationListDemoViewController: SKYChatConversationListViewControl
     func listViewController(_ controller: SKYChatConversationListViewController,
                             didSelectConversation conversation: SKYConversation)
     {
-        print("Conversation \(conversation.recordID.recordName!) is selected")
+        print("Conversation \(conversation.recordID().recordName!) is selected")
 
         SVProgressHUD.show()
         self.skygear.chatExtension?.fetchConversation(

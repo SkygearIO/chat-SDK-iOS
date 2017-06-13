@@ -19,8 +19,18 @@
 
 #import <SKYKit/SKYKit.h>
 
-@interface SKYChatRecord : SKYRecord
+@interface SKYChatRecord : NSObject
 
-+ (instancetype)recordWithRecord:(SKYRecord *)record;
+- (id _Nonnull)initWithRecordData:(SKYRecord *_Nonnull)record;
 
+@property (copy, nonatomic, nonnull) SKYRecord *record;
+
+- (NSString *_Nonnull)creatorUserRecordID;
+- (NSDate *_Nonnull)creationDate;
+- (SKYRecordID *_Nonnull)recordID;
+- (NSString *_Nonnull)recordType;
+
+- (void)setCreatorUserRecordID:(NSString *_Nonnull)recordID;
+- (void)setCreationDate:(NSDate *_Nonnull)date;
+- (NSDictionary *_Nonnull)dictionary;
 @end

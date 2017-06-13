@@ -29,8 +29,8 @@
  to the server. To change the corresponding record on the server, use methods defined in
  SKYChatExtension.
  */
-@interface SKYConversation : SKYChatRecord
-
+@interface SKYConversation : NSObject
+@property (copy, nonatomic, nonnull) SKYRecord *record;
 /**
  Gets or sets the user ID of the participants of this conversation.
  */
@@ -99,4 +99,11 @@
 - (void)removeAdminsWithUserIDs:(NSArray<NSString *> *_Nullable)userIDs
     NS_SWIFT_NAME(removeAdmins(_:));
 
+- (SKYRecordID *_Nonnull)recordID;
+
+- (NSString *_Nonnull)recordName;
+
++ (instancetype _Nonnull)recordWithRecord:(SKYRecord *_Nonnull)record
+                          withUnreadCount:(NSInteger)unreadCount
+                    withLastReadMessageId:(NSString *_Nullable)lastReadMessageID;
 @end

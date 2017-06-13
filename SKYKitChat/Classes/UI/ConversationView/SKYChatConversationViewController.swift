@@ -199,7 +199,7 @@ extension SKYChatConversationViewController {
             self.outgoingMessageBubbleColor = color
         }
 
-        var shouldShowAccessoryButton: Bool =
+        let shouldShowAccessoryButton: Bool =
             self.delegate?.accessoryButtonShouldShowInConversationViewController?(self) ?? false
 
         if !shouldShowAccessoryButton {
@@ -237,9 +237,9 @@ extension SKYChatConversationViewController {
             msgSenderName = senderName
         }
 
-        return JSQMessage(senderId: msg.creatorUserRecordID,
+        return JSQMessage(senderId: msg.creatorUserRecordID(),
                           senderDisplayName: msgSenderName,
-                          date: msg.creationDate,
+                          date: msg.creationDate(),
                           text: msg.body)
     }
 
@@ -249,7 +249,7 @@ extension SKYChatConversationViewController {
     ) -> JSQMessageBubbleImageDataSource! {
 
         let msg = self.messages[indexPath.row]
-        if msg.creatorUserRecordID == self.senderId {
+        if msg.creatorUserRecordID() == self.senderId {
             return self.outgoingMessageBubble
         }
 
@@ -263,7 +263,7 @@ extension SKYChatConversationViewController {
 
         let msg = self.messages[indexPath.row]
 
-        if msg.creatorUserRecordID != self.senderId {
+        if msg.creatorUserRecordID() != self.senderId {
             return nil
         }
 
@@ -363,14 +363,7 @@ extension SKYChatConversationViewController {
                                     senderDisplayName: String!,
                                     date: Date!) {
 
-        guard let msg = SKYMessage() else {
-            print("Error: Failed to create new message")
-            self.failedToSendMessage(text,
-                                     date: date!,
-                                     errorCode: SKYErrorInvalidArgument,
-                                     errorMessage: "Failed to create new message")
-            return
-        }
+        
 
         guard let conv = self.conversation else {
             self.failedToSendMessage(text,
@@ -380,9 +373,11 @@ extension SKYChatConversationViewController {
             return
         }
 
+        
+        let msg = SKYMessage()
         msg.body = text
-        msg.creatorUserRecordID = self.senderId
-        msg.creationDate = date
+        msg.setCreatorUserRecordID(self.senderId)
+        msg.setCreationDate(date)
 
         self.delegate?.conversationViewController?(self, readyToSendMessage: msg)
         self.skygear.chatExtension?.addMessage(
@@ -408,8 +403,8 @@ extension SKYChatConversationViewController {
                 }
 
                 // find the index for the "sending" message
-                let ids = self.messages.map({$0.recordID.recordName!})
-                guard let idx = ids.index(of: sentMsg.recordID.recordName!) else {
+                let ids = self.messages.map({$0.recordID().recordName!})
+                guard let idx = ids.index(of: sentMsg.recordID().recordName!) else {
                     return
                 }
 
@@ -451,8 +446,9 @@ extension SKYChatConversationViewController {
 
         let handler: ((SKYChatRecordChangeEvent, SKYMessage) -> Void) = {(event, msg) in
             let idx = self.messages
-                .map({ $0.recordID.recordName! })
-                .index(of: msg.recordID.recordName)
+                .map({ $0.recordID().recordName })
+                .index(of: msg.recordID().recordName
+            )
 
             switch event {
             case .create:
@@ -558,7 +554,7 @@ extension SKYChatConversationViewController {
         self.skygear.publicCloudDatabase?
             .fetchRecords(withIDs: participantIDs, completionHandler: { (result, error) in
                 guard error == nil else {
-                    print("Failed to fetch participants: \(error?.localizedDescription)")
+                    print("Failed to fetch participants: \(error?.localizedDescription ?? "")")
                     self.delegate?.conversationViewController?(
                         self, failedFetchingParticipantWithError: error!)
 
@@ -616,7 +612,7 @@ extension SKYChatConversationViewController {
             beforeTime: before,
             completion: { (result, error) in
                 guard error == nil else {
-                    print("Failed to fetch messages: \(error?.localizedDescription)")
+                    print("Failed to fetch messages: \(error?.localizedDescription ?? "")")
                     self.delegate?.conversationViewController?(
                         self, failedFetchingMessagesWithError: error!)
 
@@ -660,6 +656,6 @@ extension SKYChatConversationViewController {
             return nil
         }
 
-        return self.participants[message.creatorUserRecordID]
+        return self.participants[message.creatorUserRecordID()]
     }
 }

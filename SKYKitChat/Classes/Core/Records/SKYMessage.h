@@ -45,5 +45,4 @@ typedef NS_ENUM(NSInteger, SKYMessageConversationStatus) {
 @property (assign, nonatomic, readonly) SKYMessageConversationStatus conversationStatus;
 
 + (instancetype _Nullable)message;
-
 @end

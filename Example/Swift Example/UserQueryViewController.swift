@@ -53,7 +53,7 @@ extension UserQueryViewController: SKYChatParticipantListViewControllerDataSourc
                                                   options: nil,
                                                   progressBlock: nil) { (downloadedImage, error, url, data) in
                                                     guard error == nil else {
-                                                        print("Failed to download image: \(error?.localizedDescription)")
+                                                        print("Failed to download image: \(error?.localizedDescription ?? "")")
                                                         return
                                                     }
 
