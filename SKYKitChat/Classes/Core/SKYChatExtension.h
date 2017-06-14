@@ -70,8 +70,8 @@ extern NSString *_Nonnull const SKYChatRecordChangeUserInfoKey;
  */
 @interface SKYChatExtension : NSObject
 
-typedef void (^SKYChatUserConversationCompletion)(SKYUserConversation *_Nullable conversation,
-                                                  NSError *_Nullable error);
+typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable conversation,
+                                              NSError *_Nullable error);
 typedef void (^SKYChatMessageCompletion)(SKYMessage *_Nullable message, NSError *_Nullable error);
 typedef void (^SKYChatUnreadCountCompletion)(
     NSDictionary<NSString *, NSNumber *> *_Nullable response, NSError *_Nullable error);
@@ -79,11 +79,10 @@ typedef void (^SKYChatChannelCompletion)(SKYUserChannel *_Nullable userChannel,
                                          NSError *_Nullable error);
 typedef void (^SKYChatFetchUserConversationListCompletion)(
     NSArray<SKYUserConversation *> *_Nullable conversationList, NSError *_Nullable error);
+typedef void (^SKYChatFetchConversationListCompletion)(
+    NSArray<SKYConversation *> *_Nullable conversationList, NSError *_Nullable error);
 typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nullable messageList,
                                                    NSError *_Nullable error);
-typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable conversation,
-                                              NSError *_Nullable error);
-
 /**
  Gets or sets whether messages fetched from server are automatically marked as delivered.
 
@@ -125,7 +124,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)createConversationWithParticipantIDs:(NSArray<NSString *> *_Nonnull)participantIDs
                                        title:(NSString *_Nullable)title
                                     metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
-                                  completion:(SKYChatUserConversationCompletion _Nullable)completion
+                                  completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(createConversation(participantIDs:title:metadata:completion:)); /* clang-format on */
 
 /**
@@ -150,7 +149,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
                                     metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                                     adminIDs:(NSArray<NSString *> *_Nullable)adminIDs
                       distinctByParticipants:(BOOL)distinctByParticipants
-                                  completion:(SKYChatUserConversationCompletion _Nullable)completion
+                                  completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(createConversation(participantIDs:title:metadata:adminIDs:distinctByParticipants:completion:)); /* clang-format on */
 
 /**
@@ -169,7 +168,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 - (void)createDirectConversationWithUserID:(NSString *_Nonnull)userID
                                      title:(NSString *_Nullable)title
                                   metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
-                                completion:(SKYChatUserConversationCompletion _Nullable)completion
+                                completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(createDirectConversation(userID:title:metadata:completion:)); /* clang-format on */
 
 /**
@@ -180,7 +179,7 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 
  To create or reuse a conversation, call createConversation... instead.
 
- @param conversationID the ID of the conversation to be deleted
+ @param conversation the conversation to be saved
  @param completion completion block
  */
 - (void)saveConversation:(SKYConversation *_Nonnull)conversation
@@ -188,51 +187,48 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
     /* clang-format off */ NS_SWIFT_NAME(saveConversation(_:completion:)); /* clang-format on */
 
 /**
- Fetches user conversations.
+ Fetches conversations.
 
  @param completion completion block
  */
-- (void)fetchUserConversationsWithCompletion:
-    (SKYChatFetchUserConversationListCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchUserConversations(completion:)); /* clang-format on */
+- (void)fetchConversationsWithCompletion:
+    (SKYChatFetchConversationListCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchConversations(completion:)); /* clang-format on */
 
 /**
- Fetches user conversations with optional last message in conversation.
+ Fetches conversations with optional last message in conversation.
 
  @param fetchLastMessage whether to fetch the last message
  @param completion completion block
  */
-- (void)fetchUserConversationsWithFetchLastMessage:(BOOL)fetchLastMessage
-                                        completion:
-                                            (SKYChatFetchUserConversationListCompletion _Nullable)
-                                                completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchUserConversations(fetchLastMessage:completion:)); /* clang-format on */
+- (void)fetchConversationsWithFetchLastMessage:(BOOL)fetchLastMessage
+                                    completion:
+                                        (SKYChatFetchConversationListCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchConversations(fetchLastMessage:completion:)); /* clang-format on */
 
 /**
- Fetches a user conversation by conversation ID.
+ Fetches a conversation by conversation ID.
 
  @param conversationID ID of conversation
  @param fetchLastMessage whether to fetch the last message
  @param completion completion block
  */
-- (void)fetchUserConversationWithConversationID:(NSString *_Nonnull)conversationID
-                               fetchLastMessage:(BOOL)fetchLastMessage
-                                     completion:
-                                         (SKYChatUserConversationCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchUserConversation(conversationID:fetchLastMessage:completion:)); /* clang-format on */
+- (void)fetchConversationWithConversationID:(NSString *_Nonnull)conversationID
+                           fetchLastMessage:(BOOL)fetchLastMessage
+                                 completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchConversation(conversationID:fetchLastMessage:completion:)); /* clang-format on */
 
 /**
- Fetches a user conversation by conversation.
+ Fetches a conversation by conversation.
 
  @param conversation conversation object
  @param fetchLastMessage whether to fetch the last message
  @param completion completion block
  */
-- (void)fetchUserConversationWithConversation:(SKYConversation *_Nonnull)conversation
-                             fetchLastMessage:(BOOL)fetchLastMessage
-                                   completion:
-                                       (SKYChatUserConversationCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchUserConversation(conversation:fetchLastMessage:completion:)); /* clang-format on */
+- (void)fetchConversationWithConversation:(SKYConversation *_Nonnull)conversation
+                         fetchLastMessage:(BOOL)fetchLastMessage
+                               completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchConversation(conversation:fetchLastMessage:completion:)); /* clang-format on */
 
 ///---------------------------------------
 /// @name Adding and removing participants
@@ -467,28 +463,27 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 ///-----------------------------------------
 
 /**
- Delete a message in a user conversation
+ Delete a message in a conversation
 
  The message is soft-deleted in the message. Conversation unread count, last read message and last
  message are updated.
 
  @param message the message object
- @param userConversation the user conversation object
+ @param conversation the user conversation object
  @param completion completion block
  */
 - (void)deleteMessage:(SKYMessage *_Nonnull)message
-    inUserConversation:(SKYUserConversation *_Nonnull)userConversation
-            completion:(SKYChatUserConversationCompletion _Nullable)completion
+       inConversation:(SKYConversation *_Nonnull)conversation
+           completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(deleteMessage(_:in:completion:)); /* clang-format on */
 
 /**
- Edit a message in a user conversation
+ Edit a message in a conversation
 
  The message body is updated.
 
  @param message the message object
  @param body the new message body
- @param userConversation the user conversation object
  @param completion completion block
  */
 - (void)editMessage:(SKYMessage *_Nonnull)message
@@ -501,30 +496,30 @@ typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable convers
 ///--------------------------------------------------
 
 /**
- Mark a message as the last read message in a user conversation.
+ Mark a message as the last read message in a conversation.
 
- The last read message affects the last read position of messages in a user conversation. The
+ The last read message affects the last read position of messages in a conversation. The
  number of unread conversations will change. Calling this method will not affect delivery and
  read receipts.
 
  @param message the message object
- @param userConversation the user conversation object
+ @param conversation the conversation object
  @param completion completion block
  */
 - (void)markLastReadMessage:(SKYMessage *_Nonnull)message
-         inUserConversation:(SKYUserConversation *_Nonnull)userConversation
-                 completion:(SKYChatUserConversationCompletion _Nullable)completion
+             inConversation:(SKYConversation *_Nonnull)conversation
+                 completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(markLastReadMessage(_:in:completion:)); /* clang-format on */
 
 /**
- Fetches unread count of a user conversation
+ Fetches unread count of a conversation
 
- @param userConversation the user conversation object
+ @param conversation the conversation object
  @param completion completion block
  */
-- (void)fetchUnreadCountWithUserConversation:(SKYUserConversation *_Nonnull)userConversation
-                                  completion:(SKYChatUnreadCountCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchUnreadCount(userConversation:completion:)); /* clang-format on */
+- (void)fetchUnreadCountWithConversation:(SKYConversation *_Nonnull)conversation
+                              completion:(SKYChatUnreadCountCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchUnreadCount(conversation:completion:)); /* clang-format on */
 
 /**
  Fetches the total unread count of conversations and messages.

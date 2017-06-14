@@ -24,7 +24,7 @@ import Kingfisher
 class UserQueryViewController: SKYChatParticipantListViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.queryMethod = .ByName
+        self.queryMethod = .byName
         self.dataSource = self
     }
 }
@@ -53,7 +53,7 @@ extension UserQueryViewController: SKYChatParticipantListViewControllerDataSourc
                                                   options: nil,
                                                   progressBlock: nil) { (downloadedImage, error, url, data) in
                                                     guard error == nil else {
-                                                        print("Failed to download image: \(error?.localizedDescription)")
+                                                        print("Failed to download image: \(error?.localizedDescription ?? "")")
                                                         return
                                                     }
 

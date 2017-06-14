@@ -48,7 +48,7 @@ class CreateDirectConversationViewController: UIViewController {
                     return
                 }
 
-                self.createdConversationTextView.text = conversation?.recordID.canonicalString
+                self.createdConversationTextView.text = conversation?.recordID().canonicalString
             }
         }
     }

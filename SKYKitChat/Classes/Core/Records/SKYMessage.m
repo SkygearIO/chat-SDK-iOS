@@ -32,56 +32,63 @@ NSString *const SKYMessageConversationStatusKey = @"conversation_status";
     return [[self alloc] initWithRecordType:@"message"];
 }
 
+- (id)init
+{
+    self = [super init];
+    self.record = [[SKYRecord alloc] initWithRecordType:@"message"];
+    return self;
+}
+
 - (void)setConversationID:(NSString *)conversationID
 {
     if (conversationID) {
         SKYRecordID *recordID =
             [SKYRecordID recordIDWithRecordType:@"conversation" name:conversationID];
-        self[SKYMessageConversationKey] = [SKYReference referenceWithRecordID:recordID];
+        self.record[SKYMessageConversationKey] = [SKYReference referenceWithRecordID:recordID];
     } else {
-        self[SKYMessageConversationKey] = nil;
+        self.record[SKYMessageConversationKey] = nil;
     }
 }
 
 - (NSString *)conversationID
 {
-    SKYReference *conversation = self[SKYMessageConversationKey];
+    SKYReference *conversation = self.record[SKYMessageConversationKey];
     return conversation.recordID.recordName;
 }
 
 - (void)setBody:(NSString *)body
 {
-    self[SKYMessageBodyKey] = [body copy];
+    self.record[SKYMessageBodyKey] = [body copy];
 }
 
 - (NSString *)body
 {
-    return self[SKYMessageBodyKey];
+    return self.record[SKYMessageBodyKey];
 }
 
 - (void)setMetadata:(NSDictionary *)metadata
 {
-    self[SKYMessageMetadataKey] = [metadata copy];
+    self.record[SKYMessageMetadataKey] = [metadata copy];
 }
 
 - (NSDictionary *)metadata
 {
-    return self[SKYMessageMetadataKey];
+    return self.record[SKYMessageMetadataKey];
 }
 
 - (SKYAsset *)attachment
 {
-    return self[SKYMessageAttachmentKey];
+    return self.record[SKYMessageAttachmentKey];
 }
 
 - (void)setAttachment:(SKYAsset *)attachment
 {
-    self[SKYMessageAttachmentKey] = attachment;
+    self.record[SKYMessageAttachmentKey] = attachment;
 }
 
 - (SKYMessageConversationStatus)conversationStatus
 {
-    NSString *stringStatus = self[SKYMessageConversationStatusKey];
+    NSString *stringStatus = self.record[SKYMessageConversationStatusKey];
     if ([stringStatus isEqualToString:@"all_read"]) {
         return SKYMessageConversationStatusAllRead;
     } else if ([stringStatus isEqualToString:@"some_read"]) {

@@ -34,8 +34,7 @@ import SVProgressHUD
      * Notify the delegate which conversation is selected.
      **/
     @objc optional func listViewController(_ controller: SKYChatConversationListViewController,
-                                           didSelectConversation conversation: SKYConversation,
-                                           withUserConversation userCOnversation: SKYUserConversation)
+                                           didSelectConversation conversation: SKYConversation)
 }
 
 open class SKYChatConversationListViewController: UIViewController {
@@ -48,7 +47,7 @@ open class SKYChatConversationListViewController: UIViewController {
     @IBOutlet public var tableView: UITableView!
 
     var refreshControl: UIRefreshControl!
-    var userConversations: [SKYUserConversation] = []
+    var conversations: [SKYConversation] = []
     var users: [String: SKYRecord] = [:]
     var conversationChangeObserver: Any?
 }
@@ -133,21 +132,21 @@ extension SKYChatConversationListViewController {
 extension SKYChatConversationListViewController: UITableViewDelegate, UITableViewDataSource {
 
     open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return userConversations.count
+        return conversations.count
     }
 
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let userConversation = self.userConversations[indexPath.row]
+        let conversation = self.conversations[indexPath.row]
         if let cell = tableView.dequeueReusableCell(withIdentifier: "ConversationCell")
             as? SKYChatConversationTableViewCell {
 
-            cell.conversation = userConversation.conversation
-            cell.conversationMessage = userConversation.conversation.lastMessage?.body
-            cell.unreadMessageCount = userConversation.unreadCount
+            cell.conversation = conversation
+            cell.conversationMessage = conversation.lastMessage?.body
+            cell.unreadMessageCount = conversation.unreadCount
             cell.participants = []
 
             // add all participant records for display
-            userConversation.conversation.participantIds.forEach({ (eachParticipantID) in
+            conversation.participantIds.forEach({ (eachParticipantID) in
                 guard eachParticipantID != self.skygear.currentUserRecordID! else {
                     // no need to show current user's name
                     return
@@ -161,17 +160,17 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
 
             if let ds = self.dataSource {
                 cell.avatarImage = ds.listViewController?(self,
-                                                          avatarImageForConversation: userConversation.conversation,
+                                                          avatarImageForConversation: conversation,
                                                           atIndexPath: indexPath)
             } else {
-                let title = userConversation.conversation.title ?? ""
+                let title = conversation.title ?? ""
                 cell.avatarImage = UIImage.avatarImage(forInitialsOfName: title)
             }
 
             return cell
         } else {
             let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
-            if let title = userConversation.conversation.title {
+            if let title = conversation.title {
                 cell.textLabel?.text = title
                 cell.textLabel?.textColor = UIColor.black
             } else {
@@ -189,10 +188,9 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
 
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let d = self.delegate {
-            let conv = self.userConversations[indexPath.row]
+            let conv = self.conversations[indexPath.row]
             d.listViewController?(self,
-                                  didSelectConversation: conv.conversation,
-                                  withUserConversation: conv)
+                                  didSelectConversation: conv)
         }
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -210,24 +208,24 @@ extension SKYChatConversationListViewController {
         return self.users[userID]
     }
 
-    public func getUserConversations() -> [SKYUserConversation] {
-        return self.userConversations
+    public func getConversations() -> [SKYConversation] {
+        return self.conversations
     }
 
     open func performQuery(callback: (()->())?) {
-        self.skygear.chatExtension?.fetchUserConversations(fetchLastMessage: true, completion: { (userConversations, error) in
+        self.skygear.chatExtension?.fetchConversations(fetchLastMessage: true, completion: { (conversations, error) in
             callback?()
             if let err = error {
                 self.handleQueryError(error: err)
                 return
             }
 
-            if let uc = userConversations {
-                self.handleQueryResult(result: uc)
+            if let c = conversations {
+                self.handleQueryResult(result: c)
             } else {
                 let err = SKYErrorCreator()
                     .error(with: SKYErrorBadResponse,
-                           message: "Query does not response UserConversation")
+                           message: "Query does not response Conversation")
                 self.handleQueryError(error: err!)
             }
         })
@@ -255,13 +253,13 @@ extension SKYChatConversationListViewController {
         }
     }
 
-    open func handleQueryResult(result: [SKYUserConversation]) {
-        self.userConversations = result
+    open func handleQueryResult(result: [SKYConversation]) {
+        self.conversations = result
         self.tableView.reloadData()
 
         let currentCachedUserKeys = self.users.keys
         let userIDs = result
-            .reduce(Set([])) { return $0.union(Set($1.conversation.participantIds))}
+            .reduce(Set([])) { return $0.union(Set($1.participantIds))}
             .filter { !currentCachedUserKeys.contains($0) }
 
         if userIDs.count > 0 {
