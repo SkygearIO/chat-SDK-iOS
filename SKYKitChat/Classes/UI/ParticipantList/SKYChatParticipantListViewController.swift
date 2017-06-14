@@ -21,13 +21,13 @@ import SVProgressHUD
 
 public enum SKYChatParticipantQueryMethod: UInt {
     // By username of the user, supposed to be unique
-    case ByUsername
+    case byUsername
 
     // By email of the user, supposed to be unique
-    case ByEmail
+    case byEmail
 
     // By name of the user, can limit the searching scope by setting participantScope
-    case ByName
+    case byName
 }
 
 @objc public protocol SKYChatParticipantListViewControllerDelegate: class {
@@ -58,10 +58,10 @@ open class SKYChatParticipantListViewController: UIViewController {
     /*
       The method users are being search.
      */
-    public var queryMethod: SKYChatParticipantQueryMethod = .ByUsername
+    public var queryMethod: SKYChatParticipantQueryMethod = .byUsername
 
     /*
-      The participant searching scope. (Only available when queryMethod is set to `.ByName`)
+      The participant searching scope. (Only available when queryMethod is set to `.byName`)
      */
     public var participantScope: SKYQuery?
 
@@ -122,7 +122,7 @@ extension SKYChatParticipantListViewController {
             self.edgesForExtendedLayout = [.left, .right, .bottom]
         }
 
-        if self.queryMethod == .ByName {
+        if self.queryMethod == .byName {
             // show all users under the scope
             self.performUserQuery()
         }
@@ -165,7 +165,7 @@ extension SKYChatParticipantListViewController: UITableViewDelegate, UITableView
             cell.participantRecord = participantRecord
 
             // extra info
-            if self.queryMethod == .ByEmail || self.queryMethod == .ByUsername {
+            if self.queryMethod == .byEmail || self.queryMethod == .byUsername {
                 cell.participantInformation = participantInfo
             } else {
                 cell.participantInformation = nil
@@ -237,13 +237,13 @@ extension SKYChatParticipantListViewController {
         self.searchBar.keyboardType = .default
 
         switch self.queryMethod {
-        case .ByEmail:
+        case .byEmail:
             self.searchBar.placeholder = NSLocalizedString("Search for user email",
                                                            comment: "")
             self.searchBar.keyboardType = .emailAddress
-        case .ByUsername:
+        case .byUsername:
             self.searchBar.placeholder = NSLocalizedString("Search for username", comment: "")
-        case .ByName:
+        case .byName:
             self.searchBar.placeholder = NSLocalizedString("Search for name of user",
                                                            comment: "")
         default:
@@ -260,15 +260,15 @@ extension SKYChatParticipantListViewController {
 
         var participantInfo: String? = nil
         switch self.queryMethod {
-        case .ByEmail:
+        case .byEmail:
             if let email = participantRecord.transient.object(forKey: "_email") as? String {
                 participantInfo = email
             }
-        case .ByUsername:
+        case .byUsername:
             if let username = participantRecord.transient.object(forKey: "_username") as? String {
                 participantInfo = username
             }
-        case .ByName:
+        case .byName:
             if let name = participantRecord.object(forKey: "name") as? String {
                 participantInfo = name
             }
@@ -281,7 +281,7 @@ extension SKYChatParticipantListViewController {
 
     var queryPredicate: NSPredicate? {
         switch self.queryMethod {
-        case .ByEmail:
+        case .byEmail:
             if let term = self.searchTerm {
                 return SKYUserDiscoverPredicate(emails: [term])
             } else {
@@ -289,7 +289,7 @@ extension SKYChatParticipantListViewController {
                 return nil
             }
 
-        case .ByUsername:
+        case .byUsername:
             if let term = self.searchTerm {
                 return SKYUserDiscoverPredicate(usernames: [term])
             } else {
@@ -297,7 +297,7 @@ extension SKYChatParticipantListViewController {
                 return nil
             }
 
-        case .ByName:
+        case .byName:
             var predicate: NSPredicate
             if let term = self.searchTerm {
                 predicate = NSPredicate(format: "name LIKE[c] %@", argumentArray: ["*\(term)*"])
