@@ -20,7 +20,7 @@
 #import "SKYUserChannel.h"
 
 @implementation SKYUserChannel
--(id _Nonnull) init
+- (id _Nonnull)init
 {
     self = [super init];
     self.record = [[SKYRecord alloc] initWithRecordType:@"user_channel"];
