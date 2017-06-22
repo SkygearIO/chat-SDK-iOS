@@ -903,7 +903,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 - (void)createUserChannelWithCompletion:(SKYChatChannelCompletion)completion
 {
-    SKYUserChannel *userChannel = [SKYUserChannel userChannel];
+    SKYUserChannel *userChannel = [[SKYUserChannel alloc] init];
     userChannel.name = [[NSUUID UUID] UUIDString];
     [self.container.privateCloudDatabase saveRecord:userChannel.record
                                          completion:^(SKYRecord *record, NSError *error) {
@@ -1092,7 +1092,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                         return;
                     }
 
-                    SKYReference *ref = recordChange.record[@"conversation_id"];
+                    SKYReference *ref = recordChange.record[@"conversation"];
                     if (![ref isKindOfClass:[SKYReference class]]) {
                         return;
                     }

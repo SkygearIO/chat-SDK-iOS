@@ -20,10 +20,11 @@
 #import "SKYUserChannel.h"
 
 @implementation SKYUserChannel
-
-+ (instancetype)userChannel
+- (id _Nonnull)init
 {
-    return [[self alloc] initWithRecordType:@"user_channel"];
+    self = [super init];
+    self.record = [[SKYRecord alloc] initWithRecordType:@"user_channel"];
+    return self;
 }
 
 - (void)setName:(NSString *)name

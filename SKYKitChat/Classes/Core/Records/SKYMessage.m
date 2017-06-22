@@ -19,11 +19,11 @@
 
 #import "SKYMessage.h"
 
-NSString *const SKYMessageConversationKey = @"conversation_id";
+NSString *const SKYMessageConversationKey = @"conversation";
 NSString *const SKYMessageBodyKey = @"body";
 NSString *const SKYMessageMetadataKey = @"metadata";
 NSString *const SKYMessageAttachmentKey = @"attachment";
-NSString *const SKYMessageConversationStatusKey = @"conversation_status";
+NSString *const SKYMessageStatusKey = @"message_status";
 
 @implementation SKYMessage
 
@@ -88,7 +88,7 @@ NSString *const SKYMessageConversationStatusKey = @"conversation_status";
 
 - (SKYMessageConversationStatus)conversationStatus
 {
-    NSString *stringStatus = self.record[SKYMessageConversationStatusKey];
+    NSString *stringStatus = self.record[SKYMessageStatusKey];
     if ([stringStatus isEqualToString:@"all_read"]) {
         return SKYMessageConversationStatusAllRead;
     } else if ([stringStatus isEqualToString:@"some_read"]) {
