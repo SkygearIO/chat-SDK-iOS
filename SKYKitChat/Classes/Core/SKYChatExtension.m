@@ -285,15 +285,19 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 - (void)fetchConversationsWithCompletion:(SKYChatFetchConversationListCompletion)completion
 {
-    [self fetchConversationsWithFetchLastMessage:YES completion:completion];
+    [self fetchConversationsWithFetchLastMessage:YES page:1 pageSize:50 completion:completion];
 }
 
 - (void)fetchConversationsWithFetchLastMessage:(BOOL)fetchLastMessage
+                                          page:(NSInteger)page
+                                      pageSize:(NSInteger)pageSize
                                     completion:(SKYChatFetchConversationListCompletion)completion
 {
     NSPredicate *predicate =
         [NSPredicate predicateWithFormat:@"user = %@", self.container.currentUserRecordID];
     SKYQuery *query = [SKYQuery queryWithRecordType:@"user_conversation" predicate:predicate];
+    query.limit = pageSize;
+    query.offset = (page - 1) * pageSize;
     query.sortDescriptors =
         @[ [NSSortDescriptor sortDescriptorWithKey:@"_updated_at" ascending:NO] ];
     [self fetchConversationsWithQuery:query

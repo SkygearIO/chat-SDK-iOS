@@ -196,15 +196,18 @@ typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nulla
     /* clang-format off */ NS_SWIFT_NAME(fetchConversations(completion:)); /* clang-format on */
 
 /**
- Fetches conversations with optional last message in conversation.
-
+ Fetches conversations with optional last message, page and page size in conversation.
  @param fetchLastMessage whether to fetch the last message
+ @param page     page index of conversations to be fetched
+ @param pageSize maximum number of conversations to be fetched
  @param completion completion block
  */
 - (void)fetchConversationsWithFetchLastMessage:(BOOL)fetchLastMessage
+                                          page:(NSInteger)page
+                                      pageSize:(NSInteger)pageSize
                                     completion:
                                         (SKYChatFetchConversationListCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchConversations(fetchLastMessage:completion:)); /* clang-format on */
+    /* clang-format off */ NS_SWIFT_NAME(fetchConversations(fetchLastMessage:page:pageSize:completion:)); /* clang-format on */
 
 /**
  Fetches a conversation by conversation ID.
