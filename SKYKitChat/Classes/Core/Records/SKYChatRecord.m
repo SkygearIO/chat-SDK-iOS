@@ -18,6 +18,8 @@
 //
 
 #import "SKYChatRecord.h"
+// Sorry...
+#import <SKYKit/SKYRecord_Private.h>
 
 @implementation SKYChatRecord
 - (id)initWithRecordData:(SKYRecord *)record

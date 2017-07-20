@@ -156,7 +156,7 @@ extension SKYChatParticipantListViewController: UITableViewDelegate, UITableView
 
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let participantRecord = self.participants[indexPath.row]
-        var participantInfo: String? = self.getParticipantInformation(atIndex: indexPath.row)
+        let participantInfo: String? = self.getParticipantInformation(atIndex: indexPath.row)
 
         if let cell = tableView.dequeueReusableCell(withIdentifier: "ParticipantCell")
             as? SKYChatParticipantListViewCell {

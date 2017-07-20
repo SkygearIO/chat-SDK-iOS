@@ -130,7 +130,7 @@ extension SKYChatConversationViewController {
     override open func viewDidLoad() {
         super.viewDidLoad()
 
-        self.senderId = self.skygear.currentUserRecordID
+        self.senderId = self.skygear.auth.currentUserRecordID
 
         // update the display name after fetching participants
         self.senderDisplayName = NSLocalizedString("me", comment: "")
@@ -551,7 +551,7 @@ extension SKYChatConversationViewController {
                 return SKYRecordID(recordType: "user", name: eachParticipantID)
             }
 
-        self.skygear.publicCloudDatabase?
+        self.skygear.publicCloudDatabase
             .fetchRecords(withIDs: participantIDs, completionHandler: { (result, error) in
                 guard error == nil else {
                     print("Failed to fetch participants: \(error?.localizedDescription ?? "")")

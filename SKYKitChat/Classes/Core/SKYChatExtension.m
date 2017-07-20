@@ -28,7 +28,6 @@
 #import "SKYConversation.h"
 #import "SKYConversation_Private.h"
 #import "SKYMessage.h"
-#import "SKYPubsub.h"
 #import "SKYReference.h"
 #import "SKYUserChannel.h"
 #import "SKYUserConversation.h"
@@ -148,15 +147,15 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         return;
     }
 
-    if (![participantIDs containsObject:self.container.currentUserRecordID]) {
-        participantIDs = [participantIDs arrayByAddingObject:self.container.currentUserRecordID];
+    if (![participantIDs containsObject:self.container.auth.currentUserRecordID]) {
+        participantIDs = [participantIDs arrayByAddingObject:self.container.auth.currentUserRecordID];
     }
     participantIDs = [[NSSet setWithArray:participantIDs] allObjects];
 
     if (!adminIDs || adminIDs.count == 0) {
         adminIDs = [participantIDs copy];
-    } else if (![adminIDs containsObject:self.container.currentUserRecordID]) {
-        adminIDs = [adminIDs arrayByAddingObject:self.container.currentUserRecordID];
+    } else if (![adminIDs containsObject:self.container.auth.currentUserRecordID]) {
+        adminIDs = [adminIDs arrayByAddingObject:self.container.auth.currentUserRecordID];
     }
     adminIDs = [[NSSet setWithArray:adminIDs] allObjects];
 
@@ -294,7 +293,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                     completion:(SKYChatFetchConversationListCompletion)completion
 {
     NSPredicate *predicate =
-        [NSPredicate predicateWithFormat:@"user = %@", self.container.currentUserRecordID];
+        [NSPredicate predicateWithFormat:@"user = %@", self.container.auth.currentUserRecordID];
     SKYQuery *query = [SKYQuery queryWithRecordType:@"user_conversation" predicate:predicate];
     query.limit = pageSize;
     query.offset = (page - 1) * pageSize;
@@ -311,7 +310,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 {
     NSPredicate *pred =
         [NSPredicate predicateWithFormat:@"user = %@ AND conversation = %@",
-                                         self.container.currentUserRecordID, conversationId];
+                                         self.container.auth.currentUserRecordID, conversationId];
     SKYQuery *query = [SKYQuery queryWithRecordType:@"user_conversation" predicate:pred];
     query.limit = 1;
     [self fetchConversationsWithQuery:query
@@ -493,7 +492,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         return;
     }
 
-    [self.container uploadAsset:message.attachment
+    [self.container.publicCloudDatabase uploadAsset:message.attachment
               completionHandler:^(SKYAsset *uploadedAsset, NSError *error) {
                   if (error) {
                       NSLog(@"error uploading asset: %@", error);
@@ -753,7 +752,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     conversation.lastReadMessage = message;
 
     NSPredicate *pred = [NSPredicate predicateWithFormat:@"user = %@ AND conversation = %@",
-                                                         self.container.currentUserRecordID,
+                                                         self.container.auth.currentUserRecordID,
                                                          conversation.recordID.recordName];
     SKYQuery *query = [SKYQuery queryWithRecordType:@"user_conversation" predicate:pred];
     query.limit = 1;
@@ -1028,7 +1027,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         }
 
         self->subscribedUserChannel = userChannel;
-        [self.container.pubsubClient subscribeTo:userChannel.name
+        [self.container.pubsub subscribeTo:userChannel.name
                                          handler:^(NSDictionary *data) {
                                              [self handleUserChannelDictionary:data];
                                          }];
@@ -1042,7 +1041,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 - (void)unsubscribeFromUserChannel
 {
     if (subscribedUserChannel) {
-        [self.container.pubsubClient unsubscribe:subscribedUserChannel.name];
+        [self.container.pubsub unsubscribe:subscribedUserChannel.name];
         subscribedUserChannel = nil;
     }
 }

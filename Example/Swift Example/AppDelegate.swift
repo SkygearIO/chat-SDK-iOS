@@ -25,7 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var skygear: SKYContainer {
-        return SKYContainer.default()!
+        return SKYContainer.default()
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
@@ -36,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             self.skygear.configure(withAPIKey: apiKeyValue)
         }
 
-        self.skygear.registerDeviceCompletionHandler { (deviceID, error) in
+        self.skygear.push.registerDeviceCompletionHandler { (deviceID, error) in
             guard error == nil else {
                 print("Got error when register device: \(error!.localizedDescription)")
                 return
@@ -90,7 +90,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         print("Got remote notification device token")
-        self.skygear.registerRemoteNotificationDeviceToken(deviceToken) {(_, error) in
+        self.skygear.push.registerDevice(withDeviceToken: deviceToken) {(_, error) in
             guard error == nil else {
                 print("Got error when register push notification token: \(error!.localizedDescription)")
                 return

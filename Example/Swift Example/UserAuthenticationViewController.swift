@@ -38,7 +38,7 @@ class UserAuthenticationViewController: UITableViewController {
 
     internal var isLoggedIn: Bool {
         get {
-            return SKYContainer.default().currentUserRecordID != nil
+            return SKYContainer.default().auth.currentUserRecordID != nil
         }
     }
 
@@ -93,7 +93,7 @@ class UserAuthenticationViewController: UITableViewController {
                 return
             }
 
-            SKYContainer.default().login(withUsername: username, password: password) { (user, error) in
+            SKYContainer.default().auth.login(withUsername: username, password: password) { (user, error) in
                 if let err = error {
                     self.showAuthenticationError(user, error: err, completion: {
                         self.login(username)
@@ -126,7 +126,7 @@ class UserAuthenticationViewController: UITableViewController {
                 return
             }
 
-            SKYContainer.default().signup(withUsername: username, password: password) { (user, error) in
+            SKYContainer.default().auth.signup(withUsername: username, password: password) { (user, error) in
                 if let err = error {
                     self.showAuthenticationError(user, error: err, completion: {
                         self.signup(username)
@@ -147,7 +147,7 @@ class UserAuthenticationViewController: UITableViewController {
             return
         }
 
-        SKYContainer.default().logout { (user, error) in
+        SKYContainer.default().auth.logout { (user, error) in
             if let err = error {
                 self.showAuthenticationError(user, error: err, completion: nil)
                 return
@@ -160,7 +160,7 @@ class UserAuthenticationViewController: UITableViewController {
     }
 
     func updateUserRecord(by user: SKYUser) {
-        let skygear = SKYContainer.default()!
+        let skygear = SKYContainer.default()
         let userQuery = SKYQuery(recordType: "user",
                                  predicate: NSPredicate(format: "_id = %@",
                                                         argumentArray:[user.userID!]))
@@ -244,10 +244,10 @@ class UserAuthenticationViewController: UITableViewController {
                 cell.detailTextLabel?.text = self.lastUsername
             } else if indexPath.row == 1 {
                 cell.textLabel?.text = "User Record ID"
-                cell.detailTextLabel?.text = SKYContainer.default().currentUserRecordID
+                cell.detailTextLabel?.text = SKYContainer.default().auth.currentUserRecordID
             } else if indexPath.row == 2 {
                 cell.textLabel?.text = "Access Token"
-                cell.detailTextLabel?.text = SKYContainer.default().currentAccessToken.tokenString
+                cell.detailTextLabel?.text = SKYContainer.default().auth.currentAccessToken.tokenString
             }
             return cell
         default:

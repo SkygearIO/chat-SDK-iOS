@@ -147,7 +147,7 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
 
             // add all participant records for display
             conversation.participantIds.forEach({ (eachParticipantID) in
-                guard eachParticipantID != self.skygear.currentUserRecordID! else {
+                guard eachParticipantID != self.skygear.auth.currentUserRecordID! else {
                     // no need to show current user's name
                     return
                 }
