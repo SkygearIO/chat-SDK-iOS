@@ -18,14 +18,14 @@ This is the client library for the Skygear Chat extension.
   s.subspec 'Core' do |sp|
     sp.source_files = 'SKYKitChat/Classes/Core/**/*'
 
-    sp.dependency 'SKYKit/Core', '~> 0.21.0'
+    sp.dependency 'SKYKit/Core', '~> 1.0.0'
   end
 
   s.subspec 'UI' do |sp|
     sp.source_files = 'SKYKitChat/Classes/UI/**/*'
 
     sp.dependency 'SKYKitChat/Core'
-    sp.dependency 'SKYKit/Core',               '~> 0.21.0'
+    sp.dependency 'SKYKit/Core',               '~> 1.0.0'
     sp.dependency 'JSQMessagesViewController', '~> 7.3.0'
     sp.dependency 'SVProgressHUD',             '~> 2.1.0'
   end
