@@ -24,7 +24,6 @@ class ConversationListDemoViewController: SKYChatConversationListViewController 
     let showConversationSegueIdentifier: String = "ShowConversationSegue"
 
     var selectedConversation: SKYConversation?
-    var selectedUserConversation: SKYUserConversation?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,7 +40,6 @@ class ConversationListDemoViewController: SKYChatConversationListViewController 
         case showConversationSegueIdentifier:
             if let dest = segue.destination as? ConversationDemoViewController {
                 dest.conversation = self.selectedConversation
-                dest.userConversation = self.selectedUserConversation
             }
         default:
             break
@@ -53,10 +51,10 @@ extension ConversationListDemoViewController: SKYChatConversationListViewControl
     func listViewController(_ controller: SKYChatConversationListViewController,
                             didSelectConversation conversation: SKYConversation)
     {
-        print("Conversation \(conversation.recordID.recordName!) is selected")
+        print("Conversation \(conversation.recordID().recordName!) is selected")
 
         SVProgressHUD.show()
-        self.skygear.chatExtension?.fetchUserConversation(
+        self.skygear.chatExtension?.fetchConversation(
             conversation: conversation, fetchLastMessage: false, completion: { (result, error) in
                 SVProgressHUD.dismiss()
                 guard error == nil else {
@@ -65,14 +63,13 @@ extension ConversationListDemoViewController: SKYChatConversationListViewControl
                     return
                 }
 
-                guard let userConv = result else {
-                    print("Error: Get nil user conversation")
+                guard let conversation = result else {
+                    print("Error: Get nil conversation")
                     SVProgressHUD.showError(withStatus: "Cannot get conversation information")
                     return
                 }
 
                 self.selectedConversation = conversation
-                self.selectedUserConversation = userConv
                 self.performSegue(withIdentifier: self.showConversationSegueIdentifier,
                                   sender: self)
             }

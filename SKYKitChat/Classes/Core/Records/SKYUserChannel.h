@@ -36,4 +36,5 @@
  */
 + (instancetype _Nullable)userChannel;
 
+- (id _Nonnull)init;
 @end

@@ -39,14 +39,17 @@ import SVProgressHUD
 
 open class SKYChatConversationListViewController: UIViewController {
 
+
     public var skygear: SKYContainer = SKYContainer.default()
     public weak var delegate: SKYChatConversationListViewControllerDelegate?
     public weak var dataSource: SKYChatConversationListViewControllerDataSource?
 
     @IBOutlet public var tableView: UITableView!
 
-    var userConversations: [SKYUserConversation] = []
+    var refreshControl: UIRefreshControl!
+    var conversations: [SKYConversation] = []
     var users: [String: SKYRecord] = [:]
+    var conversationChangeObserver: Any?
 }
 
 // MARK: - Initializing
@@ -75,6 +78,12 @@ extension SKYChatConversationListViewController {
 
         self.tableView.register(SKYChatConversationTableViewCell.nib,
                                 forCellReuseIdentifier: "ConversationCell")
+        self.refreshControl = UIRefreshControl()
+        self.refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+        self.refreshControl?.addTarget(self, action: #selector(handleRefresh), for: UIControlEvents.valueChanged)
+        self.tableView.addSubview(refreshControl);
+        self.refreshControl.beginRefreshing()
+        self.handleRefresh(refreshControl: self.refreshControl)
     }
 
     open override func viewWillAppear(_ animated: Bool) {
@@ -89,8 +98,13 @@ extension SKYChatConversationListViewController {
         if let _ = self.navigationController {
             self.edgesForExtendedLayout = [.left, .right, .bottom]
         }
-
-        self.performQuery()
+        self.subscribeConversationChanges()
+    }
+    
+    override open func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        self.unsubscribeConversationChanges()
     }
 
     func dismiss(animated: Bool) {
@@ -105,6 +119,12 @@ extension SKYChatConversationListViewController {
             self.dismiss(animated: animated, completion: nil)
         }
     }
+    
+    public func handleRefresh(refreshControl: UIRefreshControl) {
+        self.performQuery(callback: {
+            refreshControl.endRefreshing()
+        })
+    }
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
@@ -112,22 +132,22 @@ extension SKYChatConversationListViewController {
 extension SKYChatConversationListViewController: UITableViewDelegate, UITableViewDataSource {
 
     open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return userConversations.count
+        return conversations.count
     }
 
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let userConversation = self.userConversations[indexPath.row]
+        let conversation = self.conversations[indexPath.row]
         if let cell = tableView.dequeueReusableCell(withIdentifier: "ConversationCell")
             as? SKYChatConversationTableViewCell {
 
-            cell.conversation = userConversation.conversation
-            cell.conversationMessage = userConversation.conversation.lastMessage?.body
-            cell.unreadMessageCount = userConversation.unreadCount
+            cell.conversation = conversation
+            cell.conversationMessage = conversation.lastMessage?.body
+            cell.unreadMessageCount = conversation.unreadCount
             cell.participants = []
 
             // add all participant records for display
-            userConversation.conversation.participantIds.forEach({ (eachParticipantID) in
-                guard eachParticipantID != self.skygear.currentUserRecordID! else {
+            conversation.participantIds.forEach({ (eachParticipantID) in
+                guard eachParticipantID != self.skygear.auth.currentUserRecordID! else {
                     // no need to show current user's name
                     return
                 }
@@ -140,17 +160,17 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
 
             if let ds = self.dataSource {
                 cell.avatarImage = ds.listViewController?(self,
-                                                          avatarImageForConversation: userConversation.conversation,
+                                                          avatarImageForConversation: conversation,
                                                           atIndexPath: indexPath)
             } else {
-                let title = userConversation.conversation.title ?? ""
+                let title = conversation.title ?? ""
                 cell.avatarImage = UIImage.avatarImage(forInitialsOfName: title)
             }
 
             return cell
         } else {
             let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
-            if let title = userConversation.conversation.title {
+            if let title = conversation.title {
                 cell.textLabel?.text = title
                 cell.textLabel?.textColor = UIColor.black
             } else {
@@ -168,9 +188,11 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
 
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let d = self.delegate {
-            let conv = self.userConversations[indexPath.row]
-            d.listViewController?(self, didSelectConversation: conv.conversation)
+            let conv = self.conversations[indexPath.row]
+            d.listViewController?(self,
+                                  didSelectConversation: conv)
         }
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
@@ -186,25 +208,24 @@ extension SKYChatConversationListViewController {
         return self.users[userID]
     }
 
-    public func getUserConversations() -> [SKYUserConversation] {
-        return self.userConversations
+    public func getConversations() -> [SKYConversation] {
+        return self.conversations
     }
 
-    open func performQuery() {
-        SVProgressHUD.show()
-        self.skygear.chatExtension?.fetchUserConversations(fetchLastMessage: true, completion: { (userConversations, error) in
-            SVProgressHUD.dismiss()
+    open func performQuery(callback: (()->())?) {
+        self.skygear.chatExtension?.fetchConversations(completion: { (conversations, error) in
+            callback?()
             if let err = error {
                 self.handleQueryError(error: err)
                 return
             }
 
-            if let uc = userConversations {
-                self.handleQueryResult(result: uc)
+            if let c = conversations {
+                self.handleQueryResult(result: c)
             } else {
                 let err = SKYErrorCreator()
                     .error(with: SKYErrorBadResponse,
-                           message: "Query does not response UserConversation")
+                           message: "Query does not response Conversation")
                 self.handleQueryError(error: err!)
             }
         })
@@ -232,13 +253,13 @@ extension SKYChatConversationListViewController {
         }
     }
 
-    open func handleQueryResult(result: [SKYUserConversation]) {
-        self.userConversations = result
+    open func handleQueryResult(result: [SKYConversation]) {
+        self.conversations = result
         self.tableView.reloadData()
 
         let currentCachedUserKeys = self.users.keys
         let userIDs = result
-            .reduce(Set([])) { return $0.union(Set($1.conversation.participantIds))}
+            .reduce(Set([])) { return $0.union(Set($1.participantIds))}
             .filter { !currentCachedUserKeys.contains($0) }
 
         if userIDs.count > 0 {
@@ -262,5 +283,34 @@ extension SKYChatConversationListViewController {
 
     open func handleUserQueryError(error: Error) {
         SVProgressHUD.showError(withStatus: error.localizedDescription)
+    }
+    
+    open func subscribeConversationChanges() {
+        
+        self.unsubscribeConversationChanges()
+        
+        let handler: ((SKYChatRecordChangeEvent, SKYConversation) -> Void) = {(event, msg) in
+            switch event {
+            case .create:
+                NSLog("Conversation create")
+            case .update:
+                NSLog("Conversation update")
+            case .delete:
+                NSLog("Conversation delete")
+            }
+            self.performQuery(callback: nil)
+
+        }
+        
+        self.conversationChangeObserver = self.skygear.chatExtension?
+            .subscribeToConversation(handler: handler)
+        
+    }
+    
+    open func unsubscribeConversationChanges() {
+        if let observer = self.conversationChangeObserver {
+            self.skygear.chatExtension?.unsubscribeToConversation(withObserver: observer)
+            self.conversationChangeObserver = nil
+        }
     }
 }
