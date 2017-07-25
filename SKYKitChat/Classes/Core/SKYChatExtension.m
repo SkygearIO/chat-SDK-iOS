@@ -148,7 +148,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     }
 
     if (![participantIDs containsObject:self.container.auth.currentUserRecordID]) {
-        participantIDs = [participantIDs arrayByAddingObject:self.container.auth.currentUserRecordID];
+        participantIDs =
+            [participantIDs arrayByAddingObject:self.container.auth.currentUserRecordID];
     }
     participantIDs = [[NSSet setWithArray:participantIDs] allObjects];
 
@@ -493,17 +494,18 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     }
 
     [self.container.publicCloudDatabase uploadAsset:message.attachment
-              completionHandler:^(SKYAsset *uploadedAsset, NSError *error) {
-                  if (error) {
-                      NSLog(@"error uploading asset: %@", error);
+                                  completionHandler:^(SKYAsset *uploadedAsset, NSError *error) {
+                                      if (error) {
+                                          NSLog(@"error uploading asset: %@", error);
 
-                      // NOTE(cheungpat): No idea why we should save message when upload asset
-                      // has failed, but this is the existing behavior.
-                  } else {
-                      message.attachment = uploadedAsset;
-                  }
-                  [self saveMessage:message completion:completion];
-              }];
+                                          // NOTE(cheungpat): No idea why we should save message
+                                          // when upload asset has failed, but this is the existing
+                                          // behavior.
+                                      } else {
+                                          message.attachment = uploadedAsset;
+                                      }
+                                      [self saveMessage:message completion:completion];
+                                  }];
 }
 
 - (void)fetchMessagesWithConversation:(SKYConversation *)conversation
@@ -1028,9 +1030,9 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
         self->subscribedUserChannel = userChannel;
         [self.container.pubsub subscribeTo:userChannel.name
-                                         handler:^(NSDictionary *data) {
-                                             [self handleUserChannelDictionary:data];
-                                         }];
+                                   handler:^(NSDictionary *data) {
+                                       [self handleUserChannelDictionary:data];
+                                   }];
 
         if (completion) {
             completion(nil);
