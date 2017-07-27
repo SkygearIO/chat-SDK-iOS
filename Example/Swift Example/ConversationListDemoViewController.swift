@@ -52,28 +52,8 @@ extension ConversationListDemoViewController: SKYChatConversationListViewControl
                             didSelectConversation conversation: SKYConversation)
     {
         print("Conversation \(conversation.recordID().recordName!) is selected")
-
-        SVProgressHUD.show()
-        self.skygear.chatExtension?.fetchConversation(
-            conversation: conversation, fetchLastMessage: false, completion: { (result, error) in
-                SVProgressHUD.dismiss()
-                guard error == nil else {
-                    print("Error: \(error!.localizedDescription)")
-                    SVProgressHUD.showError(withStatus: error!.localizedDescription)
-                    return
-                }
-
-                guard let conversation = result else {
-                    print("Error: Get nil conversation")
-                    SVProgressHUD.showError(withStatus: "Cannot get conversation information")
-                    return
-                }
-
-                self.selectedConversation = conversation
-                self.performSegue(withIdentifier: self.showConversationSegueIdentifier,
+        self.selectedConversation = conversation
+        self.performSegue(withIdentifier: self.showConversationSegueIdentifier,
                                   sender: self)
-            }
-        )
-
     }
 }

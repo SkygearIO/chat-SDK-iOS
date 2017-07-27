@@ -27,4 +27,3 @@
 #import "SKYKitChat.h"
 #import "SKYMessage.h"
 #import "SKYUserChannel.h"
-#import "SKYUserConversation.h"

@@ -29,8 +29,7 @@
  to the server. To change the corresponding record on the server, use methods defined in
  SKYChatExtension.
  */
-@interface SKYConversation : NSObject
-@property (copy, nonatomic, nonnull) SKYRecord *record;
+@interface SKYConversation : SKYChatRecord
 /**
  Gets or sets the user ID of the participants of this conversation.
  */
@@ -60,50 +59,14 @@
 /**
  The ID of the last message in this conversation.
  */
-@property (readonly, nonatomic, nullable) NSString *lastMessageID;
-@property (readonly, nonatomic, nullable) SKYMessage *lastMessage;
-
-/**
- The ID of the last read message in this conversation.
- */
-@property (nonatomic, nullable) NSString *lastReadMessageID;
-@property (nonatomic, nullable) SKYMessage *lastReadMessage;
-
-/**
- The total number of unread messages
- */
-@property (nonatomic) NSInteger unreadCount;
+@property (readonly, nonatomic, nullable) NSString *lastMessageId;
+@property (readonly, nonatomic, nullable) NSString *lastReadMessageId;
+@property (nonatomic, readonly) NSInteger unreadCount;
+@property (strong, nonatomic, nullable) SKYMessage *lastMessage;
+@property (strong, nonatomic, nullable) SKYMessage *lastReadMessage;
 
 - (NSString *_Nonnull)toString;
-
-/**
- Add participants to the conversation.
- */
-- (void)addParticipantsWithUserIDs:(NSArray<NSString *> *_Nullable)userIDs
-    NS_SWIFT_NAME(addParticipants(_:));
-
-/**
- Remove participants from the conversation.
- */
-- (void)removeParticipantsWithUserIDs:(NSArray<NSString *> *_Nullable)userIDs
-    NS_SWIFT_NAME(removeParticipants(_:));
-
-/**
- Add admins to the conversation.
- */
-- (void)addAdminsWithUserIDs:(NSArray<NSString *> *_Nullable)userIDs NS_SWIFT_NAME(addAdmins(_:));
-
-/**
- Remove admins from the conversation.
- */
-- (void)removeAdminsWithUserIDs:(NSArray<NSString *> *_Nullable)userIDs
-    NS_SWIFT_NAME(removeAdmins(_:));
-
-- (SKYRecordID *_Nonnull)recordID;
-
 - (NSString *_Nonnull)recordName;
-
-+ (instancetype _Nonnull)recordWithRecord:(SKYRecord *_Nonnull)record
-                          withUnreadCount:(NSInteger)unreadCount
-                    withLastReadMessageId:(NSString *_Nullable)lastReadMessageID;
+- (SKYRecordID *_Nonnull)recordID;
++ (instancetype _Nonnull)recordWithRecord:(SKYRecord *_Nullable)record;
 @end

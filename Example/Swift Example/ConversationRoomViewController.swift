@@ -200,7 +200,7 @@ class ConversationRoomViewController: UIViewController,
             
             let message = self.messages[indexPath.row]
             SKYContainer.default().chatExtension?.deleteMessage(message,
-                                                                in: self.conversation) { (conv, error) in
+                                                                in: self.conversation) { (conversation, error) in
                     if let err = error {
                         let alert = UIAlertController(title: "Unable to delete message", message: err.localizedDescription, preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))

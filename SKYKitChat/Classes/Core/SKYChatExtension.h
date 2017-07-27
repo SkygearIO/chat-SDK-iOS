@@ -57,7 +57,7 @@ extern NSString *_Nonnull const SKYChatTypingIndicatorUserInfoKey;
  */
 extern NSString *_Nonnull const SKYChatRecordChangeUserInfoKey;
 
-@class SKYConversation, SKYMessage, SKYUserChannel, SKYUserConversation;
+@class SKYConversation, SKYMessage, SKYUserChannel;
 
 /**
  SKYChatExtension is a simple object that expose easy to use helper methods to develop a chat
@@ -77,8 +77,6 @@ typedef void (^SKYChatUnreadCountCompletion)(
     NSDictionary<NSString *, NSNumber *> *_Nullable response, NSError *_Nullable error);
 typedef void (^SKYChatChannelCompletion)(SKYUserChannel *_Nullable userChannel,
                                          NSError *_Nullable error);
-typedef void (^SKYChatFetchUserConversationListCompletion)(
-    NSArray<SKYUserConversation *> *_Nullable conversationList, NSError *_Nullable error);
 typedef void (^SKYChatFetchConversationListCompletion)(
     NSArray<SKYConversation *> *_Nullable conversationList, NSError *_Nullable error);
 typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nullable messageList,
@@ -196,18 +194,17 @@ typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nulla
     /* clang-format off */ NS_SWIFT_NAME(fetchConversations(completion:)); /* clang-format on */
 
 /**
- Fetches conversations with optional last message, page and page size in conversation.
+ Fetches conversations with optional last message in conversation.
+
  @param fetchLastMessage whether to fetch the last message
  @param page     page index of conversations to be fetched
  @param pageSize maximum number of conversations to be fetched
  @param completion completion block
  */
 - (void)fetchConversationsWithFetchLastMessage:(BOOL)fetchLastMessage
-                                          page:(NSInteger)page
-                                      pageSize:(NSInteger)pageSize
                                     completion:
                                         (SKYChatFetchConversationListCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchConversations(fetchLastMessage:page:pageSize:completion:)); /* clang-format on */
+    /* clang-format off */ NS_SWIFT_NAME(fetchConversations(fetchLastMessage:completion:)); /* clang-format on */
 
 /**
  Fetches a conversation by conversation ID.
@@ -220,18 +217,6 @@ typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nulla
                            fetchLastMessage:(BOOL)fetchLastMessage
                                  completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(fetchConversation(conversationID:fetchLastMessage:completion:)); /* clang-format on */
-
-/**
- Fetches a conversation by conversation.
-
- @param conversation conversation object
- @param fetchLastMessage whether to fetch the last message
- @param completion completion block
- */
-- (void)fetchConversationWithConversation:(SKYConversation *_Nonnull)conversation
-                         fetchLastMessage:(BOOL)fetchLastMessage
-                               completion:(SKYChatConversationCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchConversation(conversation:fetchLastMessage:completion:)); /* clang-format on */
 
 ///---------------------------------------
 /// @name Adding and removing participants
@@ -472,7 +457,7 @@ typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nulla
  message are updated.
 
  @param message the message object
- @param conversation the user conversation object
+ @param conversation the conversation object
  @param completion completion block
  */
 - (void)deleteMessage:(SKYMessage *_Nonnull)message

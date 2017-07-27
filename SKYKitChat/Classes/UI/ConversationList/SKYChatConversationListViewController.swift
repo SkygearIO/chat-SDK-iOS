@@ -213,15 +213,16 @@ extension SKYChatConversationListViewController {
     }
 
     open func performQuery(callback: (()->())?) {
-        self.skygear.chatExtension?.fetchConversations(completion: { (conversations, error) in
+        self.skygear.chatExtension?.fetchConversations(fetchLastMessage: true, completion: {
+            (conversations, error) in
             callback?()
             if let err = error {
                 self.handleQueryError(error: err)
                 return
             }
 
-            if let c = conversations {
-                self.handleQueryResult(result: c)
+            if let conversations = conversations {
+                self.handleQueryResult(result: conversations)
             } else {
                 let err = SKYErrorCreator()
                     .error(with: SKYErrorBadResponse,

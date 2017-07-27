@@ -18,6 +18,7 @@
 //
 
 #import "SKYMessage.h"
+#import "SKYConversation.h"
 
 NSString *const SKYMessageConversationKey = @"conversation";
 NSString *const SKYMessageBodyKey = @"body";
@@ -26,6 +27,12 @@ NSString *const SKYMessageAttachmentKey = @"attachment";
 NSString *const SKYMessageStatusKey = @"message_status";
 
 @implementation SKYMessage
+
++ (instancetype)recordWithRecord:(SKYRecord *)record
+{
+    SKYMessage *new_record = [[SKYMessage alloc] initWithRecordData:record];
+    return new_record;
+}
 
 + (instancetype)message
 {
@@ -39,21 +46,14 @@ NSString *const SKYMessageStatusKey = @"message_status";
     return self;
 }
 
-- (void)setConversationID:(NSString *)conversationID
+- (void)setConversationRef:(SKYReference *)ref
 {
-    if (conversationID) {
-        SKYRecordID *recordID =
-            [SKYRecordID recordIDWithRecordType:@"conversation" name:conversationID];
-        self.record[SKYMessageConversationKey] = [SKYReference referenceWithRecordID:recordID];
-    } else {
-        self.record[SKYMessageConversationKey] = nil;
-    }
+    self.record[SKYMessageConversationKey] = ref;
 }
 
-- (NSString *)conversationID
+- (SKYReference *)conversationRef
 {
-    SKYReference *conversation = self.record[SKYMessageConversationKey];
-    return conversation.recordID.recordName;
+    return self.record[SKYMessageConversationKey];
 }
 
 - (void)setBody:(NSString *)body

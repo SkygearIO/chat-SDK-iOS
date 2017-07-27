@@ -34,7 +34,7 @@ typedef NS_ENUM(NSInteger, SKYMessageConversationStatus) {
 
 @interface SKYMessage : SKYChatRecord
 
-@property (strong, nonatomic, nullable) NSString *conversationID;
+@property (strong, nonatomic, nullable) SKYReference *conversationRef;
 @property (copy, nonatomic, nullable) NSString *body;
 @property (copy, nonatomic, nullable) NSDictionary<NSString *, id> *metadata;
 @property (strong, nonatomic, readwrite, nullable) SKYAsset *attachment;
@@ -45,4 +45,5 @@ typedef NS_ENUM(NSInteger, SKYMessageConversationStatus) {
 @property (assign, nonatomic, readonly) SKYMessageConversationStatus conversationStatus;
 
 + (instancetype _Nullable)message;
++ (instancetype _Nonnull)recordWithRecord:(SKYRecord *_Nonnull)record;
 @end

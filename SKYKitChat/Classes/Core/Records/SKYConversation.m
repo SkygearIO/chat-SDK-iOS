@@ -18,41 +18,46 @@
 //
 
 #import "SKYConversation.h"
+#import "SKYChatRecord.h"
+#import "SKYMessage.h"
 
 NSString *const SKYConversationParticipantsKey = @"participant_ids";
 NSString *const SKYConversationAdminsKey = @"admin_ids";
 NSString *const SKYConversationTitleKey = @"title";
 NSString *const SKYConversationDistinctByParticipantsKey = @"distinct_by_participants";
 NSString *const SKYConversationMetadataKey = @"metadata";
+NSString *const SKYConversationLastMessageIDKey = @"last_message_ref";
+NSString *const SKYConversationLastReadMessageIDKey = @"last_read_message_ref";
 NSString *const SKYConversationLastMessageKey = @"last_message";
+NSString *const SKYConversationLastReadMessageKey = @"last_read_message";
+NSString *const SKYConversationUnreadCountKey = @"unread_count";
 
-@implementation SKYConversation : NSObject
+@implementation SKYConversation : SKYChatRecord
 + (instancetype)recordWithRecord:(SKYRecord *)record
-                 withUnreadCount:(NSInteger)unreadCount
-           withLastReadMessageId:(NSString *)lastReadMessageID
 {
+    SKYConversation *conversation = [[SKYConversation alloc] initWithRecordData:record];
+    SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
+    if (conversation.record[SKYConversationLastMessageKey]) {
+        conversation.lastMessage = [SKYMessage
+            recordWithRecord:[deserializer
+                                 recordWithDictionary:conversation
+                                                          .record[SKYConversationLastMessageKey]]];
+    }
 
-    SKYConversation *conversation = [[SKYConversation alloc] init];
-    conversation.record = record;
-    conversation.unreadCount = unreadCount;
-    conversation.lastReadMessageID = lastReadMessageID;
+    if (conversation.record[SKYConversationLastReadMessageKey]) {
+        conversation.lastReadMessage = [SKYMessage
+            recordWithRecord:
+                [deserializer
+                    recordWithDictionary:conversation.record[SKYConversationLastReadMessageKey]]];
+    }
+
     return conversation;
-}
-
-- (void)setParticipantIds:(NSArray<NSString *> *)participantIds
-{
-    self.record[SKYConversationParticipantsKey] = [[NSSet setWithArray:participantIds] allObjects];
 }
 
 - (NSArray<NSString *> *)participantIds
 {
     NSArray *admins = self.record[SKYConversationParticipantsKey];
     return admins ? admins : [NSArray array];
-}
-
-- (void)setAdminIds:(NSArray<NSString *> *)adminIds
-{
-    self.record[SKYConversationAdminsKey] = [[NSSet setWithArray:adminIds] allObjects];
 }
 
 - (NSArray<NSString *> *)adminIds
@@ -96,9 +101,14 @@ NSString *const SKYConversationLastMessageKey = @"last_message";
     return [[self.record[SKYConversationLastMessageKey] recordID] recordName];
 }
 
-- (void)setLastMessage:(SKYMessage *_Nullable)lastMessage
+- (NSString *)lastReadMessageID
 {
-    _lastMessage = lastMessage;
+    return [[self.record[SKYConversationLastMessageKey] recordID] recordName];
+}
+
+- (NSInteger)unreadCount
+{
+    return [self.record[SKYConversationUnreadCountKey] integerValue];
 }
 
 - (NSString *)toString
@@ -108,30 +118,6 @@ NSString *const SKYConversationLastMessageKey = @"last_message";
                                       self.participantIds, self.adminIds, self.title,
                                       self.distinctByParticipants ? @"YES" : @"NO",
                                       self.record.modificationDate];
-}
-
-- (void)addParticipantsWithUserIDs:(NSArray<NSString *> *)userIDs
-{
-    [self setParticipantIds:[self.participantIds arrayByAddingObjectsFromArray:userIDs]];
-}
-
-- (void)removeParticipantsWithUserIDs:(NSArray<NSString *> *)userIDs
-{
-    NSMutableArray *participants = [self.participantIds mutableCopy];
-    [participants removeObjectsInArray:userIDs];
-    [self setParticipantIds:participants];
-}
-
-- (void)addAdminsWithUserIDs:(NSArray<NSString *> *)userIDs
-{
-    [self setAdminIds:[self.adminIds arrayByAddingObjectsFromArray:userIDs]];
-}
-
-- (void)removeAdminsWithUserIDs:(NSArray<NSString *> *)userIDs
-{
-    NSMutableArray *admins = [self.adminIds mutableCopy];
-    [admins removeObjectsInArray:userIDs];
-    [self setAdminIds:admins];
 }
 
 - (NSString *)recordName
