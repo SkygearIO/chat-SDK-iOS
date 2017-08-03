@@ -156,6 +156,28 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
              }];
 }
 
+- (void)deleteConversation:(SKYConversation *)conversation
+                completion:(SKYChatDeleteConversationCompletion)completion
+{
+    [self.container
+               callLambda:@"chat:delete_conversation"
+                arguments:@[ conversation.recordName ]
+        completionHandler:^(NSDictionary *response, NSError *error) {
+            /* FIXME: remove SKYErrorName checking after
+             https://github.com/SkygearIO/skygear-SDK-iOS/issues/118 is close */
+            if (error && [error.userInfo[@"SKYErrorName"] isEqualToString:@"PermissionDenied"]) {
+                NSLog(@"error calling chat:delete_conversation: %@", error);
+                if (completion) {
+                    completion(nil, error);
+                }
+                return;
+            }
+            if (completion) {
+                completion(@YES, nil);
+            }
+        }];
+}
+
 - (void)createDirectConversationWithUserID:(NSString *)userID
                                      title:(NSString *)title
                                   metadata:(NSDictionary<NSString *, id> *)metadata

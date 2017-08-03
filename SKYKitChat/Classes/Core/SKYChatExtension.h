@@ -69,7 +69,8 @@ extern NSString *_Nonnull const SKYChatRecordChangeUserInfoKey;
  a SKYChatExtension through the `-[SKYContainer chatExtension]` category method.
  */
 @interface SKYChatExtension : NSObject
-
+typedef void (^SKYChatDeleteConversationCompletion)(NSNumber *_Nullable result,
+                                                    NSError *_Nullable error);
 typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable conversation,
                                               NSError *_Nullable error);
 typedef void (^SKYChatMessageCompletion)(SKYMessage *_Nullable message, NSError *_Nullable error);
@@ -183,6 +184,17 @@ typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nulla
 - (void)saveConversation:(SKYConversation *_Nonnull)conversation
               completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(saveConversation(_:completion:)); /* clang-format on */
+
+/**
+ Deletes a conversation.
+
+ This method can be used to delete an existing conversation.
+ @param conversation the conversation to be saved
+ @param completion completion block
+ */
+- (void)deleteConversation:(SKYConversation *_Nonnull)conversation
+                completion:(SKYChatDeleteConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(deleteConversation(_:completion:)); /* clang-format on */
 
 /**
  Fetches conversations.

@@ -78,4 +78,24 @@ class ConversationsViewController: UITableViewController {
         self.performSegue(withIdentifier: "conversation_room", sender: conversations[indexPath.row])
     }
 
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let deleteAction = UITableViewRowAction(style: UITableViewRowActionStyle.normal, title: "Delete") { (action, indexPath) in
+            let conversation = self.conversations[indexPath.row]
+            SKYContainer.default().chatExtension?.deleteConversation(conversation) { (result, error) in
+                if let err = error {
+                    let alert = UIAlertController(title: "Unable to delete conversation", message: err.localizedDescription,preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                    tableView.reloadData()
+                    return
+                }
+                self.conversations.remove(at: indexPath.row)
+                tableView.reloadData()
+            }
+        }
+        
+        deleteAction.backgroundColor = UIColor.red
+        
+        return [deleteAction]
+    }
 }
