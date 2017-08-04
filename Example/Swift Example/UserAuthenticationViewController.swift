@@ -60,7 +60,7 @@ class UserAuthenticationViewController: UITableViewController {
 
     // MARK: - Actions
 
-    func showAuthenticationError(_ user: SKYUser?, error: Error, completion: (() -> Void)?) {
+    func showAuthenticationError(_ user: SKYRecord?, error: Error, completion: (() -> Void)?) {
         let alert = UIAlertController(title: "Unable to Authenticate", message: error.localizedDescription, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action) in
             if let c = completion {
@@ -159,11 +159,11 @@ class UserAuthenticationViewController: UITableViewController {
         }
     }
 
-    func updateUserRecord(by user: SKYUser) {
+    func updateUserRecord(by user: SKYRecord) {
         let skygear = SKYContainer.default()
         let userQuery = SKYQuery(recordType: "user",
                                  predicate: NSPredicate(format: "_id = %@",
-                                                        argumentArray:[user.userID!]))
+                                                        argumentArray:[user.recordID.recordName!]))
         skygear.publicCloudDatabase.perform(
             userQuery, completionHandler: { (results, queryError) in
                 guard queryError == nil else {
@@ -178,7 +178,7 @@ class UserAuthenticationViewController: UITableViewController {
                     }
 
                     let theUser = userRecords[0]
-                    theUser.setValue(user.username, forKey: "name")
+                    theUser.setValue(user["username"], forKey: "name")
 
                     skygear.publicCloudDatabase.save(theUser, completion: { (savedRecord, saveError) in
                         guard saveError == nil else {
