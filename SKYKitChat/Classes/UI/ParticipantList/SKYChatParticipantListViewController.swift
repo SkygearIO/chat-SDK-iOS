@@ -246,8 +246,6 @@ extension SKYChatParticipantListViewController {
         case .byName:
             self.searchBar.placeholder = NSLocalizedString("Search for name of user",
                                                            comment: "")
-        default:
-            self.searchBar.placeholder = nil
         }
     }
 
@@ -272,49 +270,37 @@ extension SKYChatParticipantListViewController {
             if let name = participantRecord.object(forKey: "name") as? String {
                 participantInfo = name
             }
-        default:
-            break
         }
 
         return participantInfo
     }
 
     var queryPredicate: NSPredicate? {
+        var keyword = ""
         switch self.queryMethod {
         case .byEmail:
-            if let term = self.searchTerm {
-                return SKYUserDiscoverPredicate(emails: [term])
-            } else {
-                print("Cannot search for an empty email")
-                return nil
-            }
-
+            keyword = "email"
+            break
         case .byUsername:
-            if let term = self.searchTerm {
-                return SKYUserDiscoverPredicate(usernames: [term])
-            } else {
-                print("Cannot search for an empty email")
-                return nil
-            }
-
+            keyword = "username"
+            break
         case .byName:
-            var predicate: NSPredicate
-            if let term = self.searchTerm {
-                predicate = NSPredicate(format: "name LIKE[c] %@", argumentArray: ["*\(term)*"])
-            } else {
-                predicate = NSPredicate(format: "name != nil")
-            }
-
-            if let scope = self.participantScope {
-                predicate = NSCompoundPredicate(
-                    andPredicateWithSubpredicates: [predicate, scope.predicate])
-            }
-
-            return predicate
-
-        default:
-            return nil
+            keyword = "name"
+            break
         }
+        
+        var predicate: NSPredicate
+        if let term = self.searchTerm {
+            predicate = NSPredicate(format: "%K LIKE[c] %@", keyword, "*\(term)*")
+        } else {
+            predicate = NSPredicate(format: "%@ != nil")
+        }
+        
+        if let scope = self.participantScope {
+            predicate = NSCompoundPredicate(
+                andPredicateWithSubpredicates: [predicate, scope.predicate])
+        }
+        return predicate
     }
 
     open func performUserQuery() {

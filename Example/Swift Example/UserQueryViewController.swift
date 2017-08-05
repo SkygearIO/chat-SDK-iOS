@@ -24,7 +24,7 @@ import Kingfisher
 class UserQueryViewController: SKYChatParticipantListViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.queryMethod = .byName
+        self.queryMethod = .byUsername
         self.dataSource = self
     }
 }
