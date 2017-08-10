@@ -18,8 +18,7 @@ This is the client library for the Skygear Chat extension.
   s.subspec 'Core' do |sp|
     sp.source_files = 'SKYKitChat/Classes/Core/**/*'
 
-    #Temporary disable subspec dependency for non existing package
-    #sp.dependency 'SKYKit/Core', '~> 1.1.0-alpha.1'
+    sp.dependency 'SKYKit/Core', '~> 1.1.0'
   end
 
   s.subspec 'UI' do |sp|

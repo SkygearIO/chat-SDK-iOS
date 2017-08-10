@@ -13,7 +13,7 @@ before_install:
 - pod install --project-directory=Example
 script:
 - xcodebuild -scheme "$SCHEME" -workspace "$WORKSPACE" -sdk "$SDK" -destination "$DESTINATION" build test | xcpretty
-  #- pod lib lint --allow-warnings
+- pod lib lint --allow-warnings
 - ./clang-check.sh
 - swiftlint lint --path SKYKitChat
 - lizard SKYKitChat/ -C 15 -w -i 0
