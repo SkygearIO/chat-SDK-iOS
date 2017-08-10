@@ -293,7 +293,7 @@ extension SKYChatParticipantListViewController {
         if let term = self.searchTerm {
             predicate = NSPredicate(format: "%K LIKE[c] %@", keyword, "*\(term)*")
         } else {
-            predicate = NSPredicate(format: "%@ != nil")
+            predicate = NSPredicate(format: "1 = 1")
         }
         
         if let scope = self.participantScope {
