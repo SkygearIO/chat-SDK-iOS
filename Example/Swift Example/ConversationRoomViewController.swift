@@ -282,22 +282,20 @@ class ConversationRoomViewController: UIViewController,
             return
         }
 
-        if let asset = SKYAsset(data: UIImagePNGRepresentation(image)) {
-            asset.mimeType = "image/png"
-            SKYContainer.default().publicCloudDatabase.uploadAsset(asset) { (asset, error) in
-                if let err = error {
-                    let alert = UIAlertController(title: "Unable to upload", message: err.localizedDescription, preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(alert, animated: true, completion: nil)
-                    return
-                }
+        let asset = SKYAsset(data: UIImagePNGRepresentation(image)!)
+        asset.mimeType = "image/png"
+        SKYContainer.default().publicCloudDatabase.uploadAsset(asset) { (asset, error) in
+            if let err = error {
+                let alert = UIAlertController(title: "Unable to upload", message: err.localizedDescription, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+                return
+            }
 
-                if let ast = asset {
-                    self.chosenAsset = ast
-                    self.chosenAsseTexttLabel.text = ast.description
-                }
+            if let ast = asset {
+                self.chosenAsset = ast
+                self.chosenAsseTexttLabel.text = ast.description
             }
         }
-
     }
 }

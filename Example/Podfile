@@ -5,7 +5,6 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 target 'SKYKitChat_Example' do
   pod 'SKYKitChat', :path => '../'
-  pod 'SKYKit/Core', :git => 'https://github.com/SkygearIO/skygear-SDK-iOS.git', :tag => '1.1.0-alpha.0'
   target 'SKYKitChat_Tests' do
     inherit! :search_paths
 
@@ -16,7 +15,6 @@ end
 
 
 target 'Swift Example' do
-  pod 'SKYKit/Core', :git => 'https://github.com/SkygearIO/skygear-SDK-iOS.git', :tag => '1.1.0-alpha.0'
   pod 'SKYKitChat', :path => '../'
   pod 'SKYKitChat/UI', :path => '../'
   pod 'Kingfisher', '~> 3.0'

@@ -71,8 +71,8 @@ class CreateGroupConversationViewController: UIViewController,
 
         var userIds = self.userIds
 
-        if !userIds.contains(SKYContainer.default().auth.currentUserRecordID) {
-            userIds.append(SKYContainer.default().auth.currentUserRecordID)
+        if !userIds.contains(SKYContainer.default().auth.currentUserRecordID!) {
+            userIds.append(SKYContainer.default().auth.currentUserRecordID!)
         }
 
         // let ids be unique

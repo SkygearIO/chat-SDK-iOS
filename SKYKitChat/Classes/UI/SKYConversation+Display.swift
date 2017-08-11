@@ -43,11 +43,11 @@ public extension SKYConversation {
     public func nameList(fromParticipants participants: [SKYRecord],
                          currentUserID: String) -> String? {
 
-        guard participants.contains(where: { $0.recordID.recordName! == currentUserID }) else {
+        guard participants.contains(where: { $0.recordID.recordName == currentUserID }) else {
             return self.nameList(fromParticipants: participants)
         }
 
-        let filtered = participants.filter { $0.recordID.recordName! != currentUserID }
+        let filtered = participants.filter { $0.recordID.recordName != currentUserID }
         guard let namelist = self.nameList(fromParticipants: filtered) else {
             return nil
         }
