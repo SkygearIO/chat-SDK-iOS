@@ -403,8 +403,8 @@ extension SKYChatConversationViewController {
                 }
 
                 // find the index for the "sending" message
-                let ids = self.messages.map({$0.recordID().recordName!})
-                guard let idx = ids.index(of: sentMsg.recordID().recordName!) else {
+                let ids = self.messages.map({$0.recordID().recordName})
+                guard let idx = ids.index(of: sentMsg.recordID().recordName) else {
                     return
                 }
 
@@ -426,13 +426,11 @@ extension SKYChatConversationViewController {
                                   errorCode: SKYErrorCode,
                                   errorMessage: String) {
 
-        if let err = self.errorCreator.error(with: errorCode, message: errorMessage) {
-
-            self.delegate?.conversationViewController?(self,
-                                                       failedToSendMessageText: messageText,
-                                                       date: date,
-                                                       error: err)
-        }
+        let err = self.errorCreator.error(with: errorCode, message: errorMessage)
+        self.delegate?.conversationViewController?(self,
+                                                   failedToSendMessageText: messageText,
+                                                   date: date,
+                                                   error: err)
     }
 }
 
@@ -505,7 +503,7 @@ extension SKYChatConversationViewController {
             }
 
             let shouldShowIndicator: Bool = indicator.userIDs
-                .flatMap({ SKYRecordID(canonicalString: $0)?.recordName })
+                .flatMap({ SKYRecordID(canonicalString: $0).recordName })
                 .filter({ $0 != nil && $0 != self.senderId })
                 .count > 0
 
@@ -552,7 +550,7 @@ extension SKYChatConversationViewController {
             }
 
         self.skygear.publicCloudDatabase
-            .fetchRecords(withIDs: participantIDs, completionHandler: { (result, error) in
+            .fetchRecords(with: participantIDs, completionHandler: { (result, error) in
                 guard error == nil else {
                     print("Failed to fetch participants: \(error?.localizedDescription ?? "")")
                     self.delegate?.conversationViewController?(
@@ -563,13 +561,12 @@ extension SKYChatConversationViewController {
 
                 guard let participantMap = result as? [SKYRecordID: SKYRecord] else {
                     print("Fetched participants are in wrong format")
-                    if let err = self.errorCreator.error(
+                    let err = self.errorCreator.error(
                         with: SKYErrorBadResponse,
-                        message: "Fetched participants are in wrong format") {
+                        message: "Fetched participants are in wrong format")
 
-                        self.delegate?.conversationViewController?(
-                            self, failedFetchingParticipantWithError: err)
-                    }
+                    self.delegate?.conversationViewController?(
+                        self, failedFetchingParticipantWithError: err)
 
                     return
                 }
@@ -622,12 +619,11 @@ extension SKYChatConversationViewController {
 
                 guard let msgs = result else {
                     print("Failed to get any messages")
-                    if let err = self.errorCreator.error(
-                        with: SKYErrorBadResponse, message: "Failed to get any messages") {
+                    let err = self.errorCreator.error(
+                        with: SKYErrorBadResponse, message: "Failed to get any messages")
 
-                        self.delegate?.conversationViewController?(
-                            self, failedFetchingMessagesWithError: err)
-                    }
+                    self.delegate?.conversationViewController?(
+                        self, failedFetchingMessagesWithError: err)
 
                     return
                 }

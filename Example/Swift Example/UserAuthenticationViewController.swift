@@ -93,7 +93,7 @@ class UserAuthenticationViewController: UITableViewController {
                 return
             }
 
-            SKYContainer.default().auth.login(withUsername: username, password: password) { (user, error) in
+            SKYContainer.default().auth.login(withUsername: username!, password: password!) { (user, error) in
                 if let err = error {
                     self.showAuthenticationError(user, error: err, completion: {
                         self.login(username)
@@ -126,7 +126,7 @@ class UserAuthenticationViewController: UITableViewController {
                 return
             }
 
-            SKYContainer.default().auth.signup(withUsername: username, password: password) { (user, error) in
+            SKYContainer.default().auth.signup(withUsername: username!, password: password!) { (user, error) in
                 if let err = error {
                     self.showAuthenticationError(user, error: err, completion: {
                         self.signup(username)
@@ -163,7 +163,7 @@ class UserAuthenticationViewController: UITableViewController {
         let skygear = SKYContainer.default()
         let userQuery = SKYQuery(recordType: "user",
                                  predicate: NSPredicate(format: "_id = %@",
-                                                        argumentArray:[user.recordID.recordName!]))
+                                                        argumentArray:[user.recordID.recordName]))
         skygear.publicCloudDatabase.perform(
             userQuery, completionHandler: { (results, queryError) in
                 guard queryError == nil else {
@@ -247,7 +247,7 @@ class UserAuthenticationViewController: UITableViewController {
                 cell.detailTextLabel?.text = SKYContainer.default().auth.currentUserRecordID
             } else if indexPath.row == 2 {
                 cell.textLabel?.text = "Access Token"
-                cell.detailTextLabel?.text = SKYContainer.default().auth.currentAccessToken.tokenString
+                cell.detailTextLabel?.text = SKYContainer.default().auth.currentAccessToken?.tokenString
             }
             return cell
         default:

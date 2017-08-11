@@ -77,9 +77,8 @@ extension MainViewController: SKYChatParticipantListViewControllerDelegate {
     public func listViewController(_ controller: SKYChatParticipantListViewController,
                                    didSelectParticipant user: SKYRecord) {
         let _ = self.navigationController?.popViewController(animated: true)
-        if let recordName = user.recordID.recordName {
-            print("User \(recordName) is selected.")
-        }
+        let recordName = user.recordID.recordName
+        print("User \(recordName) is selected.")
 
     }
 }

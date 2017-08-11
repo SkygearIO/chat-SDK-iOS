@@ -298,7 +298,7 @@ extension SKYChatParticipantListViewController {
         
         if let scope = self.participantScope {
             predicate = NSCompoundPredicate(
-                andPredicateWithSubpredicates: [predicate, scope.predicate])
+                andPredicateWithSubpredicates: [predicate, scope.predicate!])
         }
         return predicate
     }
@@ -327,7 +327,7 @@ extension SKYChatParticipantListViewController {
             } else {
                 let err = SKYErrorCreator().error(with: SKYErrorBadResponse,
                                                   message: "Query does not response SKYRecord")
-                self.handleQueryError(error: err!)
+                self.handleQueryError(error: err)
             }
         })
     }

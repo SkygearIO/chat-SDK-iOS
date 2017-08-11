@@ -227,7 +227,7 @@ extension SKYChatConversationListViewController {
                 let err = SKYErrorCreator()
                     .error(with: SKYErrorBadResponse,
                            message: "Query does not response Conversation")
-                self.handleQueryError(error: err!)
+                self.handleQueryError(error: err)
             }
         })
     }
@@ -246,7 +246,7 @@ extension SKYChatConversationListViewController {
                 let err = SKYErrorCreator()
                     .error(with: SKYErrorBadResponse,
                            message: NSLocalizedString("Cannot get any users", comment: ""))
-                self.handleUserQueryError(error: err!)
+                self.handleUserQueryError(error: err)
                 return
             }
 
@@ -274,9 +274,8 @@ extension SKYChatConversationListViewController {
 
     open func handleUserQueryResult(result: [SKYRecord]) {
         result.forEach { (eachUser) in
-            if let eachUserID = eachUser.recordID.recordName {
-                self.users[eachUserID] = eachUser
-            }
+            let eachUserID = eachUser.recordID.recordName
+            self.users[eachUserID] = eachUser
         }
 
         self.tableView.reloadData()
