@@ -371,13 +371,15 @@ typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nulla
  @param conversation conversation object
  @param limit the number of messages to fetch
  @param beforeTime only messages before this time is fetched
+ @param order order of the messages, either 'edited_at' or '_created_at'
  @param completion completion block
  */
 - (void)fetchMessagesWithConversation:(SKYConversation *_Nonnull)conversation
                                 limit:(NSInteger)limit
                            beforeTime:(NSDate *_Nullable)beforeTime
+                                order:(NSString *_Nullable)order
                            completion:(SKYChatFetchMessagesListCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchMessages(conversation:limit:beforeTime:completion:)); /* clang-format on */
+    /* clang-format off */ NS_SWIFT_NAME(fetchMessages(conversation:limit:beforeTime:order:completion:)); /* clang-format on */
 
 /**
  Fetch messages in a conversation by ID.
@@ -385,13 +387,15 @@ typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nulla
  @param conversationId ID of the conversation
  @param limit the number of messages to fetch
  @param beforeTime only messages before this time is fetched
+ @param order order of the messages, either 'edited_at' or '_created_at'
  @param completion completion block
  */
 - (void)fetchMessagesWithConversationID:(NSString *_Nonnull)conversationId
                                   limit:(NSInteger)limit
                              beforeTime:(NSDate *_Nullable)beforeTime
+                                  order:(NSString *_Nullable)order
                              completion:(SKYChatFetchMessagesListCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchMessages(conversationID:limit:beforeTime:completion:)); /* clang-format on */
+    /* clang-format off */ NS_SWIFT_NAME(fetchMessages(conversationID:limit:beforeTime:order:completion:)); /* clang-format on */
 
 ///----------------------------------------------
 /// @name Send message delivery and read receipts

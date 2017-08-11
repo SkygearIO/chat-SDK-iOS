@@ -610,6 +610,7 @@ extension SKYChatConversationViewController {
             conversation: self.conversation!,
             limit: Int(self.messagesFetchLimit),
             beforeTime: before,
+                 order: nil,
             completion: { (result, error) in
                 guard error == nil else {
                     print("Failed to fetch messages: \(error?.localizedDescription ?? "")")

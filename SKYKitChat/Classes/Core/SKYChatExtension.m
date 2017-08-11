@@ -478,12 +478,14 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     [self fetchMessagesWithConversationID:conversation.recordID.recordName
                                     limit:limit
                                beforeTime:beforeTime
+                                    order:nil
                                completion:completion];
 }
 
 - (void)fetchMessagesWithConversationID:(NSString *)conversationId
                                   limit:(NSInteger)limit
                              beforeTime:(NSDate *)beforeTime
+                                  order:(NSString *)order
                              completion:(SKYChatFetchMessagesListCompletion)completion
 {
 
@@ -493,6 +495,10 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         NSLog(@"dateString :%@", dateString);
 
         [arguments addObject:dateString];
+    }
+
+    if (order) {
+        [arguments addObject:order];
     }
 
     [self.container callLambda:@"chat:get_messages"
