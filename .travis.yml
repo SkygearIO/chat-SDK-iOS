@@ -8,7 +8,7 @@ before_install:
 - gem install --no-rdoc --no-ri 'cocoapods:1.2.1'
 - brew update
 - brew install clang-format
-- brew install swiftlint
+- brew install swiftlint || brew upgrade swiftlint
 - sudo pip install lizard
 - pod repo update > /dev/null
 - pod install --project-directory=Example
