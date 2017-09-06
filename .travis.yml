@@ -18,6 +18,20 @@ script:
 - ./clang-check.sh
 - swiftlint lint --path SKYKitChat
 - lizard SKYKitChat/ -C 15 -w -i 0
+before_deploy:
+- rvm install ruby-2.2.4
+- rvm use ruby-2.2.4
+- gem install jazzy
+- sudo pip install awscli
+- sudo pip install https://github.com/SkygearIO/skygear-doc-tools/archive/master.zip
+- aws configure set preview.cloudfront true
+deploy:
+  - provider: script
+    script: scripts/deploy.sh
+    skip_cleanup: true
+    on:
+      repo: SkygearIO/chat-SDK-iOS
+      all_branches: true
 env:
   global:
     - LC_CTYPE=en_US.UTF-8
