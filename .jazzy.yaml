@@ -1,0 +1,14 @@
+objc: true
+clean: true
+author: Skygear
+author_url: https://skygear.io
+github_url: https://github.com/SkygearIO/chat-SDK-iOS/
+github_file_prefix: https://github.com/SkygearIO/chat-SDK-iOS/tree/master
+framework_root: .
+module: SKYKitChat
+umbrella_header: SKYKitChat/Classes/Core/SKYChatExtension.h
+hide_documentation_coverage: true
+theme: fullwidth
+sdk: iphonesimulator
+exclude: "*_Private.h"
+output: jazzy_docs
