@@ -23,7 +23,7 @@ before_deploy:
 - rvm use ruby-2.2.4
 - gem install jazzy
 - sudo pip install awscli
-- sudo pip install https://github.com/SkygearIO/skygear-doc-tools/archive/master.zip
+- sudo pip install git+https://github.com/SkygearIO/skygear-doc-tools.git@master
 - aws configure set preview.cloudfront true
 deploy:
   - provider: script
