@@ -18,6 +18,7 @@
 //
 
 import JSQMessagesViewController
+import ImagePicker
 
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
@@ -32,6 +33,9 @@ import JSQMessagesViewController
         _ controller: SKYChatConversationViewController) -> UIColor
 
     @objc optional func accessoryButtonShouldShowInConversationViewController(
+        _ controller: SKYChatConversationViewController) -> Bool
+
+    @objc optional func cameraButtonShouldShowInConversationViewController(
         _ controller: SKYChatConversationViewController) -> Bool
 
     @objc optional func conversationViewController(
@@ -63,7 +67,7 @@ import JSQMessagesViewController
     @objc optional func conversationViewController(
         _ controller: SKYChatConversationViewController,
         failedFetchingParticipantWithError error: Error)
-    
+
     @objc optional func startFetchingMessages(_ controller: SKYChatConversationViewController)
 
     @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
@@ -92,6 +96,8 @@ open class SKYChatConversationViewController: JSQMessagesViewController {
     public var bubbleFactory: JSQMessagesBubbleImageFactory? = JSQMessagesBubbleImageFactory()
     public var incomingMessageBubble: JSQMessagesBubbleImage?
     public var outgoingMessageBubble: JSQMessagesBubbleImage?
+
+    public var cameraButton: UIButton?
 
     public var incomingMessageBubbleColor: UIColor? {
         didSet {
@@ -205,6 +211,36 @@ extension SKYChatConversationViewController {
         if !shouldShowAccessoryButton {
             self.inputToolbar?.contentView?.leftBarButtonItem?.removeFromSuperview()
             self.inputToolbar?.contentView?.leftBarButtonItem = nil
+        }
+
+        let shouldShowCameraButton: Bool =
+            self.delegate?.cameraButtonShouldShowInConversationViewController?(self) ?? true
+
+        if shouldShowCameraButton {
+            let cameraButton = UIButton(type: .custom)
+            cameraButton.translatesAutoresizingMaskIntoConstraints = false
+            cameraButton.setImage(UIImage(named: "icon-camera", in: self.bundle(), compatibleWith: nil), for: .normal)
+            cameraButton.addTarget(self, action: #selector(didPressCameraButton(_:)), for: .touchUpInside)
+            self.inputToolbar?.contentView?.rightBarButtonContainerView.addSubview(cameraButton)
+            let contentView = self.inputToolbar?.contentView
+            let rightContainerView = contentView?.rightBarButtonContainerView
+            let sendButton = contentView?.rightBarButtonItem
+
+            rightContainerView?.removeConstraints(rightContainerView?.constraints ?? [])
+
+            NSLayoutConstraint.activate([
+                NSLayoutConstraint(item: cameraButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 32),
+                NSLayoutConstraint(item: cameraButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 32),
+                NSLayoutConstraint(item: cameraButton, attribute: .left, relatedBy: .equal, toItem: rightContainerView, attribute: .left, multiplier: 1, constant: 8),
+                NSLayoutConstraint(item: cameraButton, attribute: .right, relatedBy: .equal, toItem: sendButton, attribute: .left, multiplier: 1, constant: -8),
+                NSLayoutConstraint(item: sendButton, attribute: .right, relatedBy: .equal, toItem: rightContainerView, attribute: .right, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: cameraButton, attribute: .top, relatedBy: .equal, toItem: rightContainerView, attribute: .top, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: cameraButton, attribute: .bottom, relatedBy: .equal, toItem: rightContainerView, attribute: .bottom, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: sendButton, attribute: .top, relatedBy: .equal, toItem: rightContainerView, attribute: .top, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: sendButton, attribute: .bottom, relatedBy: .equal, toItem: rightContainerView, attribute: .bottom, multiplier: 1, constant: 0)
+            ])
+
+            self.cameraButton = cameraButton
         }
     }
 
@@ -357,13 +393,17 @@ extension SKYChatConversationViewController {
         }
     }
 
+    open func didPressCameraButton(_ sender: UIButton!) {
+        let imagePicker = ImagePickerController()
+        imagePicker.delegate = self
+        self.present(imagePicker, animated: true, completion: nil)
+    }
+
     open override func didPressSend(_ button: UIButton!,
                                     withMessageText text: String!,
                                     senderId: String!,
                                     senderDisplayName: String!,
                                     date: Date!) {
-
-        
 
         guard let conv = self.conversation else {
             self.failedToSendMessage(text,
@@ -373,7 +413,6 @@ extension SKYChatConversationViewController {
             return
         }
 
-        
         let msg = SKYMessage()
         msg.body = text
         msg.setCreatorUserRecordID(self.senderId)
@@ -431,6 +470,33 @@ extension SKYChatConversationViewController {
                                                    failedToSendMessageText: messageText,
                                                    date: date,
                                                    error: err)
+    }
+}
+
+// MARK: ImagePickerDelegate
+
+extension SKYChatConversationViewController: ImagePickerDelegate {
+    public func wrapperDidPress(_ imagePicker: ImagePickerController, images: [UIImage]) {
+
+    }
+
+    public func doneButtonDidPress(_ imagePicker: ImagePickerController, images: [UIImage]) {
+        imagePicker.dismiss(animated: true)
+        for image in images {
+            self.send(image: image)
+        }
+    }
+
+    public func cancelButtonDidPress(_ imagePicker: ImagePickerController) {
+
+    }
+}
+
+// MARK: - Send photos
+
+extension SKYChatConversationViewController {
+    open func send(image: UIImage) {
+        // TODO: send image
     }
 }
 
@@ -654,5 +720,16 @@ extension SKYChatConversationViewController {
         }
 
         return self.participants[message.creatorUserRecordID()]
+    }
+}
+
+// MARK: Resource
+
+extension SKYChatConversationViewController {
+    open func bundle() -> Bundle? {
+        let podBundle = Bundle(for: SKYChatConversationViewController.self)
+        let bundleUrl = podBundle.url(forResource: "SKYKitChatUI", withExtension:"bundle")
+        let bundle = Bundle(url: bundleUrl!)
+        return bundle
     }
 }

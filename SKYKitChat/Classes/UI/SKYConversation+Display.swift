@@ -55,4 +55,3 @@ public extension SKYConversation {
         return String.localizedStringWithFormat("%@ and You", namelist)
     }
 }
-

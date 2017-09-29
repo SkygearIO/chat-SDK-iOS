@@ -3,6 +3,7 @@ PODS:
   - FMDB (2.7.2):
     - FMDB/standard (= 2.7.2)
   - FMDB/standard (2.7.2)
+  - ImagePicker (2.1.1)
   - JSQMessagesViewController (7.3.5):
     - JSQSystemSoundPlayer (~> 2.0.1)
   - JSQSystemSoundPlayer (2.0.1)
@@ -15,6 +16,7 @@ PODS:
   - SKYKitChat/Core (0.0.2):
     - SKYKit/Core (~> 1.1.0)
   - SKYKitChat/UI (0.0.2):
+    - ImagePicker (~> 2.1)
     - JSQMessagesViewController (~> 7.3.0)
     - SKYKit/Core (~> 1.1.0)
     - SKYKitChat/Core
@@ -32,16 +34,17 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   SKYKitChat:
-    :path: ../
+    :path: "../"
 
 SPEC CHECKSUMS:
   Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
   FMDB: 6198a90e7b6900cfc046e6bc0ef6ebb7be9236aa
+  ImagePicker: fe4c699abb56ff03994fa98d8b02e3883ee118be
   JSQMessagesViewController: 6587f56aedbcb150a8ba1d968e1ef58b1bc758b7
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
   Kingfisher: dc3a4983e86d2dfa89513664983a82340c11a289
   SKYKit: 124d42572fc55e93dadc3a4136a7fcfa956c680b
-  SKYKitChat: af133b86f024da1b06a8fbff09d085ca676c9b91
+  SKYKitChat: 6f57197fc2c0b82fb833c54e19b7d19ec8fb9fdb
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   Specta: f506f3a8361de16bc0dcf3b17b75e269072ba465
   SVProgressHUD: c404a55d78acbeb7ebb78b76d3faf986475a6994

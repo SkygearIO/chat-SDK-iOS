@@ -12,11 +12,16 @@ This is the client library for the Skygear Chat extension.
   s.author           = { "Oursky Ltd." => "hello@oursky.com" }
   s.source           = { :git => 'https://github.com/SkygearIO/chat-SDK-iOS.git', :tag => s.version.to_s }
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '8.2'
   s.default_subspecs = 'Core'
 
   s.subspec 'Core' do |sp|
     sp.source_files = 'SKYKitChat/Classes/Core/**/*'
+    sp.resource_bundles = {
+        'SKYKitChatUI' => [
+            'SKYKitChat/Assets/*.xcassets'
+        ]
+    }
 
     sp.dependency 'SKYKit/Core', '~> 1.1.0'
   end
@@ -28,6 +33,7 @@ This is the client library for the Skygear Chat extension.
     sp.dependency 'SKYKit/Core',               '~> 1.1.0'
     sp.dependency 'JSQMessagesViewController', '~> 7.3.0'
     sp.dependency 'SVProgressHUD',             '~> 2.1.0'
+    sp.dependency 'ImagePicker',               '~> 2.1'
   end
 
 end
