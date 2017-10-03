@@ -18,7 +18,7 @@
 //
 
 import JSQMessagesViewController
-import ImagePicker
+import ALCameraViewController
 
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
@@ -273,10 +273,17 @@ extension SKYChatConversationViewController {
             msgSenderName = senderName
         }
 
+        if msg.attachment == nil {
+            return JSQMessage(senderId: msg.creatorUserRecordID(),
+                              senderDisplayName: msgSenderName,
+                              date: msg.creationDate(),
+                              text: msg.body)
+        }
+
         return JSQMessage(senderId: msg.creatorUserRecordID(),
                           senderDisplayName: msgSenderName,
                           date: msg.creationDate(),
-                          text: msg.body)
+                          media: msg.messageMediaData())
     }
 
     open override func collectionView(
@@ -394,8 +401,16 @@ extension SKYChatConversationViewController {
     }
 
     open func didPressCameraButton(_ sender: UIButton!) {
-        let imagePicker = ImagePickerController()
-        imagePicker.delegate = self
+        // There is always a cropping overlay
+        // So just disable it
+        let croppingParams = CroppingParameters(isEnabled: false, allowResizing: true, allowMoving: true, minimumSize: CGSize.init(width: 64, height: 64))
+        let imagePicker = CameraViewController(croppingParameters: croppingParams, allowsLibraryAccess: false) { [weak self] image, asset in
+            if image != nil {
+                self?.send(image: image!)
+            }
+            self?.dismiss(animated: true, completion: nil)
+        }
+
         self.present(imagePicker, animated: true, completion: nil)
     }
 
@@ -473,30 +488,71 @@ extension SKYChatConversationViewController {
     }
 }
 
-// MARK: ImagePickerDelegate
-
-extension SKYChatConversationViewController: ImagePickerDelegate {
-    public func wrapperDidPress(_ imagePicker: ImagePickerController, images: [UIImage]) {
-
-    }
-
-    public func doneButtonDidPress(_ imagePicker: ImagePickerController, images: [UIImage]) {
-        imagePicker.dismiss(animated: true)
-        for image in images {
-            self.send(image: image)
-        }
-    }
-
-    public func cancelButtonDidPress(_ imagePicker: ImagePickerController) {
-
-    }
-}
-
 // MARK: - Send photos
 
 extension SKYChatConversationViewController {
+    func cleanup(asset: SKYAsset) {
+        try? FileManager.default.removeItem(at: asset.url)
+    }
+
     open func send(image: UIImage) {
-        // TODO: send image
+        let date = Date()
+
+        guard let conv = self.conversation else {
+            self.failedToSendMessage("",
+                                     date: date,
+                                     errorCode: SKYErrorInvalidArgument,
+                                     errorMessage: "Cannot send message to nil conversation")
+            return
+        }
+
+        let msg = SKYMessage(withImage: image)
+        msg.setCreatorUserRecordID(self.senderId)
+        msg.setCreationDate(date)
+
+        self.delegate?.conversationViewController?(self, readyToSendMessage: msg)
+        self.skygear.chatExtension?.addMessage(
+            msg,
+            to: conv,
+            completion: { (result, error) in
+                defer {
+                    if let attachment = msg.attachment {
+                        self.cleanup(asset: attachment)
+                    }
+                }
+
+                guard error == nil else {
+                    print("Failed to sent message: \(error!.localizedDescription)")
+                    self.failedToSendMessage("",
+                                             date: date,
+                                             errorCode: SKYErrorBadResponse,
+                                             errorMessage: error!.localizedDescription)
+                    return
+                }
+
+                guard let sentMsg = result else {
+                    print("Error: Got nil sent message")
+                    self.failedToSendMessage("",
+                                             date: date,
+                                             errorCode: SKYErrorBadResponse,
+                                             errorMessage: "Got nil sent message")
+                    return
+                }
+
+                // find the index for the "sending" message
+                let ids = self.messages.map({$0.recordID().recordName})
+                guard let idx = ids.index(of: sentMsg.recordID().recordName) else {
+                    return
+                }
+
+                self.messages[idx] = sentMsg
+                self.collectionView?.reloadData()
+
+                self.delegate?.conversationViewController?(self, finishSendingMessage: sentMsg)
+        }
+        )
+
+        self.messages.append(msg)
     }
 }
 

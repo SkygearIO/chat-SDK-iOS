@@ -33,7 +33,7 @@ This is the client library for the Skygear Chat extension.
     sp.dependency 'SKYKit/Core',               '~> 1.1.0'
     sp.dependency 'JSQMessagesViewController', '~> 7.3.0'
     sp.dependency 'SVProgressHUD',             '~> 2.1.0'
-    sp.dependency 'ImagePicker',               '~> 2.1'
+    sp.dependency 'ALCameraViewController',    '~> 2.0'
   end
 
 end
