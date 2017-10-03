@@ -450,7 +450,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         completion:(SKYChatMessageCompletion)completion
 {
     message.conversationRef = [SKYReference referenceWithRecord:conversation];
-    if (!message.attachment || message.attachment.url.isFileURL) {
+    if (!message.attachment || !message.attachment.url.isFileURL) {
         [self saveMessage:message completion:completion];
         return;
     }
