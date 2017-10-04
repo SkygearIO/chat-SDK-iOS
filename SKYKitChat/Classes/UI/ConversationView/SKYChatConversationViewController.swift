@@ -404,7 +404,7 @@ extension SKYChatConversationViewController {
         // There is always a cropping overlay
         // So just disable it
         let croppingParams = CroppingParameters(isEnabled: false, allowResizing: true, allowMoving: true, minimumSize: CGSize.init(width: 64, height: 64))
-        let imagePicker = CameraViewController(croppingParameters: croppingParams, allowsLibraryAccess: false) { [weak self] image, asset in
+        let imagePicker = CameraViewController(croppingParameters: croppingParams, allowsLibraryAccess: false) { [weak self] image, _ in
             if image != nil {
                 self?.send(image: image!)
             }

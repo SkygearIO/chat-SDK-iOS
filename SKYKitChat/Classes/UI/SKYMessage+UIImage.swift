@@ -17,14 +17,14 @@
 //  limitations under the License.
 //
 
-fileprivate let MAX_IMAGE_SIZE: CGFloat = 1600
-fileprivate let IMAGE_FORMAT: String = SKYMessageImageThumbnailFormatJPEG
+private let defaultMaxImageSize: CGFloat = 1600
+private let defaultImageFormat: String = SKYMessageImageThumbnailFormatJPEG
 
-fileprivate let THUMBNAIL_SIZE: CGFloat = 80
-fileprivate let THUMBMAIL_FORMAT: String = SKYMessageImageThumbnailFormatJPEG
+private let defaultThumbnailSize: CGFloat = 80
+private let defaultThumbnailFormat: String = SKYMessageImageThumbnailFormatJPEG
 
 let SKYMessageImageMaxSizeAttributeName = "SKYMessageImageMaxSizeAttributeName"
-let SKYMessageImageFormatAttributeName = "SKYMessageImageFormatAttributeName"
+let SKYMessageMaxImageSizeAttributeName = "SKYMessageMaxImageSizeAttributeName"
 
 let SKYMessageImageThumbnailSizeAttributeName = "SKYMessageImageThumbnailSizeAttributeName"
 let SKYMessageImageThumbnailFormatAttributeName = "SKYMessageImageThumbnailFormatAttributeName"
@@ -32,9 +32,9 @@ let SKYMessageImageThumbnailFormatAttributeName = "SKYMessageImageThumbnailForma
 let SKYMessageImageThumbnailFormatPNG = "PNG"
 let SKYMessageImageThumbnailFormatJPEG = "JPEG"
 
-fileprivate let SKYMessageMetadataThumbnailAttributeName = "thumbnail"
-fileprivate let SKYMessageMetadataWidthAttributeName = "width"
-fileprivate let SKYMessageMetadataHeightAttributeName = "height"
+private let SKYMessageMetadataThumbnailAttributeName = "thumbnail"
+private let SKYMessageMetadataWidthAttributeName = "width"
+private let SKYMessageMetadataHeightAttributeName = "height"
 
 extension SKYMessage {
     convenience init(withImage: UIImage) {
@@ -44,28 +44,47 @@ extension SKYMessage {
     convenience init(withImage: UIImage, options: [String: Any]?) {
         self.init()
 
-        let parsedOptions = SKYMessage.parseOptions(options: options)
-
         self.body = ""
-        self.attachment = SKYMessage.attachmentFor(image: withImage, options: parsedOptions)
-        self.metadata = SKYMessage.metadataFor(image: withImage, options: parsedOptions)
+        self.attachment = SKYMessage.attachmentFor(image: withImage, options: options ?? [String: Any]())
+        self.metadata = SKYMessage.metadataFor(image: withImage, options: options ?? [String: Any]())
     }
 
-    fileprivate static func parseOptions(options: [String: Any]?) -> [String: Any] {
-        var _options = options ?? [String: Any]()
+    fileprivate static func getImageMaxSize(options: [String: Any]) -> CGFloat {
+        if let size = options[SKYMessageImageMaxSizeAttributeName] as? CGFloat {
+            return size
+        }
 
-        _options[SKYMessageImageMaxSizeAttributeName] = _options[SKYMessageImageMaxSizeAttributeName] ?? MAX_IMAGE_SIZE
-        _options[SKYMessageImageFormatAttributeName] = _options[SKYMessageImageFormatAttributeName] ?? IMAGE_FORMAT
-        _options[SKYMessageImageThumbnailSizeAttributeName] = _options[SKYMessageImageThumbnailSizeAttributeName] ?? THUMBNAIL_SIZE
-        _options[SKYMessageImageThumbnailFormatAttributeName] = _options[SKYMessageImageThumbnailFormatAttributeName] ?? THUMBMAIL_FORMAT
+        return defaultMaxImageSize
+    }
 
-        return _options
+    fileprivate static func getImageFormat(options: [String: Any]) -> String {
+        if let format = options[SKYMessageMaxImageSizeAttributeName] as? String {
+            return format
+        }
+
+        return defaultImageFormat
+    }
+
+    fileprivate static func getThumbnailSize(options: [String: Any]) -> CGFloat {
+        if let size = options[SKYMessageImageThumbnailSizeAttributeName] as? CGFloat {
+            return size
+        }
+
+        return defaultThumbnailSize
+    }
+
+    fileprivate static func getThumbnailFormat(options: [String: Any]) -> String {
+        if let format = options[SKYMessageImageThumbnailFormatAttributeName] as? String {
+            return format
+        }
+
+        return defaultThumbnailFormat
     }
 
     fileprivate static func attachmentFor(image: UIImage, options: [String: Any]) -> SKYAsset {
-        let imageSize = scaleSize(from: image.size, toMax: options[SKYMessageImageMaxSizeAttributeName] as! CGFloat)
+        let imageSize = scaleSize(from: image.size, toMax: self.getImageMaxSize(options: options))
         let scaledImage = scale(image: image, toSize: imageSize)
-        let format = options[SKYMessageImageFormatAttributeName] as! String
+        let format = self.getImageFormat(options: options)
         let data = SKYMessage.convert(image: scaledImage!, format: format, quality: 0.7)
         return SKYAsset(name: UUID().uuidString, mimeType: SKYMessage.getMimeTypeFrom(format: format), data: data!)
     }
@@ -73,15 +92,15 @@ extension SKYMessage {
     fileprivate static func metadataFor(image: UIImage, options: [String: Any]) -> [String: Any] {
         var metadata = [String: Any]()
 
-        let thumbnailSize = scaleSize(from: image.size, toMax: options[SKYMessageImageThumbnailSizeAttributeName] as! CGFloat)
+        let thumbnailSize = scaleSize(from: image.size, toMax: self.getThumbnailSize(options: options))
         let thumbnailImage = scale(image: image, toSize: thumbnailSize)
 
         if let ti = thumbnailImage as UIImage? {
-            let format = options[SKYMessageImageThumbnailFormatAttributeName] as! String
+            let format = self.getThumbnailFormat(options: options)
             metadata[SKYMessageMetadataThumbnailAttributeName] = SKYMessage.convert(image: ti, format: format, quality: 0.4)?.base64EncodedString()
         }
 
-        let imageSize = scaleSize(from: image.size, toMax: options[SKYMessageImageMaxSizeAttributeName] as! CGFloat)
+        let imageSize = scaleSize(from: image.size, toMax: self.getImageMaxSize(options: options))
         metadata[SKYMessageMetadataWidthAttributeName] = imageSize.width
         metadata[SKYMessageMetadataHeightAttributeName] = imageSize.height
 
@@ -160,7 +179,7 @@ func scale(image: UIImage, toSize: CGSize) -> UIImage? {
         return image
     }
 
-    UIGraphicsBeginImageContextWithOptions(toSize, false, 1);
+    UIGraphicsBeginImageContextWithOptions(toSize, false, 1)
     image.draw(in: CGRect.init(x: 0, y: 0, width: toSize.width, height: toSize.height))
     let newImage = UIGraphicsGetImageFromCurrentImageContext()
     UIGraphicsEndImageContext()

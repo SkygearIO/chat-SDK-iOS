@@ -19,17 +19,17 @@
 
 import JSQMessagesViewController
 
-fileprivate let MAX_DISPLAY_SIZE: CGFloat = 240
-fileprivate let MIN_DISPLAY_SIZE: CGFloat = 80
+private let maxDisplaySize: CGFloat = 240
+private let minDisplaySize: CGFloat = 80
 
 class SKYChatConversationImageItem: NSObject, JSQMessageMediaData {
 
-    var imageName: String? = nil
-    var image: UIImage? = nil
+    var imageName: String?
+    var image: UIImage?
     var displaySize: CGSize = CGSize.zero
-    var thumbnailImage: UIImage? = nil
+    var thumbnailImage: UIImage?
 
-    var getImage: (() -> UIImage?)? = nil
+    var getImage: (() -> UIImage?)?
 
     func mediaView() -> UIView? {
         if self.image != nil {
@@ -75,14 +75,14 @@ extension SKYChatConversationImageItem {
         let metadata = withMessage.metadata ?? [String: Any]()
 
         var thumbnailImage: UIImage? = nil
-        if let thumbnailImageString = metadata["thumbnail"] as! String! {
+        if let thumbnailImageString = metadata["thumbnail"] as? String {
             let thumbnailImageData = Data(base64Encoded: thumbnailImageString)
             thumbnailImage = UIImage(data: thumbnailImageData!)
         }
         self.thumbnailImage = thumbnailImage
 
         self.imageName = asset!.name
-        if let width = metadata["width"] as! CGFloat?, let height = metadata["height"] as! CGFloat? {
+        if let width = metadata["width"] as? CGFloat, let height = metadata["height"] as? CGFloat {
             let imageSize = CGSize.init(width: width, height: height)
             self.displaySize = SKYChatConversationImageItem.calculateDisplaySize(from: imageSize)
         } else {
@@ -101,9 +101,8 @@ extension SKYChatConversationImageItem {
 
         // TODO: non-singleton, set by SKYChatConversationViewController
         let cache = SKYAssetMemoryCache.shared()
-        var image = cache.get(asset: asset!) as! UIImage?
-        if image != nil {
-            return image
+        if let cachedImage = cache.get(asset: asset!) as? UIImage {
+            return cachedImage
         }
 
         let assetUrl = (asset?.url)!
@@ -112,7 +111,7 @@ extension SKYChatConversationImageItem {
             return nil
         }
 
-        image = UIImage(data: data!)
+        let image = UIImage(data: data!)
         cache.set(value: image!, for: asset!)
         return image
     }
@@ -120,10 +119,10 @@ extension SKYChatConversationImageItem {
     fileprivate static func calculateDisplaySize(from imageSize: CGSize) -> CGSize {
         let width = imageSize.width
         let height = imageSize.height
-        if width > MAX_DISPLAY_SIZE || height > MAX_DISPLAY_SIZE {
-            return scaleSize(from: imageSize, toMax: MAX_DISPLAY_SIZE)
-        } else if width < MIN_DISPLAY_SIZE || height < MIN_DISPLAY_SIZE {
-            return scaleSize(from: imageSize, toMin: MIN_DISPLAY_SIZE)
+        if width > maxDisplaySize || height > maxDisplaySize {
+            return scaleSize(from: imageSize, toMax: maxDisplaySize)
+        } else if width < minDisplaySize || height < minDisplaySize {
+            return scaleSize(from: imageSize, toMin: minDisplaySize)
         }
 
         return imageSize

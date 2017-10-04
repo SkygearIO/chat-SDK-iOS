@@ -26,7 +26,7 @@ extension SKYMessage {
         }
 
         let asset = self.attachment!
-        if asset.mimeType.starts(with: "image/") {
+        if asset.mimeType.hasPrefix("image/") {
             return SKYChatConversationImageItem(withMessage: self)
         }
 
