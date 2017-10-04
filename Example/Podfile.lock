@@ -8,6 +8,7 @@ PODS:
     - JSQSystemSoundPlayer (~> 2.0.1)
   - JSQSystemSoundPlayer (2.0.1)
   - Kingfisher (3.10.4)
+  - LruCache (0.1)
   - SKYKit/Core (1.1.0):
     - FMDB (~> 2.5)
     - SocketRocket (~> 0.4)
@@ -18,6 +19,7 @@ PODS:
   - SKYKitChat/UI (0.0.2):
     - ALCameraViewController (~> 2.0)
     - JSQMessagesViewController (~> 7.3.0)
+    - LruCache (~> 0.1)
     - SKYKit/Core (~> 1.1.0)
     - SKYKitChat/Core
     - SVProgressHUD (~> 2.1.0)
@@ -43,8 +45,9 @@ SPEC CHECKSUMS:
   JSQMessagesViewController: 6587f56aedbcb150a8ba1d968e1ef58b1bc758b7
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
   Kingfisher: dc3a4983e86d2dfa89513664983a82340c11a289
+  LruCache: 3a1a9dbed4db352c980bc1ad956e3046bce32515
   SKYKit: 124d42572fc55e93dadc3a4136a7fcfa956c680b
-  SKYKitChat: 8de4d4c4f699783530d35a19d1637c1c18892999
+  SKYKitChat: a8e78d986f892aeb8ffc576a8561af0f8a7571d3
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   Specta: f506f3a8361de16bc0dcf3b17b75e269072ba465
   SVProgressHUD: c404a55d78acbeb7ebb78b76d3faf986475a6994

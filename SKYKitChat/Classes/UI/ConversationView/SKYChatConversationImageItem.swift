@@ -29,7 +29,7 @@ class SKYChatConversationImageItem: NSObject, JSQMessageMediaData {
     var displaySize: CGSize = CGSize.zero
     var thumbnailImage: UIImage? = nil
 
-    var getImageData: (() -> Data?)? = nil
+    var getImage: (() -> UIImage?)? = nil
 
     func mediaView() -> UIView? {
         if self.image != nil {
@@ -38,10 +38,10 @@ class SKYChatConversationImageItem: NSObject, JSQMessageMediaData {
 
         let imageView = UIImageView(image: self.thumbnailImage)
         DispatchQueue.global().async {
-            let data = self.getImageData!()
+            let image = self.getImage!()
             DispatchQueue.main.sync {
-                if data != nil {
-                    imageView.image = UIImage(data: data!)
+                if image != nil {
+                    imageView.image = image
                 }
             }
         }
@@ -89,10 +89,32 @@ extension SKYChatConversationImageItem {
             self.displaySize = SKYChatConversationImageItem.getDefaultDisplaySize()
         }
 
-        self.getImageData = {
-            let assetUrl = (asset?.url)!
-            return try? Data(contentsOf: assetUrl)
+        self.getImage = {
+            return self.getImage(fromAsset: asset)
         }
+    }
+
+    func getImage(fromAsset asset: SKYAsset?) -> UIImage? {
+        if asset == nil {
+            return nil
+        }
+
+        // TODO: non-singleton, set by SKYChatConversationViewController
+        let cache = SKYAssetMemoryCache.shared()
+        var image = cache.get(asset: asset!) as! UIImage?
+        if image != nil {
+            return image
+        }
+
+        let assetUrl = (asset?.url)!
+        let data = try? Data(contentsOf: assetUrl)
+        if data == nil {
+            return nil
+        }
+
+        image = UIImage(data: data!)
+        cache.set(value: image!, for: asset!)
+        return image
     }
 
     fileprivate static func calculateDisplaySize(from imageSize: CGSize) -> CGSize {
