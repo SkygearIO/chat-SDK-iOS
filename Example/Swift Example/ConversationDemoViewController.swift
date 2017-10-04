@@ -70,6 +70,10 @@ extension ConversationDemoViewController: SKYChatConversationViewControllerDeleg
             })
         )
 
+        alert.addAction(
+            UIAlertAction(title: "Photo", style: .default, handler: self.defaultPhotoPickerActionHandler())
+        )
+
         alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
 
         return alert

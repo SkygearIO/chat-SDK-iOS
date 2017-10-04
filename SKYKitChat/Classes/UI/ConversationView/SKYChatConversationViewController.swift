@@ -19,6 +19,7 @@
 
 import JSQMessagesViewController
 import ALCameraViewController
+import CTAssetsPickerController
 
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
@@ -414,7 +415,26 @@ extension SKYChatConversationViewController {
             self.delegate?.conversationViewController?(self,
                                                        alertControllerForAccessoryButton: sender!) {
             self.present(alert, animated: true, completion: nil)
+            return
         }
+
+        self.present(self.defaultAccessoryButtonAlertController(), animated: true, completion: nil)
+    }
+
+    func defaultAccessoryButtonAlertController() -> UIAlertController {
+        let alert = UIAlertController(title: "Actions",
+                                      message: nil,
+                                      preferredStyle: .actionSheet)
+
+
+        // TODO: support Photo or Video
+        alert.addAction(
+            UIAlertAction(title: "Photo" /* Photo or Video */, style: .default, handler: self.defaultPhotoPickerActionHandler())
+        )
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+
+        return alert
     }
 
     open func didPressCameraButton(_ sender: UIButton!) {
@@ -505,11 +525,54 @@ extension SKYChatConversationViewController {
     }
 }
 
+// MARK: - Default accessory action handler
+
+extension SKYChatConversationViewController {
+    public func defaultPhotoPickerActionHandler() -> (UIAlertAction) -> Swift.Void {
+        return { _ in
+            let picker = CTAssetsPickerController()
+            picker.delegate = self
+            picker.assetsFetchOptions = PHFetchOptions()
+            picker.assetsFetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
+            self.present(picker, animated: true, completion: nil)
+        }
+    }
+}
+
+// MARK: - CTAssetsPickerControllerDelegate
+
+extension SKYChatConversationViewController: CTAssetsPickerControllerDelegate {
+    public func assetsPickerController(_ picker: CTAssetsPickerController!, didFinishPickingAssets assets: [Any]!) {
+        for asset in assets {
+            switch asset {
+            case let a as PHAsset:
+                self.send(asset: a)
+            default:
+                NSLog("Unknown asset type")
+            }
+        }
+        picker.dismiss(animated: true, completion: nil)
+    }
+}
+
+
 // MARK: - Send photos
 
 extension SKYChatConversationViewController {
     func cleanup(asset: SKYAsset) {
         try? FileManager.default.removeItem(at: asset.url)
+    }
+
+    open func send(asset: PHAsset) {
+        let manager = PHImageManager.default()
+        let option = PHImageRequestOptions()
+        option.resizeMode = .fast
+        option.deliveryMode = .fastFormat
+        manager.requestImage(for: asset, targetSize: PHImageManagerMaximumSize, contentMode: .default, options: option, resultHandler: {(result, info)->Void in
+            if result != nil {
+                self.send(image: result!)
+            }
+        })
     }
 
     open func send(image: UIImage) {
