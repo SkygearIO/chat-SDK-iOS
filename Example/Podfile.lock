@@ -40,7 +40,7 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   SKYKitChat:
-    :path: ../
+    :path: "../"
 
 SPEC CHECKSUMS:
   ALCameraViewController: 7b86c2888df0e63f53a801e9d96fe194f51157ec
