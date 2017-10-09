@@ -32,7 +32,7 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   SKYKitChat:
-    :path: ../
+    :path: "../"
 
 SPEC CHECKSUMS:
   Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5

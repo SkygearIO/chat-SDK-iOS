@@ -289,6 +289,30 @@ extension SKYChatConversationViewController {
 
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
+        attributedTextForCellTopLabelAt indexPath: IndexPath!
+    ) -> NSAttributedString! {
+        let msg = self.messages[indexPath.row]
+        let date = msg.creationDate()
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .short
+        dateFormatter.doesRelativeDateFormatting = true
+        let dateString = dateFormatter.string(from: date)
+
+        return NSAttributedString(string: "\(dateString)")
+    }
+
+    open override func collectionView(
+        _ collectionView: JSQMessagesCollectionView!,
+        layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!,
+        heightForCellTopLabelAt indexPath: IndexPath!
+    ) -> CGFloat {
+        return CGFloat(20)
+    }
+
+    open override func collectionView(
+        _ collectionView: JSQMessagesCollectionView!,
         avatarImageDataForItemAt indexPath: IndexPath!
     ) -> JSQMessageAvatarImageDataSource! {
 
