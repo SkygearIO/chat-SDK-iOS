@@ -29,6 +29,16 @@ class ConversationDemoViewController: SKYChatConversationViewController {
 }
 
 extension ConversationDemoViewController: SKYChatConversationViewControllerDelegate {
+    func dateFormatterFor(
+        message: SKYMessage,
+        controller: SKYChatConversationViewController) -> DateFormatter {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .short
+        dateFormatter.doesRelativeDateFormatting = true
+        return dateFormatter
+    }
+
     func incomingMessageColorForConversationViewController(
         _ controller: SKYChatConversationViewController) -> UIColor
     {

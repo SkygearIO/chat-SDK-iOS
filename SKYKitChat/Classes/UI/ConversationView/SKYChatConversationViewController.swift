@@ -22,6 +22,14 @@ import JSQMessagesViewController
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
     /**
+     * For customizing message date display
+     */
+
+    @objc optional func dateFormatterFor(
+        message: SKYMessage,
+        controller: SKYChatConversationViewController) -> DateFormatter
+
+    /**
      * For customizing the views
      */
 
@@ -294,10 +302,16 @@ extension SKYChatConversationViewController {
         let msg = self.messages[indexPath.row]
         let date = msg.creationDate()
 
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .short
-        dateFormatter.doesRelativeDateFormatting = true
+        var dateFormatter: DateFormatter
+        if let df = self.delegate?.dateFormatterFor?(message: msg, controller: self) {
+            dateFormatter = df
+        } else {
+            dateFormatter = DateFormatter()
+            dateFormatter.dateStyle = .medium
+            dateFormatter.timeStyle = .short
+            dateFormatter.doesRelativeDateFormatting = true
+        }
+
         let dateString = dateFormatter.string(from: date)
 
         return NSAttributedString(string: "\(dateString)")
