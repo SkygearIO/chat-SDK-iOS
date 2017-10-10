@@ -114,7 +114,7 @@ extension SKYChatConversationImageItem {
         }
 
         let image = UIImage(data: data!)
-        if let cache = self.assetCache {
+        if image != nil, let cache = self.assetCache {
             cache.set(value: image!, for: asset!)
         }
         return image
