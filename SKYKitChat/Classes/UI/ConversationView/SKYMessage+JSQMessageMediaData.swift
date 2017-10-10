@@ -20,16 +20,34 @@
 import JSQMessagesViewController
 
 extension SKYMessage {
-    public func messageMediaData() -> JSQMessageMediaData? {
+    func messageMediaData(withCache cache: SKYAssetCache?) -> JSQMessageMediaData? {
         guard self.attachment != nil else {
             return nil
         }
 
         let asset = self.attachment!
         if asset.mimeType.hasPrefix("image/") {
-            return SKYChatConversationImageItem(withMessage: self)
+            let imageItem = SKYChatConversationImageItem(withMessage: self)
+            imageItem.assetCache = cache
+            return imageItem
         }
 
         return nil
+    }
+}
+
+public class JSQMessageMediaDataFactory {
+    let assetCache: SKYAssetCache?
+
+    public init(with assetCache: SKYAssetCache?) {
+        self.assetCache = assetCache
+    }
+
+    public convenience init() {
+        self.init(with: SKYAssetMemoryCache.shared())
+    }
+
+    public func mediaData(with message: SKYMessage) -> JSQMessageMediaData? {
+        return message.messageMediaData(withCache: self.assetCache)
     }
 }

@@ -97,6 +97,14 @@ open class SKYChatConversationViewController: JSQMessagesViewController {
     public var incomingMessageBubble: JSQMessagesBubbleImage?
     public var outgoingMessageBubble: JSQMessagesBubbleImage?
 
+    var defaultMediaDataFactory: JSQMessageMediaDataFactory = JSQMessageMediaDataFactory()
+    open var messageMediaDataFactory: JSQMessageMediaDataFactory {
+        get {
+            return defaultMediaDataFactory
+        }
+    }
+
+
     public var cameraButton: UIButton?
 
     public var incomingMessageBubbleColor: UIColor? {
@@ -116,6 +124,10 @@ open class SKYChatConversationViewController: JSQMessagesViewController {
     static let errorDomain: String = "SKYChatConversationViewControllerErrorDomain"
     var errorCreator: SKYErrorCreator {
         return SKYErrorCreator(defaultErrorDomain: SKYChatConversationViewController.errorDomain)
+    }
+
+    open func getMessageMediaDataFactory() -> JSQMessageMediaDataFactory {
+        return messageMediaDataFactory
     }
 }
 
@@ -273,17 +285,22 @@ extension SKYChatConversationViewController {
             msgSenderName = senderName
         }
 
-        if msg.attachment == nil {
-            return JSQMessage(senderId: msg.creatorUserRecordID(),
-                              senderDisplayName: msgSenderName,
-                              date: msg.creationDate(),
-                              text: msg.body)
+        let mediaData = self.messageMediaDataFactory.mediaData(with: msg)
+        var jsqMessage: JSQMessage
+
+        if mediaData == nil {
+            jsqMessage = JSQMessage(senderId: msg.creatorUserRecordID(),
+                                    senderDisplayName: msgSenderName,
+                                    date: msg.creationDate(),
+                                    text: msg.body)
+        } else {
+            jsqMessage = JSQMessage(senderId: msg.creatorUserRecordID(),
+                                    senderDisplayName: msgSenderName,
+                                    date: msg.creationDate(),
+                                    media: mediaData)
         }
 
-        return JSQMessage(senderId: msg.creatorUserRecordID(),
-                          senderDisplayName: msgSenderName,
-                          date: msg.creationDate(),
-                          media: msg.messageMediaData())
+        return jsqMessage
     }
 
     open override func collectionView(

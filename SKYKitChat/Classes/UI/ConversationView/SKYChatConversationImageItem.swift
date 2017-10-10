@@ -31,6 +31,8 @@ class SKYChatConversationImageItem: NSObject, JSQMessageMediaData {
 
     var getImage: (() -> UIImage?)?
 
+    var assetCache: SKYAssetCache?
+
     func mediaView() -> UIView? {
         if self.image != nil {
             return UIImageView(image: self.image)
@@ -99,10 +101,10 @@ extension SKYChatConversationImageItem {
             return nil
         }
 
-        // TODO: non-singleton, set by SKYChatConversationViewController
-        let cache = SKYAssetMemoryCache.shared()
-        if let cachedImage = cache.get(asset: asset!) as? UIImage {
-            return cachedImage
+        if let cache = self.assetCache {
+            if let cachedImage = cache.get(asset: asset!) as? UIImage {
+                return cachedImage
+            }
         }
 
         let assetUrl = (asset?.url)!
@@ -112,7 +114,9 @@ extension SKYChatConversationImageItem {
         }
 
         let image = UIImage(data: data!)
-        cache.set(value: image!, for: asset!)
+        if let cache = self.assetCache {
+            cache.set(value: image!, for: asset!)
+        }
         return image
     }
 

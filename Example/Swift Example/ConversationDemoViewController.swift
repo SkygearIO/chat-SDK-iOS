@@ -19,7 +19,17 @@
 
 import SKYKitChat
 
+let assetCache: SKYAssetCache = SKYAssetMemoryCache(maxSize: 20)
+
 class ConversationDemoViewController: SKYChatConversationViewController {
+
+    var demoMessageMediaDataFactory: JSQMessageMediaDataFactory
+        = JSQMessageMediaDataFactory(with: assetCache)
+    override var messageMediaDataFactory: JSQMessageMediaDataFactory {
+        get {
+            return demoMessageMediaDataFactory
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()

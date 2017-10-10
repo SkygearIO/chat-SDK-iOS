@@ -19,7 +19,7 @@
 
 import LruCache
 
-protocol SKYAssetCache {
+public protocol SKYAssetCache {
     func get(asset: SKYAsset) -> Any?
     func set(value: Any, for asset: SKYAsset)
     func purge(asset: SKYAsset)
@@ -29,30 +29,34 @@ protocol SKYAssetCache {
 extension SKYAssetCache {
 }
 
-class SKYAssetMemoryCache: SKYAssetCache {
+public class SKYAssetMemoryCache: SKYAssetCache {
     let store: LruCache
 
     static func shared() -> SKYAssetMemoryCache {
         return sharedMemoryCache
     }
 
-    init() {
-        self.store = LruCache(maxSize: 100)
+    public init(maxSize: Int) {
+        self.store = LruCache(maxSize: maxSize)
     }
 
-    func get(asset: SKYAsset) -> Any? {
+    public convenience init() {
+        self.init(maxSize: 100)
+    }
+
+    public func get(asset: SKYAsset) -> Any? {
         return self.store.get(asset.name)
     }
 
-    func set(value: Any, for asset: SKYAsset) {
+    public func set(value: Any, for asset: SKYAsset) {
         self.store.put(asset.name, value: value)
     }
 
-    func purge(asset: SKYAsset) {
+    public func purge(asset: SKYAsset) {
         self.store.remove(asset.name)
     }
 
-    func purgeAll() {
+    public func purgeAll() {
         self.store.evictAll()
     }
 }
