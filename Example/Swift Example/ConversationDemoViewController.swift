@@ -39,6 +39,22 @@ class ConversationDemoViewController: SKYChatConversationViewController {
 }
 
 extension ConversationDemoViewController: SKYChatConversationViewControllerDelegate {
+    func conversationViewController(
+        _ controller: SKYChatConversationViewController,
+        dateStringAt indexPath: IndexPath) -> NSAttributedString {
+        let msg = self.messages[indexPath.row]
+        let date = msg.creationDate()
+
+        let dateFormatter: DateFormatter
+        dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .short
+        dateFormatter.doesRelativeDateFormatting = true
+        let dateString = dateFormatter.string(from: date)
+
+        return NSAttributedString(string: "\(dateString)")
+    }
+
     func incomingMessageColorForConversationViewController(
         _ controller: SKYChatConversationViewController) -> UIColor
     {

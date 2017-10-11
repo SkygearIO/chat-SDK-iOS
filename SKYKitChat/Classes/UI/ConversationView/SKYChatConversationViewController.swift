@@ -24,6 +24,18 @@ import CTAssetsPickerController
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
     /**
+     * For customizing message date display
+     */
+
+    @objc optional func conversationViewController(
+        _ controller: SKYChatConversationViewController,
+        dateStringAt indexPath: IndexPath) -> NSAttributedString
+
+    @objc optional func conversationViewController(
+        _ controller: SKYChatConversationViewController,
+        shouldShowDateAt indexPath: IndexPath) -> Bool
+
+    /**
      * For customizing the views
      */
 
@@ -346,6 +358,53 @@ extension SKYChatConversationViewController {
         heightForCellBottomLabelAt indexPath: IndexPath!
     ) -> CGFloat {
         return CGFloat(14)
+    }
+
+    open override func collectionView(
+        _ collectionView: JSQMessagesCollectionView!,
+        attributedTextForCellTopLabelAt indexPath: IndexPath!
+    ) -> NSAttributedString! {
+        if let ds = self.delegate?.conversationViewController?(self, dateStringAt: indexPath) {
+            return ds
+        }
+
+        let msg = self.messages[indexPath.row]
+        let date = msg.creationDate()
+
+        let dateFormatter: DateFormatter
+        dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .short
+        dateFormatter.doesRelativeDateFormatting = true
+        let dateString = dateFormatter.string(from: date)
+        
+        return NSAttributedString(string: "\(dateString)")
+    }
+
+    open override func collectionView(
+        _ collectionView: JSQMessagesCollectionView!,
+        layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!,
+        heightForCellTopLabelAt indexPath: IndexPath!
+    ) -> CGFloat {
+        var shouldShow: Bool
+        if let s = self.delegate?.conversationViewController?(self, shouldShowDateAt: indexPath) {
+            shouldShow = s
+        } else {
+            // default behaviour
+            // skip when date string is the same as previous one
+            if indexPath.row == 0 {
+                shouldShow = true
+            } else {
+                let thisString = self.collectionView(collectionView,
+                                                     attributedTextForCellTopLabelAt: indexPath)
+                let lastIndexPath = IndexPath(row: indexPath.row - 1, section: indexPath.section)
+                let lastString = self.collectionView(collectionView,
+                                                     attributedTextForCellTopLabelAt: lastIndexPath)
+                shouldShow = thisString?.string != lastString?.string
+            }
+        }
+
+        return shouldShow ? CGFloat(20) : CGFloat(0)
     }
 
     open override func collectionView(
