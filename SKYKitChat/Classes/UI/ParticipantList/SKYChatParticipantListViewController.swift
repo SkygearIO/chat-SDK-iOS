@@ -288,14 +288,14 @@ extension SKYChatParticipantListViewController {
             keyword = "name"
             break
         }
-        
+
         var predicate: NSPredicate
         if let term = self.searchTerm {
             predicate = NSPredicate(format: "%K = %@", keyword, "\(term)")
         } else {
             predicate = NSPredicate(format: "1 = 1")
         }
-        
+
         if let scope = self.participantScope {
             predicate = NSCompoundPredicate(
                 andPredicateWithSubpredicates: [predicate, scope.predicate!])
