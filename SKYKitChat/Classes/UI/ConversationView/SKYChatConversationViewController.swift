@@ -20,6 +20,7 @@
 import JSQMessagesViewController
 import ALCameraViewController
 import CTAssetsPickerController
+import AVFoundation
 
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
@@ -95,7 +96,7 @@ import CTAssetsPickerController
         failedFetchingMessagesWithError error: Error)
 }
 
-open class SKYChatConversationViewController: JSQMessagesViewController {
+open class SKYChatConversationViewController: JSQMessagesViewController, AVAudioRecorderDelegate {
 
     weak public var delegate: SKYChatConversationViewControllerDelegate?
 
@@ -142,6 +143,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController {
     }
 
     static let errorDomain: String = "SKYChatConversationViewControllerErrorDomain"
+    
     var errorCreator: SKYErrorCreator {
         return SKYErrorCreator(defaultErrorDomain: SKYChatConversationViewController.errorDomain)
     }
@@ -149,6 +151,14 @@ open class SKYChatConversationViewController: JSQMessagesViewController {
     open func getMessageMediaDataFactory() -> JSQMessageMediaDataFactory {
         return messageMediaDataFactory
     }
+    
+    var sendButton: UIButton?
+    var recordButton: UIButton?
+    var audioRecorder: AVAudioRecorder?
+    var inputTextView: UITextView?
+    var slideToCancelTextView: UITextView?
+    var gesture: UILongPressGestureRecognizer?
+    var isRecordingCancelled: Bool = false
 }
 
 // MARK: - Initializing
@@ -277,6 +287,22 @@ extension SKYChatConversationViewController {
 
             self.cameraButton = cameraButton
         }
+        
+        //let stepsTextField = UITextField(frame: CGRect(x: 20, y: 100, width: 300, height: 40))
+        self.sendButton = self.inputToolbar?.contentView?.rightBarButtonItem
+        self.sendButton?.removeFromSuperview()
+        self.inputTextView = self.inputToolbar?.contentView?.textView
+        self.slideToCancelTextView = UITextView(frame: self.inputTextView!.frame)
+        self.slideToCancelTextView?.isEditable = false
+        self.slideToCancelTextView?.text = "Slide to Cancel";
+        self.recordButton = UIButton(frame: self.sendButton!.frame)
+        let bundle = Bundle(for: type(of: self))
+        print("%@", self.skygear.chatExtension?.bundle())
+        let image = UIImage(named: "mic", in: self.skygear.chatExtension?.bundle(), compatibleWith: nil)
+        NSLog("%@", image!)
+        self.recordButton?.setImage(image, for: UIControlState.normal)
+        self.recordButton?.tintColor = self.sendButton?.tintColor
+        self.setRecordButton()
     }
 
     open func updateTitle() {
@@ -509,29 +535,56 @@ extension SKYChatConversationViewController {
 
         self.showTypingIndicator = false
     }
-}
-
-// MARK: - Actions
-
-extension SKYChatConversationViewController {
-    open override func textViewDidChange(_ textView: UITextView) {
-        super.textViewDidChange(textView)
-
-        self.skygear.chatExtension?.sendTypingIndicator(.begin, in: self.conversation!)
+    
+    open func setRecordButton() {
+        
+        self.inputToolbar?.contentView?.rightBarButtonItem = self.recordButton
+        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchUpInside)
+        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchDown)
+        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self.inputToolbar, action: nil, for: UIControlEvents.touchUpInside)
+        self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didStartRecord), for: UIControlEvents.touchDown)
+        self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didStopRecord), for: UIControlEvents.touchUpInside)
+        self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didStopRecord), for: UIControlEvents.touchUpOutside)
+        self.inputToolbar?.contentView?.rightBarButtonItem.isEnabled = true
+        self.gesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressAction(gesture:)))
+        self.inputToolbar?.contentView?.rightBarButtonItem.addGestureRecognizer(self.gesture!)
     }
-
-    open override func textViewDidEndEditing(_ textView: UITextView) {
-        super.textViewDidEndEditing(textView)
-
-        self.skygear.chatExtension?.sendTypingIndicator(.pause, in: self.conversation!)
+    
+    open func setSendButton() {
+        self.inputToolbar?.contentView?.rightBarButtonItem.removeGestureRecognizer(self.gesture!)
+        self.inputToolbar?.contentView?.rightBarButtonItem = self.sendButton
+        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchDown)
+        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self.inputToolbar, action: nil, for: UIControlEvents.touchUpInside)
+        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchUpInside)
+        self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didPressSendButton), for: UIControlEvents.touchUpInside)
     }
-
-    open override func didPressAccessoryButton(_ sender: UIButton!) {
-        if let alert =
-            self.delegate?.conversationViewController?(self,
-                                                       alertControllerForAccessoryButton: sender!) {
-            self.present(alert, animated: true, completion: nil)
-            return
+    
+    func longPressAction(gesture: UILongPressGestureRecognizer) {
+        if gesture.state == .began {
+            guard let view = gesture.view else {
+                return
+            }
+            print("begin")
+        }
+        else {
+            var cancelled = gesture.state == .cancelled
+            if gesture.state == .changed || gesture.state == .ended {
+                guard let view = gesture.view else {
+                    return
+                }
+                
+                let point = gesture.location(in: view.superview)
+                if point.x < -10 || point.y < -10 {
+                    cancelled = true
+                }
+            }
+            
+            if cancelled {
+                self.didStopRecord(button: self.recordButton!, cancelled: true)
+            }
+            else if gesture.state == .ended && !cancelled {
+                self.didStopRecord(button: self.recordButton!)
+            }
         }
 
         self.present(self.defaultAccessoryButtonAlertController(), animated: true, completion: nil)
@@ -566,16 +619,28 @@ extension SKYChatConversationViewController {
 
         self.present(imagePicker, animated: true, completion: nil)
     }
+}
 
-    open override func didPressSend(_ button: UIButton!,
-                                    withMessageText text: String!,
-                                    senderId: String!,
-                                    senderDisplayName: String!,
-                                    date: Date!) {
 
+// MARK: - Send Message
+
+extension SKYChatConversationViewController {
+    open func failedToSendMessage(_ messageText: String,
+                                  date: Date,
+                                  errorCode: SKYErrorCode,
+                                  errorMessage: String) {
+        
+        let err = self.errorCreator.error(with: errorCode, message: errorMessage)
+        self.delegate?.conversationViewController?(self,
+                                                   failedToSendMessageText: messageText,
+                                                   date: date,
+                                                   error: err)
+    }
+    
+    func sendMessage(_ msg: SKYMessage) {
         guard let conv = self.conversation else {
-            self.failedToSendMessage(text,
-                                     date: date!,
+            self.failedToSendMessage(msg.body ?? "",
+                                     date: msg.creationDate(),
                                      errorCode: SKYErrorInvalidArgument,
                                      errorMessage: "Cannot send message to nil conversation")
             return
@@ -593,51 +658,83 @@ extension SKYChatConversationViewController {
             completion: { (result, error) in
                 guard error == nil else {
                     print("Failed to sent message: \(error!.localizedDescription)")
-                    self.failedToSendMessage(text,
-                                             date: date!,
+                    self.failedToSendMessage(msg.body ?? "",
+                                             date: msg.creationDate(),
                                              errorCode: SKYErrorBadResponse,
                                              errorMessage: error!.localizedDescription)
                     return
                 }
-
+                
                 guard let sentMsg = result else {
                     print("Error: Got nil sent message")
-                    self.failedToSendMessage(text,
-                                             date: date!,
+                    self.failedToSendMessage(msg.body ?? "",
+                                             date: msg.creationDate(),
                                              errorCode: SKYErrorBadResponse,
                                              errorMessage: "Got nil sent message")
                     return
                 }
-
+                
                 // find the index for the "sending" message
                 let ids = self.messages.map({$0.recordID().recordName})
                 guard let idx = ids.index(of: sentMsg.recordID().recordName) else {
                     return
                 }
-
+                
                 self.messages[idx] = sentMsg
                 self.collectionView?.reloadData()
-
+                
                 self.delegate?.conversationViewController?(self, finishSendingMessage: sentMsg)
-            }
+                self.setRecordButton()
+        }
         )
-
+        
         self.messages.append(msg)
         self.finishSendingMessage(animated: true)
-
+        
         self.skygear.chatExtension?.sendTypingIndicator(.finished, in: self.conversation!)
     }
+}
 
-    open func failedToSendMessage(_ messageText: String,
-                                  date: Date,
-                                  errorCode: SKYErrorCode,
-                                  errorMessage: String) {
+// MARK: - Actions
 
-        let err = self.errorCreator.error(with: errorCode, message: errorMessage)
-        self.delegate?.conversationViewController?(self,
-                                                   failedToSendMessageText: messageText,
-                                                   date: date,
-                                                   error: err)
+extension SKYChatConversationViewController {
+    open override func textViewDidChange(_ textView: UITextView) {
+        super.textViewDidChange(textView)
+        if textView.text.characters.count > 0 {
+            self.setSendButton()
+        } else {
+            self.setRecordButton()
+        }
+        self.skygear.chatExtension?.sendTypingIndicator(.begin, in: self.conversation!)
+    }
+
+    open override func textViewDidEndEditing(_ textView: UITextView) {
+        super.textViewDidEndEditing(textView)
+        self.skygear.chatExtension?.sendTypingIndicator(.pause, in: self.conversation!)
+    }
+
+    open override func didPressAccessoryButton(_ sender: UIButton!) {
+        if let alert =
+            self.delegate?.conversationViewController?(self,
+                                                       alertControllerForAccessoryButton: sender!) {
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+
+    open override func didPressSend(_ button: UIButton!,
+                                    withMessageText text: String!,
+                                    senderId: String!,
+                                    senderDisplayName: String!,
+                                    date: Date!) {
+        let msg = SKYMessage()
+        msg.body = text
+        msg.setCreatorUserRecordID(self.senderId)
+        msg.setCreationDate(date)
+        self.sendMessage(msg)
+    }
+    
+    open func didPressSendButton(button: UIButton) {
+        self.inputToolbar?.delegate.messagesInputToolbar(self.inputToolbar, didPressRightBarButton: button)
     }
 
     open override func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
@@ -769,7 +866,107 @@ extension SKYChatConversationViewController {
     }
 }
 
-// MARK: - Subscription
+// MARK: - Audio
+
+extension SKYChatConversationViewController {
+    func startRecord() {
+        print("Start Recording")
+        let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("recording.m4a")
+        let settings = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVSampleRateKey: 44100,
+            AVNumberOfChannelsKey: 2,
+            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+        ]
+        
+        do {
+            
+            if (self.audioRecorder == nil) {
+                self.audioRecorder = try AVAudioRecorder(url: url, settings: settings)
+                self.audioRecorder?.delegate = self
+                self.audioRecorder?.stop()
+                self.audioRecorder?.prepareToRecord()
+            }
+            
+            self.audioRecorder?.record()
+        } catch {
+            //TODO: show dialog
+            
+        }
+    }
+    
+    func didStartRecord(button: UIButton) {
+        
+        let recordingSession = AVAudioSession.sharedInstance()
+        do {
+            try recordingSession.setCategory(AVAudioSessionCategoryPlayAndRecord)
+            try recordingSession.setActive(true)
+            recordingSession.requestRecordPermission() { [unowned self] allowed in
+                DispatchQueue.main.async {
+                    if allowed {
+                        self.inputTextView?.isHidden = true
+                        self.inputToolbar?.contentView?.leftBarButtonItem?.isHidden = true
+                        self.inputToolbar?.contentView?.addSubview(self.slideToCancelTextView!)
+                        self.startRecord()
+                    } else {
+                        //TODO: show dialog
+                    }
+                }
+            }
+        } catch {
+            //TODO: show dialog
+        }
+    }
+    
+    open func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        
+        if !flag || self.isRecordingCancelled {
+            print("Cancelled")
+            self.setRecordButton()
+            return
+        }
+        do{
+            let asset = SKYAsset(data: try Data(contentsOf: recorder.url))
+            asset.mimeType = "audio/m4a"
+            SKYContainer.default().publicCloudDatabase.uploadAsset(asset) { (asset, error) in
+                if let err = error {
+                    let alert = UIAlertController(title: "Unable to upload", message: err.localizedDescription, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                }
+                print("Uploaded")
+                if let ast = asset {
+                    NSLog(ast.url.absoluteString)
+                }
+                let msg = SKYMessage()
+                msg.body = ""
+                msg.metadata = [:]
+                msg.attachment = asset
+                self.sendMessage(msg)
+                self.setRecordButton()
+            }
+        } catch {
+            print("Unable to send audio")
+        }
+    }
+    
+    
+    func didStopRecord(button: UIButton, cancelled: Bool = false) {
+        print("Stop recording")
+        self.setSendButton()
+        self.isRecordingCancelled = cancelled
+        self.audioRecorder?.stop()
+        self.slideToCancelTextView?.removeFromSuperview()
+        self.inputTextView?.isHidden = false
+        self.inputToolbar?.contentView?.leftBarButtonItem?.isHidden = false
+        do {
+            let recordingSession = AVAudioSession.sharedInstance()
+            try recordingSession.setActive(false)
+        } catch {
+            print("Failed to stop recording session.")
+        }
+    }
+}
 
 extension SKYChatConversationViewController {
 

@@ -723,4 +723,9 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
  @param NSNotification observer
  */
 - (void)unsubscribeToTypingIndicatorWithObserver:(id _Nonnull)observer;
+
+/**
+ Get SKYKitChat Bundle
+ */
+- (NSBundle *_Nonnull)bundle;
 @end

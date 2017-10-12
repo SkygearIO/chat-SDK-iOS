@@ -1045,4 +1045,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                 object:self];
 }
 
+- (NSBundle *)bundle
+{
+    return [NSBundle bundleForClass:[self class]];
+}
 @end
