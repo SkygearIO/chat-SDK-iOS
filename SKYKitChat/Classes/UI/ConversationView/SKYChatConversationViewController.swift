@@ -241,7 +241,7 @@ extension SKYChatConversationViewController {
         }
 
         let shouldShowAccessoryButton: Bool =
-            self.delegate?.accessoryButtonShouldShowInConversationViewController?(self) ?? false
+            self.delegate?.accessoryButtonShouldShowInConversationViewController?(self) ?? true
 
         if !shouldShowAccessoryButton {
             self.inputToolbar?.contentView?.leftBarButtonItem?.removeFromSuperview()
