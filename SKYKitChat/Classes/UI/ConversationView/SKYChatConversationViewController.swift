@@ -159,6 +159,8 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     var slideToCancelTextView: UITextView?
     var gesture: UILongPressGestureRecognizer?
     var isRecordingCancelled: Bool = false
+    var audioDict: [String: JSQMessageMediaData] = [:]
+    var msgDict:   [String: JSQMessage] = [:]
 }
 
 // MARK: - Initializing
@@ -238,7 +240,47 @@ extension SKYChatConversationViewController {
 // MARK: - Rendering
 
 extension SKYChatConversationViewController {
-
+    func createSlideToCancelTextView(_ frame: CGRect) -> UITextView {
+        let textView = UITextView(frame: frame)
+        textView.isEditable = false
+        textView.text = "Slide to Cancel";
+        textView.backgroundColor = UIColor.clear
+        textView.textColor = UIColor.darkGray
+        return textView
+    }
+    
+    func createRecordButton(_ frame: CGRect) -> UIButton {
+        let recordButton = UIButton(frame: frame)
+        recordButton.setImage(UIImage(named: "icon-mic", in: self.bundle(), compatibleWith: nil), for: UIControlState.normal)
+        recordButton.tintColor = self.sendButton?.tintColor
+        return recordButton
+    }
+    
+    func reLayout() {
+        let contentView = self.inputToolbar?.contentView
+        let rightContainerView = contentView?.rightBarButtonContainerView
+        let sendButton = contentView?.rightBarButtonItem
+        let cameraButton = self.cameraButton!
+        rightContainerView?.removeConstraints(rightContainerView?.constraints ?? [])
+        
+        NSLayoutConstraint.activate([
+            NSLayoutConstraint(item: cameraButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 32),
+            NSLayoutConstraint(item: cameraButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 32),
+            NSLayoutConstraint(item: cameraButton, attribute: .left, relatedBy: .equal, toItem: rightContainerView, attribute: .left, multiplier: 1, constant: 8),
+            NSLayoutConstraint(item: cameraButton, attribute: .right, relatedBy: .equal, toItem: sendButton, attribute: .left, multiplier: 1, constant: -8),
+            NSLayoutConstraint(item: cameraButton, attribute: .top, relatedBy: .equal, toItem: rightContainerView, attribute: .top, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: cameraButton, attribute: .bottom, relatedBy: .equal, toItem: rightContainerView, attribute: .bottom, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: sendButton, attribute: .right, relatedBy: .equal, toItem: rightContainerView, attribute: .right, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: sendButton, attribute: .top, relatedBy: .equal, toItem: rightContainerView, attribute: .top, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: sendButton, attribute: .bottom, relatedBy: .equal, toItem: rightContainerView, attribute: .bottom, multiplier: 1, constant: 0)
+            ])
+    }
+    
+    func shouldShowCameraButton() -> Bool {
+        return
+            self.delegate?.cameraButtonShouldShowInConversationViewController?(self) ?? true
+    }
+    
     open func customizeViews() {
         self.updateTitle()
 
@@ -258,51 +300,26 @@ extension SKYChatConversationViewController {
             self.inputToolbar?.contentView?.leftBarButtonItem = nil
         }
 
-        let shouldShowCameraButton: Bool =
-            self.delegate?.cameraButtonShouldShowInConversationViewController?(self) ?? true
+        let shouldShowCameraButton: Bool = self.shouldShowCameraButton()
 
+        self.sendButton = self.inputToolbar?.contentView?.rightBarButtonItem
+        self.sendButton?.removeFromSuperview()
+        self.inputTextView = self.inputToolbar?.contentView?.textView
+        self.slideToCancelTextView = self.createSlideToCancelTextView(self.inputTextView!.frame)
+        self.recordButton = self.createRecordButton(self.sendButton!.frame)
+        
+    
         if shouldShowCameraButton {
             let cameraButton = UIButton(type: .custom)
             cameraButton.translatesAutoresizingMaskIntoConstraints = false
             cameraButton.setImage(UIImage(named: "icon-camera", in: self.bundle(), compatibleWith: nil), for: .normal)
             cameraButton.addTarget(self, action: #selector(didPressCameraButton(_:)), for: .touchUpInside)
             self.inputToolbar?.contentView?.rightBarButtonContainerView.addSubview(cameraButton)
-            let contentView = self.inputToolbar?.contentView
-            let rightContainerView = contentView?.rightBarButtonContainerView
-            let sendButton = contentView?.rightBarButtonItem
-
-            rightContainerView?.removeConstraints(rightContainerView?.constraints ?? [])
-
-            NSLayoutConstraint.activate([
-                NSLayoutConstraint(item: cameraButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 32),
-                NSLayoutConstraint(item: cameraButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 32),
-                NSLayoutConstraint(item: cameraButton, attribute: .left, relatedBy: .equal, toItem: rightContainerView, attribute: .left, multiplier: 1, constant: 8),
-                NSLayoutConstraint(item: cameraButton, attribute: .right, relatedBy: .equal, toItem: sendButton, attribute: .left, multiplier: 1, constant: -8),
-                NSLayoutConstraint(item: sendButton, attribute: .right, relatedBy: .equal, toItem: rightContainerView, attribute: .right, multiplier: 1, constant: 0),
-                NSLayoutConstraint(item: cameraButton, attribute: .top, relatedBy: .equal, toItem: rightContainerView, attribute: .top, multiplier: 1, constant: 0),
-                NSLayoutConstraint(item: cameraButton, attribute: .bottom, relatedBy: .equal, toItem: rightContainerView, attribute: .bottom, multiplier: 1, constant: 0),
-                NSLayoutConstraint(item: sendButton, attribute: .top, relatedBy: .equal, toItem: rightContainerView, attribute: .top, multiplier: 1, constant: 0),
-                NSLayoutConstraint(item: sendButton, attribute: .bottom, relatedBy: .equal, toItem: rightContainerView, attribute: .bottom, multiplier: 1, constant: 0)
-            ])
-
             self.cameraButton = cameraButton
         }
         
-        //let stepsTextField = UITextField(frame: CGRect(x: 20, y: 100, width: 300, height: 40))
-        self.sendButton = self.inputToolbar?.contentView?.rightBarButtonItem
-        self.sendButton?.removeFromSuperview()
-        self.inputTextView = self.inputToolbar?.contentView?.textView
-        self.slideToCancelTextView = UITextView(frame: self.inputTextView!.frame)
-        self.slideToCancelTextView?.isEditable = false
-        self.slideToCancelTextView?.text = "Slide to Cancel";
-        self.recordButton = UIButton(frame: self.sendButton!.frame)
-        let bundle = Bundle(for: type(of: self))
-        print("%@", self.skygear.chatExtension?.bundle())
-        let image = UIImage(named: "mic", in: self.skygear.chatExtension?.bundle(), compatibleWith: nil)
-        NSLog("%@", image!)
-        self.recordButton?.setImage(image, for: UIControlState.normal)
-        self.recordButton?.tintColor = self.sendButton?.tintColor
         self.setRecordButton()
+
     }
 
     open func updateTitle() {
@@ -333,7 +350,7 @@ extension SKYChatConversationViewController {
 
             msgSenderName = senderName
         }
-
+        
         let mediaData = self.messageMediaDataFactory.mediaData(with: msg)
         var jsqMessage: JSQMessage
 
@@ -343,10 +360,20 @@ extension SKYChatConversationViewController {
                                     date: msg.creationDate(),
                                     text: msg.body)
         } else {
+            
+            
             jsqMessage = JSQMessage(senderId: msg.creatorUserRecordID(),
                                     senderDisplayName: msgSenderName,
                                     date: msg.creationDate(),
                                     media: mediaData)
+            
+            /* Need to store strong reference for audio data
+               https://github.com/jessesquires/JSQMessagesViewController/issues/1705
+            */
+            
+            let key = msg.recordID().canonicalString
+            self.audioDict[key] = mediaData
+            self.msgDict[key] = jsqMessage
         }
 
         return jsqMessage
@@ -395,6 +422,7 @@ extension SKYChatConversationViewController {
     ) -> CGFloat {
         return CGFloat(14)
     }
+    
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
         attributedTextForCellTopLabelAt indexPath: IndexPath!
@@ -537,7 +565,6 @@ extension SKYChatConversationViewController {
     }
     
     open func setRecordButton() {
-        
         self.inputToolbar?.contentView?.rightBarButtonItem = self.recordButton
         self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchUpInside)
         self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchDown)
@@ -548,6 +575,9 @@ extension SKYChatConversationViewController {
         self.inputToolbar?.contentView?.rightBarButtonItem.isEnabled = true
         self.gesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressAction(gesture:)))
         self.inputToolbar?.contentView?.rightBarButtonItem.addGestureRecognizer(self.gesture!)
+        if self.shouldShowCameraButton() {
+            self.reLayout()
+        }
     }
     
     open func setSendButton() {
@@ -557,6 +587,9 @@ extension SKYChatConversationViewController {
         self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self.inputToolbar, action: nil, for: UIControlEvents.touchUpInside)
         self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchUpInside)
         self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didPressSendButton), for: UIControlEvents.touchUpInside)
+        if self.shouldShowCameraButton() {
+            self.reLayout()
+        }
     }
     
     func longPressAction(gesture: UILongPressGestureRecognizer) {
@@ -586,8 +619,6 @@ extension SKYChatConversationViewController {
                 self.didStopRecord(button: self.recordButton!)
             }
         }
-
-        self.present(self.defaultAccessoryButtonAlertController(), animated: true, completion: nil)
     }
 
     func defaultAccessoryButtonAlertController() -> UIAlertController {
@@ -646,11 +677,6 @@ extension SKYChatConversationViewController {
             return
         }
 
-        let msg = SKYMessage()
-        msg.body = text
-        msg.setCreatorUserRecordID(self.senderId)
-        msg.setCreationDate(date)
-
         self.delegate?.conversationViewController?(self, readyToSendMessage: msg)
         self.skygear.chatExtension?.addMessage(
             msg,
@@ -690,7 +716,6 @@ extension SKYChatConversationViewController {
         
         self.messages.append(msg)
         self.finishSendingMessage(animated: true)
-        
         self.skygear.chatExtension?.sendTypingIndicator(.finished, in: self.conversation!)
     }
 }
@@ -719,6 +744,8 @@ extension SKYChatConversationViewController {
                                                        alertControllerForAccessoryButton: sender!) {
             self.present(alert, animated: true, completion: nil)
         }
+        
+        self.present(self.defaultAccessoryButtonAlertController(), animated: true, completion: nil)
     }
 
     open override func didPressSend(_ button: UIButton!,
@@ -942,6 +969,8 @@ extension SKYChatConversationViewController {
                 msg.body = ""
                 msg.metadata = [:]
                 msg.attachment = asset
+                msg.setCreatorUserRecordID(self.senderId)
+                msg.setCreationDate(Date())
                 self.sendMessage(msg)
                 self.setRecordButton()
             }

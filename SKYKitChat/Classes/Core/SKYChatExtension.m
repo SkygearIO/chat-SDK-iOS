@@ -1044,9 +1044,4 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                   name:SKYChatDidReceiveTypingIndicatorNotification
                 object:self];
 }
-
-- (NSBundle *)bundle
-{
-    return [NSBundle bundleForClass:[self class]];
-}
 @end
