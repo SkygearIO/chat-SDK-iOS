@@ -16,7 +16,10 @@ script:
 - xcodebuild -scheme "$SCHEME" -workspace "$WORKSPACE" -sdk "$SDK" -destination "$DESTINATION" build test | xcpretty
 - pod lib lint --allow-warnings
 - ./clang-check.sh
-- swiftlint lint --path SKYKitChat
+# swiftlint is not finding config file path from the current directory
+# so need to set it explicitly
+# failed swiftlint version found on travis is 0.23.1
+- swiftlint lint --path SKYKitChat --config ../.swiftlint.yml
 - lizard SKYKitChat/ -C 15 -w -i 0
 env:
   global:
