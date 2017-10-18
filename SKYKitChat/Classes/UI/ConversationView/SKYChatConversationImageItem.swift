@@ -78,7 +78,8 @@ extension SKYChatConversationImageItem {
 
         var thumbnailImage: UIImage? = nil
         if let thumbnailImageString = metadata["thumbnail"] as? String {
-            let thumbnailImageData = Data(base64Encoded: thumbnailImageString)
+            let thumbnailImageData =
+                Data(base64Encoded: thumbnailImageString, options: .ignoreUnknownCharacters)
             thumbnailImage = UIImage(data: thumbnailImageData!)
         }
         self.thumbnailImage = thumbnailImage
