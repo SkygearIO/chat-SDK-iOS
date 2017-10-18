@@ -623,6 +623,8 @@ extension SKYChatConversationViewController {
         )
 
         self.messages.append(msg)
+        self.collectionView?.reloadData()
+        self.scrollToBottom(animated: true)
         self.finishSendingMessage(animated: true)
 
         self.skygear.chatExtension?.sendTypingIndicator(.finished, in: self.conversation!)
@@ -766,6 +768,8 @@ extension SKYChatConversationViewController {
         )
 
         self.messages.append(msg)
+        self.collectionView?.reloadData()
+        self.scrollToBottom(animated: true)
     }
 }
 
