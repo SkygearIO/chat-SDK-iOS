@@ -160,6 +160,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     var gesture: UILongPressGestureRecognizer?
     var isRecordingCancelled: Bool = false
     var audioDict: [String: JSQMessageMediaData] = [:]
+    var audioTime: TimeInterval?
 }
 
 // MARK: - Initializing
@@ -965,7 +966,7 @@ extension SKYChatConversationViewController {
                 }
                 let msg = SKYMessage()
                 msg.body = ""
-                msg.metadata = [:]
+                msg.metadata = ["length": self.audioTime]
                 msg.attachment = asset
                 msg.setCreatorUserRecordID(self.senderId)
                 msg.setCreationDate(Date())
@@ -984,6 +985,7 @@ extension SKYChatConversationViewController {
             print("Stop recording", cancelled)
             self.setSendButton()
             self.isRecordingCancelled = cancelled
+            self.audioTime = self.audioRecorder?.currentTime
             self.audioRecorder?.stop()
             self.slideToCancelTextView?.removeFromSuperview()
             self.inputTextView?.isHidden = false
