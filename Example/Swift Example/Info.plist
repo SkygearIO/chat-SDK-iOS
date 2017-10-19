@@ -42,6 +42,8 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-	</array>
+    </array>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>We need to access your microphone for sending voice message</string>
 </dict>
 </plist>

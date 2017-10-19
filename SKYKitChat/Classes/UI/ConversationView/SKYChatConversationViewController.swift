@@ -160,7 +160,6 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     var gesture: UILongPressGestureRecognizer?
     var isRecordingCancelled: Bool = false
     var audioDict: [String: JSQMessageMediaData] = [:]
-    var msgDict:   [String: JSQMessage] = [:]
 }
 
 // MARK: - Initializing
@@ -243,6 +242,7 @@ extension SKYChatConversationViewController {
     func createSlideToCancelTextView(_ frame: CGRect) -> UITextView {
         let textView = UITextView(frame: frame)
         textView.isEditable = false
+        textView.isSelectable = false
         textView.text = "Slide to Cancel";
         textView.backgroundColor = UIColor.clear
         textView.textColor = UIColor.darkGray
@@ -373,7 +373,6 @@ extension SKYChatConversationViewController {
             
             let key = msg.recordID().canonicalString
             self.audioDict[key] = mediaData
-            self.msgDict[key] = jsqMessage
         }
 
         return jsqMessage
@@ -573,6 +572,7 @@ extension SKYChatConversationViewController {
         self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didStopRecord), for: UIControlEvents.touchUpInside)
         self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didStopRecord), for: UIControlEvents.touchUpOutside)
         self.inputToolbar?.contentView?.rightBarButtonItem.isEnabled = true
+        self.cameraButton?.isHidden = false
         self.gesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressAction(gesture:)))
         self.inputToolbar?.contentView?.rightBarButtonItem.addGestureRecognizer(self.gesture!)
         if self.shouldShowCameraButton() {
@@ -925,23 +925,21 @@ extension SKYChatConversationViewController {
     func didStartRecord(button: UIButton) {
         
         let recordingSession = AVAudioSession.sharedInstance()
-        do {
-            try recordingSession.setCategory(AVAudioSessionCategoryPlayAndRecord)
-            try recordingSession.setActive(true)
-            recordingSession.requestRecordPermission() { [unowned self] allowed in
-                DispatchQueue.main.async {
-                    if allowed {
-                        self.inputTextView?.isHidden = true
-                        self.inputToolbar?.contentView?.leftBarButtonItem?.isHidden = true
-                        self.inputToolbar?.contentView?.addSubview(self.slideToCancelTextView!)
-                        self.startRecord()
-                    } else {
-                        //TODO: show dialog
-                    }
-                }
+        
+        if recordingSession.recordPermission() == .granted {
+            do {
+                try recordingSession.setCategory(AVAudioSessionCategoryPlayAndRecord)
+                try recordingSession.setActive(true)
+                self.inputTextView?.isHidden = true
+                self.inputToolbar?.contentView?.leftBarButtonItem?.isHidden = true
+                self.inputToolbar?.contentView?.addSubview(self.slideToCancelTextView!)
+                self.cameraButton?.isHidden = true
+                self.startRecord()
+            } catch {
+                print("Cannot start recording session.")
             }
-        } catch {
-            //TODO: show dialog
+        } else {
+            recordingSession.requestRecordPermission() { allowed in }
         }
     }
     
@@ -981,18 +979,21 @@ extension SKYChatConversationViewController {
     
     
     func didStopRecord(button: UIButton, cancelled: Bool = false) {
-        print("Stop recording")
-        self.setSendButton()
-        self.isRecordingCancelled = cancelled
-        self.audioRecorder?.stop()
-        self.slideToCancelTextView?.removeFromSuperview()
-        self.inputTextView?.isHidden = false
-        self.inputToolbar?.contentView?.leftBarButtonItem?.isHidden = false
-        do {
-            let recordingSession = AVAudioSession.sharedInstance()
-            try recordingSession.setActive(false)
-        } catch {
-            print("Failed to stop recording session.")
+        let recordingSession = AVAudioSession.sharedInstance()
+        if recordingSession.recordPermission() == .granted {
+            print("Stop recording", cancelled)
+            self.setSendButton()
+            self.isRecordingCancelled = cancelled
+            self.audioRecorder?.stop()
+            self.slideToCancelTextView?.removeFromSuperview()
+            self.inputTextView?.isHidden = false
+            self.inputToolbar?.contentView?.leftBarButtonItem?.isHidden = false
+            do {
+                
+                try recordingSession.setActive(false)
+            } catch {
+                print("Failed to stop recording session.")
+            }
         }
     }
 }

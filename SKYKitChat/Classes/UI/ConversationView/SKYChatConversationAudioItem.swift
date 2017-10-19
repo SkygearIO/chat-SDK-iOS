@@ -45,7 +45,6 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
         if self.data == nil {
             DispatchQueue.global().async {
                 self.data = try? Data(contentsOf: self.asset!.url)
-                print(self.asset!.url)
                 DispatchQueue.main.sync {
                     if self.data != nil {
                         self.audioData = self.data
