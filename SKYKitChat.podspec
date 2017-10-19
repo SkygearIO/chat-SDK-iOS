@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'SKYKitChat'
-  s.version          = '0.0.2'
+  s.version          = '1.1.0'
   s.summary          = 'Chat extension for SKYKit'
 
   s.description      = <<-DESC
@@ -23,14 +23,14 @@ This is the client library for the Skygear Chat extension.
         ]
     }
 
-    sp.dependency 'SKYKit/Core', '~> 1.1.0'
+    sp.dependency 'SKYKit/Core', '~> 1.1'
   end
 
   s.subspec 'UI' do |sp|
     sp.source_files = 'SKYKitChat/Classes/UI/**/*'
 
     sp.dependency 'SKYKitChat/Core'
-    sp.dependency 'SKYKit/Core',               '~> 1.1.0'
+    sp.dependency 'SKYKit/Core',               '~> 1.1'
     sp.dependency 'JSQMessagesViewController', '~> 7.3.0'
     sp.dependency 'SVProgressHUD',             '~> 2.1.0'
     sp.dependency 'ALCameraViewController',    '~> 2.0'
