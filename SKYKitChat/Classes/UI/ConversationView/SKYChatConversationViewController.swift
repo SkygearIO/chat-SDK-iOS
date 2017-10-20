@@ -21,6 +21,7 @@ import JSQMessagesViewController
 import ALCameraViewController
 import CTAssetsPickerController
 import AVFoundation
+import SKPhotoBrowser
 
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
@@ -96,7 +97,7 @@ import AVFoundation
         failedFetchingMessagesWithError error: Error)
 }
 
-open class SKYChatConversationViewController: JSQMessagesViewController, AVAudioRecorderDelegate {
+open class SKYChatConversationViewController: JSQMessagesViewController, AVAudioRecorderDelegate, SKYChatConversationImageItemDelegate {
 
     weak public var delegate: SKYChatConversationViewControllerDelegate?
 
@@ -391,6 +392,10 @@ extension SKYChatConversationViewController {
                 }
                 self.audioDict[key] = audioItem
             }
+            
+            if let imageItem = mediaData as? SKYChatConversationImageItem {
+                imageItem.delegate = self
+            }
         }
 
         return jsqMessage
@@ -629,6 +634,13 @@ extension SKYChatConversationViewController {
                 self.didStopRecord(button: self.recordButton!)
             }
         }
+    }
+    
+    open func imageDidTap(_ url: URL?) {
+        let photo = SKPhoto.photoWithImageURL(url!.absoluteString)
+        let browser = SKPhotoBrowser(photos: [photo])
+        
+        self.present(browser, animated: true, completion: nil)
     }
 
     func defaultAccessoryButtonAlertController() -> UIAlertController {

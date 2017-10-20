@@ -12,6 +12,7 @@ PODS:
   - Kingfisher (3.10.4)
   - LruCache (0.1)
   - PureLayout (3.0.2)
+  - SKPhotoBrowser (4.1.1)
   - SKYKit/Core (1.1.0):
     - FMDB (~> 2.5)
     - SocketRocket (~> 0.4)
@@ -24,6 +25,7 @@ PODS:
     - CTAssetsPickerController (~> 3.3.1)
     - JSQMessagesViewController (~> 7.3.0)
     - LruCache (~> 0.1)
+    - SKPhotoBrowser (~> 4.1.1)
     - SKYKit/Core (~> 1.1)
     - SKYKitChat/Core
     - SVProgressHUD (~> 2.1.0)
@@ -52,8 +54,9 @@ SPEC CHECKSUMS:
   Kingfisher: dc3a4983e86d2dfa89513664983a82340c11a289
   LruCache: 3a1a9dbed4db352c980bc1ad956e3046bce32515
   PureLayout: 4d550abe49a94f24c2808b9b95db9131685fe4cd
+  SKPhotoBrowser: aa02de50f56d80fac23f543e40847af6b360e4b3
   SKYKit: 124d42572fc55e93dadc3a4136a7fcfa956c680b
-  SKYKitChat: 6ffac6955eea74b0141ab24338d2cf99bb7f224e
+  SKYKitChat: 8d224def4b983f6e6562ad874bccfc70cd68c9e5
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   Specta: f506f3a8361de16bc0dcf3b17b75e269072ba465
   SVProgressHUD: c404a55d78acbeb7ebb78b76d3faf986475a6994
