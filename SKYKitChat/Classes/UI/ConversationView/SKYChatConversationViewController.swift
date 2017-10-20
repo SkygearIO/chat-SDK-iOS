@@ -288,14 +288,17 @@ extension SKYChatConversationViewController {
 
     func createActivityIndicator() {
         self.indicator = UIActivityIndicatorView()
-        self.indicator?.center = (self.collectionView?.center)!
         self.indicator?.activityIndicatorViewStyle = .gray
-        print(self.indicator?.frame)
         self.indicator?.hidesWhenStopped = true
         self.view.addSubview(indicator!)
         indicator?.superview?.bringSubview(toFront: indicator!)
+        indicator?.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            NSLayoutConstraint(item: self.indicator!, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: self.indicator!, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1, constant: 0)
+            ])
     }
-
+    
     open func customizeViews() {
         self.updateTitle()
 
