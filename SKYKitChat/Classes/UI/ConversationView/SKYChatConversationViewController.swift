@@ -143,7 +143,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     }
 
     static let errorDomain: String = "SKYChatConversationViewControllerErrorDomain"
-    
+
     var errorCreator: SKYErrorCreator {
         return SKYErrorCreator(defaultErrorDomain: SKYChatConversationViewController.errorDomain)
     }
@@ -151,7 +151,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     open func getMessageMediaDataFactory() -> JSQMessageMediaDataFactory {
         return messageMediaDataFactory
     }
-    
+
     var sendButton: UIButton?
     var recordButton: UIButton?
     var audioRecorder: AVAudioRecorder?
@@ -161,6 +161,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     var isRecordingCancelled: Bool = false
     var audioDict: [String: SKYChatConversationAudioItem] = [:]
     var audioTime: TimeInterval?
+    var indicator: UIActivityIndicatorView?
 }
 
 // MARK: - Initializing
@@ -252,21 +253,21 @@ extension SKYChatConversationViewController {
         textView.textColor = UIColor.darkGray
         return textView
     }
-    
+
     func createRecordButton(_ frame: CGRect) -> UIButton {
         let recordButton = UIButton(frame: frame)
         recordButton.setImage(UIImage(named: "icon-mic", in: self.bundle(), compatibleWith: nil), for: UIControlState.normal)
         recordButton.tintColor = self.sendButton?.tintColor
         return recordButton
     }
-    
+
     func reLayout() {
         let contentView = self.inputToolbar?.contentView
         let rightContainerView = contentView?.rightBarButtonContainerView
         let sendButton = contentView?.rightBarButtonItem
         let cameraButton = self.cameraButton!
         rightContainerView?.removeConstraints(rightContainerView?.constraints ?? [])
-        
+
         NSLayoutConstraint.activate([
             NSLayoutConstraint(item: cameraButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 32),
             NSLayoutConstraint(item: cameraButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 32),
@@ -279,10 +280,23 @@ extension SKYChatConversationViewController {
             NSLayoutConstraint(item: sendButton, attribute: .bottom, relatedBy: .equal, toItem: rightContainerView, attribute: .bottom, multiplier: 1, constant: 0)
             ])
     }
-    
+
     func shouldShowCameraButton() -> Bool {
         return
             self.delegate?.cameraButtonShouldShowInConversationViewController?(self) ?? true
+    }
+
+    func createActivityIndicator() {
+        self.indicator = UIActivityIndicatorView()
+        self.indicator?.activityIndicatorViewStyle = .gray
+        self.indicator?.hidesWhenStopped = true
+        self.view.addSubview(indicator!)
+        indicator?.superview?.bringSubview(toFront: indicator!)
+        indicator?.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            NSLayoutConstraint(item: self.indicator!, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: self.indicator!, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1, constant: 0)
+            ])
     }
     
     open func customizeViews() {
@@ -311,8 +325,7 @@ extension SKYChatConversationViewController {
         self.inputTextView = self.inputToolbar?.contentView?.textView
         self.slideToCancelTextView = self.createSlideToCancelTextView(self.inputTextView!.frame)
         self.recordButton = self.createRecordButton(self.sendButton!.frame)
-        
-    
+
         if shouldShowCameraButton {
             let cameraButton = UIButton(type: .custom)
             cameraButton.translatesAutoresizingMaskIntoConstraints = false
@@ -321,9 +334,9 @@ extension SKYChatConversationViewController {
             self.inputToolbar?.contentView?.rightBarButtonContainerView.addSubview(cameraButton)
             self.cameraButton = cameraButton
         }
-        
-        self.setRecordButton()
 
+        self.setRecordButton()
+        self.createActivityIndicator()
     }
 
     open func updateTitle() {
@@ -1167,6 +1180,7 @@ extension SKYChatConversationViewController {
             return
         }
 
+        self.indicator?.startAnimating()
         let chatExt = self.skygear.chatExtension
         self.isFetchingMessage = true
 
@@ -1178,7 +1192,7 @@ extension SKYChatConversationViewController {
                  order: nil,
             completion: { (result, error) in
                 self.isFetchingMessage = false
-
+                self.indicator?.stopAnimating()
                 guard error == nil else {
                     print("Failed to fetch messages: \(error?.localizedDescription ?? "")")
                     self.delegate?.conversationViewController?(
