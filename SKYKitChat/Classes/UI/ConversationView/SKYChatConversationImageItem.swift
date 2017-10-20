@@ -22,7 +22,7 @@ import JSQMessagesViewController
 private let maxDisplaySize: CGFloat = 240
 private let minDisplaySize: CGFloat = 80
 
-protocol SKYChatConversationImageItemDelegate {
+protocol SKYChatConversationImageItemDelegate: class {
     func imageDidTap(_ url: URL?)
 }
 
@@ -32,9 +32,8 @@ class SKYChatConversationImageItem: NSObject, JSQMessageMediaData {
     var image: UIImage?
     var displaySize: CGSize = CGSize.zero
     var thumbnailImage: UIImage?
-    var controller: UIViewController?
     var tap:  UITapGestureRecognizer?
-    var delegate: SKYChatConversationImageItemDelegate?
+    weak var delegate: SKYChatConversationImageItemDelegate?
     var assetUrl: URL?
 
     var getImage: (() -> UIImage?)?
