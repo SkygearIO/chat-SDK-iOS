@@ -594,6 +594,7 @@ extension SKYChatConversationViewController {
         self.inputToolbar?.contentView?.rightBarButtonItem.isEnabled = true
         self.cameraButton?.isHidden = false
         self.gesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressAction(gesture:)))
+        self.gesture?.minimumPressDuration = 0.1
         self.inputToolbar?.contentView?.rightBarButtonItem.addGestureRecognizer(self.gesture!)
         if self.shouldShowCameraButton() {
             self.reLayout()
@@ -984,6 +985,7 @@ extension SKYChatConversationViewController {
             return
         }
         do{
+            self.setRecordButton()
             let asset = SKYAsset(data: try Data(contentsOf: recorder.url))
             asset.mimeType = "audio/m4a"
             SKYContainer.default().publicCloudDatabase.uploadAsset(asset) { (asset, error) in
@@ -1003,7 +1005,6 @@ extension SKYChatConversationViewController {
                 msg.setCreatorUserRecordID(self.senderId)
                 msg.setCreationDate(Date())
                 self.sendMessage(msg)
-                self.setRecordButton()
             }
         } catch {
             print("Unable to send audio")
