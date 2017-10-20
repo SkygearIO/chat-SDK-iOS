@@ -596,7 +596,6 @@ extension SKYChatConversationViewController {
     }
     
     func longPressAction(gesture: UILongPressGestureRecognizer) {
-        print(gesture.state)
         if gesture.state == .began {
             self.didStartRecord(button: self.recordButton!)
         }
