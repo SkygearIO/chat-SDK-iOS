@@ -22,12 +22,20 @@ import JSQMessagesViewController
 private let maxDisplaySize: CGFloat = 240
 private let minDisplaySize: CGFloat = 80
 
+protocol SKYChatConversationImageItemDelegate {
+    func imageDidTap(_ url: URL?)
+}
+
 class SKYChatConversationImageItem: NSObject, JSQMessageMediaData {
 
     var imageName: String?
     var image: UIImage?
     var displaySize: CGSize = CGSize.zero
     var thumbnailImage: UIImage?
+    var controller: UIViewController?
+    var tap:  UITapGestureRecognizer?
+    var delegate: SKYChatConversationImageItemDelegate?
+    var assetUrl: URL?
 
     var getImage: (() -> UIImage?)?
 
@@ -50,7 +58,11 @@ class SKYChatConversationImageItem: NSObject, JSQMessageMediaData {
 
         let rect = CGRect.init(origin: CGPoint.zero, size: self.displaySize)
         imageView.frame = rect
-        return JSQMessagesMediaPlaceholderView(frame: rect, backgroundColor: UIColor.lightGray, imageView: imageView)
+
+        let placeHolderView = JSQMessagesMediaPlaceholderView(frame: rect, backgroundColor: UIColor.lightGray, imageView: imageView)
+        placeHolderView!.isUserInteractionEnabled = true
+        placeHolderView!.addGestureRecognizer(self.tap!)
+        return placeHolderView
     }
 
     func mediaViewDisplaySize() -> CGSize {
@@ -73,7 +85,11 @@ extension SKYChatConversationImageItem {
 
     convenience init(withMessage: SKYMessage) {
         self.init()
+        self.tap = UITapGestureRecognizer(target: self, action: #selector(imageDidTap))
+        self.tap?.numberOfTapsRequired = 1
+        
         let asset = withMessage.attachment
+        self.assetUrl = asset?.url
         let metadata = withMessage.metadata ?? [String: Any]()
 
         var thumbnailImage: UIImage? = nil
@@ -94,6 +110,12 @@ extension SKYChatConversationImageItem {
 
         self.getImage = {
             return self.getImage(fromAsset: asset)
+        }
+    }
+    
+    func imageDidTap() {
+        if let delegate = self.delegate {
+            delegate.imageDidTap(self.assetUrl)
         }
     }
 
