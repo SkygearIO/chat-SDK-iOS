@@ -376,6 +376,9 @@ extension SKYChatConversationViewController {
             */
             if let audioItem = mediaData as? SKYChatConversationAudioItem {
                 let key = msg.recordID().canonicalString
+                if let origAudioItem = self.audioDict[key] {
+                    origAudioItem.stop()
+                }
                 self.audioDict[key] = audioItem
             }
         }

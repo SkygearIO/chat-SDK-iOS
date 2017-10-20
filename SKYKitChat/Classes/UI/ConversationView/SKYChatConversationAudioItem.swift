@@ -58,6 +58,7 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
                         return
                     }
                     if item.data != nil {
+                        item.childView?.removeFromSuperview()
                         item.audioData = item.data
                         item.childView = item.mediaView()
                     }
@@ -66,6 +67,10 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
             }
         }
 
+    }
+    
+    override func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        super.audioPlayerDidFinishPlaying(player, successfully: flag)
     }
     
     override func mediaView() -> UIView? {
