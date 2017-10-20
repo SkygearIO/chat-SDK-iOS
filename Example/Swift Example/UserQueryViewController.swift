@@ -42,7 +42,7 @@ extension UserQueryViewController: SKYChatParticipantListViewControllerDataSourc
          */
 
         var name = ""
-        if let participantName = participant.object(forKey: "name") as? String {
+        if let participantName = participant.object(forKey: "username") as? String {
             name = participantName
         }
 

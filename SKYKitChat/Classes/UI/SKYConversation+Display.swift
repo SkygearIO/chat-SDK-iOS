@@ -26,7 +26,7 @@ public extension SKYConversation {
      */
     public func nameList(fromParticipants participants: [SKYRecord]) -> String? {
         let participantNames = participants.flatMap { (eachParticipant) -> String? in
-            return eachParticipant.object(forKey: "name") as? String
+            return eachParticipant.object(forKey: "username") as? String
         }
 
         guard participantNames.count > 0 else {

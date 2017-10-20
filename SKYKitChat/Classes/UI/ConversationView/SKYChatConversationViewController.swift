@@ -360,7 +360,7 @@ extension SKYChatConversationViewController {
 
         var msgSenderName: String = ""
         if let sender = self.getSender(forMessage: msg),
-            let senderName = sender.object(forKey: "name") as? String {
+            let senderName = sender.object(forKey: "username") as? String {
 
             msgSenderName = senderName
         }
@@ -494,7 +494,7 @@ extension SKYChatConversationViewController {
         let msg = self.messages[indexPath.row]
         var senderName: String = ""
         if let user = self.getSender(forMessage: msg),
-            let userName = user.object(forKey: "name") as? String {
+            let userName = user.object(forKey: "username") as? String {
             senderName = userName
         }
         
@@ -543,7 +543,7 @@ extension SKYChatConversationViewController {
         let msg = self.messages[indexPath.row]
         var senderName: String = ""
         if let user = self.getSender(forMessage: msg),
-            let userName = user.object(forKey: "name") as? String {
+            let userName = user.object(forKey: "username") as? String {
 
             senderName = userName
         }
@@ -1162,7 +1162,7 @@ extension SKYChatConversationViewController {
                 }
 
                 if let senderRecord = self.participants[self.senderId],
-                    let senderName = senderRecord.object(forKey: "name") as? String {
+                    let senderName = senderRecord.object(forKey: "username") as? String {
 
                     self.senderDisplayName = senderName
                 }

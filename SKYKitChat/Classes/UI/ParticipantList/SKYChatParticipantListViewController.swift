@@ -177,7 +177,7 @@ extension SKYChatParticipantListViewController: UITableViewDelegate, UITableView
                 avatarImage = ds.listViewController?(self,
                                                      avatarImageForParticipant: participantRecord,
                                                      atIndexPath: indexPath)
-            } else if let name = participantRecord.object(forKey: "name") as? String {
+            } else if let name = participantRecord.object(forKey: "username") as? String {
                 avatarImage = UIImage.avatarImage(forInitialsOfName: name)
             }
             cell.avatarImage = avatarImage

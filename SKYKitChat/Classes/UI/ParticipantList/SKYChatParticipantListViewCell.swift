@@ -62,7 +62,7 @@ open class SKYChatParticipantListViewCell: UITableViewCell {
      **/
     open func layoutSubviews(participant: SKYRecord) {
         // name
-        if let name = participant.object(forKey: "name") as? String {
+        if let name = participant.object(forKey: "username") as? String {
             self.participantNameLabel?.text = name
             self.participantNameLabel?.textColor = self.participantNameLabel?.tintColor
         } else {
