@@ -187,9 +187,6 @@ extension SKYChatConversationViewController {
 
         self.incomingMessageBubbleColor = UIColor.lightGray
         self.outgoingMessageBubbleColor = UIColor.jsq_messageBubbleBlue()
-
-        // prevent scroll to bottom when load more
-        self.automaticallyScrollsToMostRecentMessage = false
     }
 
     override open func viewWillAppear(_ animated: Bool) {
@@ -771,9 +768,16 @@ extension SKYChatConversationViewController {
     }
 
     open override func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if scrollView.contentOffset.y < self.offsetYToLoadMore {
+        let scrollViewHeight = scrollView.frame.size.height;
+        let scrollContentSizeHeight = scrollView.contentSize.height;
+        let scrollOffset = scrollView.contentOffset.y;
+
+        if scrollOffset < self.offsetYToLoadMore {
             self.loadMoreMessage()
         }
+
+        // should automaticallyScrollsToMostRecentMessage when reach bottom
+        self.automaticallyScrollsToMostRecentMessage = scrollOffset >= scrollContentSizeHeight - scrollViewHeight
     }
 
     open func loadMoreMessage() {
