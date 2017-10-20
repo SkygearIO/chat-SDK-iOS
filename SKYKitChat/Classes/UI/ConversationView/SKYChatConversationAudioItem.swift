@@ -43,20 +43,26 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
         let size = super.mediaViewDisplaySize()
         self.view = UIView(frame: CGRect(x: 0.0, y: 0.0, width: size.width, height: size.height))
         if self.data == nil {
-            DispatchQueue.global().async {
-                self.data = try? Data(contentsOf: self.asset!.url)
-                DispatchQueue.main.sync {
-                    if self.data != nil {
-                        self.audioData = self.data
-                        if let audioCache = cache {
-                            audioCache.set(value: self.data, for: asset!)
-                        }
-                        self.childView?.removeFromSuperview()
-                        self.clearCachedMediaViews()
-                        self.childView = super.mediaView()
-                        self.view?.addSubview(self.childView!)
+            DispatchQueue.global().async { [weak self] in
+                guard let item = self else {
+                    return
+                }
+                
+                self?.data = try? Data(contentsOf: item.asset!.url)
+                if let audioCache = cache {
+                    audioCache.set(value: self?.data, for: asset!)
+                }
+                
+                DispatchQueue.main.sync {  [weak self] in
+                    guard let item = self else {
+                        return
+                    }
+                    if item.data != nil {
+                        item.audioData = item.data
+                        item.childView = item.mediaView()
                     }
                 }
+                
             }
         }
 
@@ -71,6 +77,10 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
             self.view?.addSubview(self.mediaPlaceholderView())
         }
         return self.view
+    }
+    
+    open func stop() {
+        self.clearCachedMediaViews()
     }
     
     required init?(coder aDecoder: NSCoder) {

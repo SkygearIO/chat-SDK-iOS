@@ -159,7 +159,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     var slideToCancelTextView: UITextView?
     var gesture: UILongPressGestureRecognizer?
     var isRecordingCancelled: Bool = false
-    var audioDict: [String: JSQMessageMediaData] = [:]
+    var audioDict: [String: SKYChatConversationAudioItem] = [:]
     var audioTime: TimeInterval?
 }
 
@@ -221,6 +221,9 @@ extension SKYChatConversationViewController {
         self.unsubscribeMessageChanges()
         self.unsubscribeTypingIndicatorChanges()
         self.skygear.chatExtension?.unsubscribeFromUserChannel()
+        for (key, audioItem) in self.audioDict {
+            audioItem.stop()
+        }
     }
 
     func dismiss(animated: Bool) {
@@ -371,9 +374,10 @@ extension SKYChatConversationViewController {
             /* Need to store strong reference for audio data
                https://github.com/jessesquires/JSQMessagesViewController/issues/1705
             */
-            
-            let key = msg.recordID().canonicalString
-            self.audioDict[key] = mediaData
+            if let audioItem = mediaData as? SKYChatConversationAudioItem {
+                let key = msg.recordID().canonicalString
+                self.audioDict[key] = audioItem
+            }
         }
 
         return jsqMessage
@@ -569,9 +573,6 @@ extension SKYChatConversationViewController {
         self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchUpInside)
         self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchDown)
         self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self.inputToolbar, action: nil, for: UIControlEvents.touchUpInside)
-        self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didStartRecord), for: UIControlEvents.touchDown)
-        self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didStopRecord), for: UIControlEvents.touchUpInside)
-        self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didStopRecord), for: UIControlEvents.touchUpOutside)
         self.inputToolbar?.contentView?.rightBarButtonItem.isEnabled = true
         self.cameraButton?.isHidden = false
         self.gesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressAction(gesture:)))
@@ -584,9 +585,7 @@ extension SKYChatConversationViewController {
     open func setSendButton() {
         self.inputToolbar?.contentView?.rightBarButtonItem.removeGestureRecognizer(self.gesture!)
         self.inputToolbar?.contentView?.rightBarButtonItem = self.sendButton
-        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchDown)
         self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self.inputToolbar, action: nil, for: UIControlEvents.touchUpInside)
-        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchUpInside)
         self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didPressSendButton), for: UIControlEvents.touchUpInside)
         if self.shouldShowCameraButton() {
             self.reLayout()
@@ -594,11 +593,9 @@ extension SKYChatConversationViewController {
     }
     
     func longPressAction(gesture: UILongPressGestureRecognizer) {
+        print(gesture.state)
         if gesture.state == .began {
-            guard let view = gesture.view else {
-                return
-            }
-            print("begin")
+            self.didStartRecord(button: self.recordButton!)
         }
         else {
             var cancelled = gesture.state == .cancelled
@@ -966,7 +963,7 @@ extension SKYChatConversationViewController {
                 }
                 let msg = SKYMessage()
                 msg.body = ""
-                msg.metadata = ["length": self.audioTime]
+                msg.metadata = ["length": Int(self.audioTime! * 1000)]
                 msg.attachment = asset
                 msg.setCreatorUserRecordID(self.senderId)
                 msg.setCreationDate(Date())
