@@ -31,6 +31,15 @@ extension SKYMessage {
             imageItem.assetCache = cache
             return imageItem
         }
+        
+        if asset.mimeType.hasPrefix("audio/") {
+            do {
+                let audioItem = try SKYChatConversationAudioItem(cache: cache, asset: self.attachment)
+                return audioItem
+            } catch let error {
+                print("caught: \(error)")
+            }
+        }
 
         return nil
     }
