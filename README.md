@@ -6,15 +6,15 @@
 [![Platform](https://img.shields.io/cocoapods/p/SKYKitChat.svg?style=flat)](http://cocoapods.org/pods/SKYKitChat)
 
 
-## Using Skygear Chat
+## Using Skygear Chat iOS SDK
 
-Please reference to Skygear CHat Quick Start guide for how to use `SKYKitChat`: https://docs.skygear.io/guides/chat/quick-start/ios/
+Please reference to Skygear Chat Quick Start guide for how to use `SKYKitChat`: https://docs.skygear.io/guides/chat/quick-start/ios/
 
 ## Using Skygear Chat UIKit
 
 UIKit only support Swift 3.2 for now. Swift 4.0 supports are coming.
 
-To use the UIKit comes with SKygear, follow these steps:
+To use the UIKit comes with Skygear, follow these steps:
 
 ### 1. Include `SKYKitChat/UI` in PodFile
 
@@ -47,8 +47,8 @@ self.navigationController?.pushViewController(vc, animated: true)
 ```
 
 ### Bare minimal sample
-A bare minimal exmaple in Swift 3.2, which will display a SKYChatConversationView without the
-navigation bar.
+A bare minimal example in Swift 3.2, which will display a SKYChatConversationView without the
+navigation bar, to chat with a User hard-coded its ID.
 
 `AppDelegate.swift`:
 
