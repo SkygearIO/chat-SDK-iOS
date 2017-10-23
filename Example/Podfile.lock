@@ -16,11 +16,11 @@ PODS:
   - SKYKit/Core (1.1.0):
     - FMDB (~> 2.5)
     - SocketRocket (~> 0.4)
-  - SKYKitChat (1.1.0):
-    - SKYKitChat/Core (= 1.1.0)
-  - SKYKitChat/Core (1.1.0):
+  - SKYKitChat (1.1.1):
+    - SKYKitChat/Core (= 1.1.1)
+  - SKYKitChat/Core (1.1.1):
     - SKYKit/Core (~> 1.1)
-  - SKYKitChat/UI (1.1.0):
+  - SKYKitChat/UI (1.1.1):
     - ALCameraViewController (~> 2.0)
     - CTAssetsPickerController (~> 3.3.1)
     - JSQMessagesViewController (~> 7.3.0)
@@ -56,7 +56,7 @@ SPEC CHECKSUMS:
   PureLayout: 4d550abe49a94f24c2808b9b95db9131685fe4cd
   SKPhotoBrowser: aa02de50f56d80fac23f543e40847af6b360e4b3
   SKYKit: 124d42572fc55e93dadc3a4136a7fcfa956c680b
-  SKYKitChat: 8d224def4b983f6e6562ad874bccfc70cd68c9e5
+  SKYKitChat: bc818c56aaff19a516e2740be5e7b604890c0c9a
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   Specta: f506f3a8361de16bc0dcf3b17b75e269072ba465
   SVProgressHUD: c404a55d78acbeb7ebb78b76d3faf986475a6994
