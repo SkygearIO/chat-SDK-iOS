@@ -365,18 +365,19 @@ extension SKYChatConversationViewController {
 
             msgSenderName = senderName
         }
-        
-        let mediaData = self.messageMediaDataFactory.mediaData(with: msg)
-        var jsqMessage: JSQMessage
 
+        let isOutgoingMessage = msg.creatorUserRecordID() == self.senderId
+
+
+        let mediaData = self.messageMediaDataFactory.mediaData(with: msg,
+                                                               markedAsOutgoing: isOutgoingMessage)
+        let jsqMessage: JSQMessage
         if mediaData == nil {
             jsqMessage = JSQMessage(senderId: msg.creatorUserRecordID(),
                                     senderDisplayName: msgSenderName,
                                     date: msg.creationDate(),
                                     text: msg.body)
         } else {
-            
-            
             jsqMessage = JSQMessage(senderId: msg.creatorUserRecordID(),
                                     senderDisplayName: msgSenderName,
                                     date: msg.creationDate(),

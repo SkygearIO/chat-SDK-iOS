@@ -20,25 +20,23 @@
 import JSQMessagesViewController
 
 extension SKYMessage {
-    func messageMediaData(withCache cache: SKYAssetCache?) -> JSQMessageMediaData? {
-        guard self.attachment != nil else {
+    func messageMediaData(withCache cache: SKYAssetCache?,
+                          markedAsOutgoing isOutgoing: Bool) -> JSQMediaItem?
+    {
+        guard let asset = self.attachment else {
             return nil
         }
 
-        let asset = self.attachment!
         if asset.mimeType.hasPrefix("image/") {
-            let imageItem = SKYChatConversationImageItem(withMessage: self)
-            imageItem.assetCache = cache
-            return imageItem
+            return SKYChatConversationImageItem(withMessage: self,
+                                                assetCache: cache,
+                                                maskAsOutgoing: isOutgoing)
         }
         
         if asset.mimeType.hasPrefix("audio/") {
-            do {
-                let audioItem = try SKYChatConversationAudioItem(cache: cache, asset: self.attachment)
-                return audioItem
-            } catch let error {
-                print("caught: \(error)")
-            }
+            return SKYChatConversationAudioItem(withMessage: self,
+                                                assetCache: cache,
+                                                maskAsOutgoing: isOutgoing)
         }
 
         return nil
@@ -56,7 +54,10 @@ public class JSQMessageMediaDataFactory {
         self.init(with: SKYAssetMemoryCache.shared())
     }
 
-    public func mediaData(with message: SKYMessage) -> JSQMessageMediaData? {
-        return message.messageMediaData(withCache: self.assetCache)
+    public func mediaData(with message: SKYMessage,
+                          markedAsOutgoing isOutgoing: Bool) -> JSQMediaItem?
+    {
+        return message.messageMediaData(withCache: self.assetCache,
+                                        markedAsOutgoing: isOutgoing)
     }
 }

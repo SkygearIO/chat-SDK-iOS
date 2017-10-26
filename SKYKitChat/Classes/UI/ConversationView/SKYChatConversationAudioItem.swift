@@ -28,39 +28,57 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
     var childView: UIView?
     
     var assetCache: SKYAssetCache?
-    var data: Data?
     var asset: SKYAsset?
-    
-    init(cache: SKYAssetCache?, asset: SKYAsset?) throws {
-        self.assetCache = cache
-        self.asset = asset
-        if let audioCache = cache {
-            if let cacheData = audioCache.get(asset: asset!) {
-                self.data = cacheData as? Data
-            }
+
+    convenience init(withMessage message: SKYMessage, maskAsOutgoing isOutGoing: Bool) {
+        self.init(withMessage: message, assetCache: nil, maskAsOutgoing: isOutGoing)
+    }
+
+    init(withMessage message: SKYMessage,
+         assetCache: SKYAssetCache?,
+         maskAsOutgoing isOutGoing: Bool)
+    {
+        super.init(data: nil, audioViewAttributes: JSQAudioMediaViewAttributes())
+
+        guard let asset = message.attachment else {
+            // nothing to do if asset is nil
+            return
         }
-        super.init(data: self.data, audioViewAttributes: JSQAudioMediaViewAttributes())
-        let size = super.mediaViewDisplaySize()
-        self.view = UIView(frame: CGRect(x: 0.0, y: 0.0, width: size.width, height: size.height))
-        if self.data == nil {
+
+        self.appliesMediaViewMaskAsOutgoing = isOutGoing
+
+        let size = self.mediaViewDisplaySize()
+        self.view = UIView(frame: CGRect(x: 0.0,
+                                         y: 0.0,
+                                         width: size.width,
+                                         height: size.height))
+
+        self.assetCache = assetCache
+        self.asset = asset
+
+        if let data = self.assetCache?.get(asset: asset) as? Data {
+            self.audioData = data
+        } else {
             DispatchQueue.global().async { [weak self] in
-                guard let item = self else {
+                guard let myself = self else {
                     return
                 }
                 
-                self?.data = try? Data(contentsOf: item.asset!.url)
-                if let audioCache = cache {
-                    audioCache.set(value: self?.data, for: asset!)
+                guard let data = try? Data(contentsOf: asset.url) else {
+                    return
                 }
-                
+
+                myself.audioData = data
+                myself.assetCache?.set(value: data, for: asset)
+
                 DispatchQueue.main.sync {  [weak self] in
-                    guard let item = self else {
+                    guard let myself = self else {
                         return
                     }
-                    if item.data != nil {
-                        item.childView?.removeFromSuperview()
-                        item.audioData = item.data
-                        item.childView = item.mediaView()
+
+                    if myself.audioData != nil {
+                        myself.childView?.removeFromSuperview()
+                        myself.childView = myself.mediaView()
                     }
                 }
                 
