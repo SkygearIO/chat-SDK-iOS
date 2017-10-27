@@ -84,7 +84,6 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
                 
             }
         }
-
     }
     
     override func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
