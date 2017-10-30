@@ -26,7 +26,7 @@ protocol SKYChatConversationImageItemDelegate: class {
     func imageDidTap(_ url: URL?)
 }
 
-class SKYChatConversationImageItem: NSObject, JSQMessageMediaData {
+class SKYChatConversationImageItem: JSQMediaItem {
 
     var imageName: String?
     var image: UIImage?
@@ -40,7 +40,7 @@ class SKYChatConversationImageItem: NSObject, JSQMessageMediaData {
 
     var assetCache: SKYAssetCache?
 
-    func mediaView() -> UIView? {
+    override func mediaView() -> UIView? {
         if self.image != nil {
             return UIImageView(image: self.image)
         }
@@ -64,15 +64,15 @@ class SKYChatConversationImageItem: NSObject, JSQMessageMediaData {
         return placeHolderView
     }
 
-    func mediaViewDisplaySize() -> CGSize {
+    override func mediaViewDisplaySize() -> CGSize {
         return self.displaySize
     }
 
-    func mediaPlaceholderView() -> UIView {
+    override func mediaPlaceholderView() -> UIView {
         return UIView()
     }
 
-    func mediaHash() -> UInt {
+    override func mediaHash() -> UInt {
         return UInt(abs((self.imageName ?? "").hash))
     }
 
@@ -82,14 +82,23 @@ class SKYChatConversationImageItem: NSObject, JSQMessageMediaData {
 
 extension SKYChatConversationImageItem {
 
-    convenience init(withMessage: SKYMessage) {
-        self.init()
+    convenience init(withMessage message: SKYMessage, maskAsOutgoing isOutGoing: Bool) {
+        self.init(withMessage: message, assetCache: nil, maskAsOutgoing: isOutGoing)
+    }
+
+    convenience init(withMessage message: SKYMessage,
+                     assetCache: SKYAssetCache?,
+                     maskAsOutgoing isOutGoing: Bool) {
+
+        self.init(maskAsOutgoing: isOutGoing)
+        self.assetCache = assetCache
+
         self.tap = UITapGestureRecognizer(target: self, action: #selector(imageDidTap))
         self.tap?.numberOfTapsRequired = 1
         
-        let asset = withMessage.attachment
+        let asset = message.attachment
         self.assetUrl = asset?.url
-        let metadata = withMessage.metadata ?? [String: Any]()
+        let metadata = message.metadata ?? [String: Any]()
 
         var thumbnailImage: UIImage? = nil
         if let thumbnailImageString = metadata["thumbnail"] as? String {
