@@ -19,6 +19,7 @@
 
 import UIKit
 import SKYKit
+import SKYKitChat
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -53,6 +54,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             types: [.alert, .badge, .sound],
             categories: nil
         ))
+
+        let _ = SKYChatUIModelCustomization.default()
+            .update(userNameField: "name")
+            .update(userAvatarField: "profile_pic", avatarType: .URLString)
 
         return true
     }

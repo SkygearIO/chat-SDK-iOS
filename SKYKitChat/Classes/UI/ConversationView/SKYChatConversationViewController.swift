@@ -61,6 +61,12 @@ import SKPhotoBrowser
         _ controller: SKYChatConversationViewController,
         shouldShowSenderNameAt indexPath: IndexPath) -> Bool
 
+    @objc optional func conversationViewController(
+        _ controller: SKYChatConversationViewController,
+        avatarForMessage message: SKYMessage,
+        withAuthor author: SKYRecord?,
+        atIndexPath indexPath: IndexPath) -> UIImage?
+
     /**
      * Hooks on send message flow
      */
@@ -119,12 +125,10 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     public var incomingMessageBubble: JSQMessagesBubbleImage?
     public var outgoingMessageBubble: JSQMessagesBubbleImage?
 
-    var defaultMediaDataFactory: JSQMessageMediaDataFactory = JSQMessageMediaDataFactory()
-    open var messageMediaDataFactory: JSQMessageMediaDataFactory {
-        get {
-            return defaultMediaDataFactory
-        }
-    }
+    let downloadDispatcher = SimpleDownloadDispatcher.default()
+    public var dataCache: DataCache = MemoryDataCache.shared()
+    public var assetCache: SKYAssetCache = SKYAssetMemoryCache.shared()
+    public var messageMediaDataFactory = JSQMessageMediaDataFactory()
 
     public var cameraButton: UIButton?
 
@@ -611,12 +615,57 @@ extension SKYChatConversationViewController {
         let msg = self.messages[indexPath.row]
         let sender = self.getSender(forMessage: msg)
 
+        // get from delegate
+        if let image = self.delegate?.conversationViewController?(
+            self,
+            avatarForMessage: msg,
+            withAuthor: sender,
+            atIndexPath: indexPath)
+        {
+            return JSQMessagesAvatarImage.avatar(with: image)
         }
 
-        if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName),
-            let roundedImage = UIImage.circleImage(fromImage: avatarImage) {
+        // get from avatar field
+        let modelCustomization = SKYChatUIModelCustomization.default()
+        let avatarField = modelCustomization.userAvatarField
+        switch modelCustomization.userAvatarType {
+        case .URLString:
+            if let url = sender?.object(forKey: avatarField) as? String {
+                if let data = self.dataCache.getData(forKey: url) {
+                    return JSQMessagesAvatarImage.avatar(with: UIImage(data: data))
+                }
 
-        // generate from user name
+                // download from url
+                let _ = self.downloadDispatcher.download(url, compltion: { data in
+                    guard let downloadedData = data else {
+                        return
+                    }
+
+                    // notify to update the avatar when download is done
+                    self.dataCache.set(data: downloadedData, forKey: url)
+                    self.collectionView.reloadItems(at: [indexPath])
+                })
+            }
+        case .Asset:
+            if let asset = sender?.object(forKey: avatarField) as? SKYAsset {
+                if let data = self.assetCache.get(asset: asset) {
+                    return JSQMessagesAvatarImage.avatar(with: UIImage(data: data))
+                }
+
+                // download asset
+                let _ = self.downloadDispatcher.download(asset.url.absoluteString, compltion: { data in
+                    guard let downloadedData = data else {
+                        return
+                    }
+
+                    // notify to update the avatar when download is done
+                    self.assetCache.set(data: downloadedData, for: asset)
+                    self.collectionView.reloadItems(at: [indexPath])
+                })
+            }
+        }
+
+        // fallback: generate from user name
         let senderName = self.getSenderName(forMessage: msg) ?? ""
         if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName),
             let roundedImage = UIImage.circleImage(fromImage: avatarImage)

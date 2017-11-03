@@ -19,10 +19,17 @@
 
 import UIKit
 
+public enum AvatarType {
+    case Asset
+    case URLString
+}
+
 public class SKYChatUIModelCustomization {
     fileprivate static var sharedInstance: SKYChatUIModelCustomization? = nil
 
     public fileprivate(set) var userNameField = "username"
+    public fileprivate(set) var userAvatarField = "avatar"
+    public fileprivate(set) var userAvatarType = AvatarType.Asset
 }
 
 // MARK: - Singleton
@@ -42,6 +49,18 @@ public extension SKYChatUIModelCustomization {
 
     public func update(userNameField field: String) -> SKYChatUIModelCustomization {
         self.userNameField = field
+        return self
+    }
+
+    public func update(userAvatarField field: String) -> SKYChatUIModelCustomization {
+        return self.update(userAvatarField: field, avatarType: self.userAvatarType)
+    }
+
+    public func update(userAvatarField field: String,
+                       avatarType type: AvatarType) -> SKYChatUIModelCustomization
+    {
+        self.userAvatarField = field
+        self.userAvatarType = type
         return self
     }
 }
