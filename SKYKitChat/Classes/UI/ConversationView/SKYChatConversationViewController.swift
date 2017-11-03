@@ -126,7 +126,6 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
         }
     }
 
-
     public var cameraButton: UIButton?
 
     public var incomingMessageBubbleColor: UIColor? {
@@ -432,17 +431,9 @@ extension SKYChatConversationViewController {
     open override func collectionView(_ collectionView: JSQMessagesCollectionView!,
                                       messageDataForItemAt indexPath: IndexPath!) -> JSQMessageData! {
         let msg = self.messages[indexPath.row]
-
-        var msgSenderName: String = ""
-        if let sender = self.getSender(forMessage: msg),
-            let senderName = sender.object(forKey: "username") as? String {
-
-            msgSenderName = senderName
-        }
+        let msgSenderName = self.getSenderName(forMessage: msg) ?? ""
 
         let isOutgoingMessage = msg.creatorUserRecordID() == self.senderId
-
-
         let mediaData = self.messageMediaDataFactory.mediaData(with: msg,
                                                                markedAsOutgoing: isOutgoingMessage)
         let jsqMessage: JSQMessage
@@ -570,14 +561,11 @@ extension SKYChatConversationViewController {
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
         attributedTextForMessageBubbleTopLabelAt indexPath: IndexPath!
-        ) -> NSAttributedString! {
+        ) -> NSAttributedString!
+    {
         let msg = self.messages[indexPath.row]
-        var senderName: String = ""
-        if let user = self.getSender(forMessage: msg),
-            let userName = user.object(forKey: "username") as? String {
-            senderName = userName
-        }
-        
+        let senderName = self.getSenderName(forMessage: msg) ?? ""
+
         return NSAttributedString(string: senderName)
     }
     
@@ -621,16 +609,18 @@ extension SKYChatConversationViewController {
     ) -> JSQMessageAvatarImageDataSource! {
 
         let msg = self.messages[indexPath.row]
-        var senderName: String = ""
-        if let user = self.getSender(forMessage: msg),
-            let userName = user.object(forKey: "username") as? String {
+        let sender = self.getSender(forMessage: msg)
 
-            senderName = userName
         }
 
         if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName),
             let roundedImage = UIImage.circleImage(fromImage: avatarImage) {
 
+        // generate from user name
+        let senderName = self.getSenderName(forMessage: msg) ?? ""
+        if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName),
+            let roundedImage = UIImage.circleImage(fromImage: avatarImage)
+        {
             return JSQMessagesAvatarImage.avatar(with: roundedImage)
         }
 
@@ -1254,10 +1244,11 @@ extension SKYChatConversationViewController {
                     participants.append(v)
                 }
 
-                if let senderRecord = self.participants[self.senderId],
-                    let senderName = senderRecord.object(forKey: "username") as? String {
-
-                    self.senderDisplayName = senderName
+                if let senderRecord = self.participants[self.senderId] {
+                    let userNameField = SKYChatUIModelCustomization.default().userNameField
+                    if let senderName = senderRecord.object(forKey: userNameField) as? String {
+                        self.senderDisplayName = senderName
+                    }
                 }
 
                 self.updateTitle()
@@ -1332,12 +1323,23 @@ extension SKYChatConversationViewController {
     }
 
     open func getSender(forMessage message: SKYMessage) -> SKYRecord? {
-        guard self.participants.count > 0 else {
-            print("Warning: No participants are fetched")
+        let msgAuthorID = message.creatorUserRecordID()
+
+        guard self.participants.keys.contains(msgAuthorID) else {
+            print("Warning: Participant ID \(msgAuthorID) is not fetched")
             return nil
         }
 
-        return self.participants[message.creatorUserRecordID()]
+        return self.participants[msgAuthorID]
+    }
+
+    open func getSenderName(forMessage message: SKYMessage) -> String? {
+        guard let sender = self.getSender(forMessage: message) else {
+            return nil
+        }
+
+        let userNameField = SKYChatUIModelCustomization.default().userNameField
+        return sender.object(forKey: userNameField) as? String
     }
 }
 
