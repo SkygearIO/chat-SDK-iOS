@@ -1,5 +1,5 @@
 //
-//  SKYAsset+Cache.swift
+//  DataCache.swift
 //  SKYKitChat
 //
 //  Copyright 2016 Oursky Ltd.
@@ -19,46 +19,47 @@
 
 import LruCache
 
-public protocol SKYAssetCache {
-    func get(asset: SKYAsset) -> Any?
-    func set(value: Any, for asset: SKYAsset)
-    func purge(asset: SKYAsset)
+public protocol DataCache {
+    func getData(forKey key: String) -> Data?
+    func set(data: Data, forKey key: String)
+    func purgeData(forKey key: String)
     func purgeAll()
 }
 
-extension SKYAssetCache {
-}
-
-public class SKYAssetMemoryCache: SKYAssetCache {
+public class MemoryDataCache: DataCache {
     let store: LruCache
 
-    static func shared() -> SKYAssetMemoryCache {
-        return sharedMemoryCache
+    private static var sharedInstance: MemoryDataCache? = nil
+
+    static func shared() -> MemoryDataCache {
+        if self.sharedInstance == nil {
+            self.sharedInstance = MemoryDataCache()
+        }
+
+        return self.sharedInstance!
     }
 
-    public init(maxSize: Int) {
+    init(maxSize: Int) {
         self.store = LruCache(maxSize: maxSize)
     }
 
-    public convenience init() {
+    convenience init() {
         self.init(maxSize: 100)
     }
 
-    public func get(asset: SKYAsset) -> Any? {
-        return self.store.get(asset.name)
+    public func getData(forKey key: String) -> Data? {
+        return self.store.get(key) as? Data
     }
 
-    public func set(value: Any, for asset: SKYAsset) {
-        self.store.put(asset.name, value: value)
+    public func set(data: Data, forKey key: String) {
+        self.store.put(key, value: data)
     }
 
-    public func purge(asset: SKYAsset) {
-        self.store.remove(asset.name)
+    public func purgeData(forKey key: String) {
+        self.store.remove(key)
     }
 
     public func purgeAll() {
         self.store.evictAll()
     }
 }
-
-let sharedMemoryCache: SKYAssetMemoryCache = SKYAssetMemoryCache()
