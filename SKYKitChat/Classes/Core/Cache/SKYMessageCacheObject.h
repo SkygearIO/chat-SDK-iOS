@@ -25,8 +25,10 @@
 
 @property NSString *recordID;
 @property NSString *conversationID;
-
 @property NSDate *creationDate;
+@property NSDate *editionDate;
+
+@property NSData *recordData;
 
 @end
 

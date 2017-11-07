@@ -32,12 +32,8 @@
 
 - (SKYMessage *)messageRecord
 {
-    SKYRecordID *recordID = [SKYRecordID recordIDWithRecordType:@"message" name:self.recordID];
-    SKYRecord *record = [[SKYRecord alloc] initWithRecordID:recordID data:@{}];
+    SKYRecord *record = [NSKeyedUnarchiver unarchiveObjectWithData:self.recordData];
     SKYMessage *message = [SKYMessage recordWithRecord:record];
-    message.conversationRef = [SKYReference
-        referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
-                                                             name:self.conversationID]];
     return message;
 }
 
@@ -48,6 +44,8 @@
     cacheObject.recordID = message.recordID.recordName;
     cacheObject.conversationID = message.conversationRef.recordID.recordName;
     cacheObject.creationDate = message.record.creationDate;
+    cacheObject.editionDate = [message.record objectForKey:@"edited_at"];
+    cacheObject.recordData = [NSKeyedArchiver archivedDataWithRootObject:message.record];
 
     return cacheObject;
 }
