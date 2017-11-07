@@ -648,6 +648,7 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Swift Example/Pods-Swift Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/FMDB-iOS10.1/FMDB.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm-iOS10.1/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKit-iOS10.1/SKYKit.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKitChat.default-UI/SKYKitChat.framework",
 				"${BUILT_PRODUCTS_DIR}/SocketRocket-iOS10.1/SocketRocket.framework",
@@ -664,6 +665,7 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FMDB.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKitChat.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SocketRocket.framework",
@@ -768,6 +770,7 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-SKYKitChat_Example/Pods-SKYKitChat_Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/FMDB-iOS8.3/FMDB.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm-iOS8.3/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKit-iOS8.3/SKYKit.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKitChat/SKYKitChat.framework",
 				"${BUILT_PRODUCTS_DIR}/SocketRocket-iOS8.3/SocketRocket.framework",
@@ -775,6 +778,7 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FMDB.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKitChat.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SocketRocket.framework",

@@ -30,6 +30,9 @@
 #import "SKYReference.h"
 #import "SKYUserChannel.h"
 
+#import "SKYChatCacheController.h"
+#import "SKYMessageCacheObject.h"
+
 NSString *const SKYChatMessageUnreadCountKey = @"message";
 NSString *const SKYChatConversationUnreadCountKey = @"conversation";
 
@@ -514,6 +517,16 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         [arguments addObject:order];
     }
 
+    [[SKYChatCacheController defaultController]
+        fetchMessagesWithConversationID:conversationId
+                                  limit:limit
+                             beforeTime:beforeTime
+                                  order:order
+                             completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                          NSError *_Nullable error) {
+                                 NSLog(@"get result from cache");
+                             }];
+
     [self.container callLambda:@"chat:get_messages"
                      arguments:arguments
              completionHandler:^(NSDictionary *response, NSError *error) {
@@ -537,6 +550,9 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                          [returnArray addObject:msg];
                      }
                  }
+
+                 [[SKYChatCacheController defaultController] setMessages:returnArray];
+
                  if (completion) {
                      completion(returnArray, error);
                  }
