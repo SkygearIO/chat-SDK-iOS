@@ -24,17 +24,25 @@
 
 static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 
+@class SKYChatCacheRealmStore;
+
 @interface SKYChatCacheController ()
 
 @property SKYChatCacheRealmStore *store;
 
 @end
 
-@interface SKYChatCacheRealmStore ()
+@interface SKYChatCacheRealmStore : NSObject
 
 @property RLMRealm *realm;
 
 - (instancetype)initWithName:(NSString *)name;
+
+- (NSArray<SKYMessage *> *)getMessagesWithPredicate:(NSPredicate *)predicate
+                                              limit:(NSInteger)limit
+                                              order:(NSString *)order;
+
+- (void)setMessages:(NSArray<SKYMessage *> *)messages;
 
 @end
 

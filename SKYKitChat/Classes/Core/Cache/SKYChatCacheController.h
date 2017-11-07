@@ -35,13 +35,3 @@
 - (void)setMessages:(NSArray<SKYMessage *> *)messages;
 
 @end
-
-@interface SKYChatCacheRealmStore : NSObject
-
-- (NSArray<SKYMessage *> *)getMessagesWithPredicate:(NSPredicate *)predicate
-                                              limit:(NSInteger)limit
-                                              order:(NSString *)order;
-
-- (void)setMessages:(NSArray<SKYMessage *> *)messages;
-
-@end
