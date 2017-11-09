@@ -107,5 +107,10 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     [self.store setMessages:@[ message ]];
 }
 
+- (void)didDeleteMessage:(SKYMessage *)message
+{
+    [self.store deleteMessages:@[ message ]];
+}
+
 
 @end

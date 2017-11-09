@@ -244,6 +244,29 @@ SpecBegin(SKYChatCacheController)
             expect(newMessage.fail).to.equal(NO);
         });
 
+        it(@"delete message, update the cache", ^{
+            SKYMessage *message = [[SKYMessage alloc]
+                initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"m1"]];
+
+            [cacheController didDeleteMessage:message];
+
+            RLMRealm *realm = cacheController.store.realm;
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"m1"];
+            expect(results.count).to.equal(0);
+        });
+
+        it(@"delete non-existed message", ^{
+            SKYMessage *message = [[SKYMessage alloc]
+                initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"hello"]];
+
+            [cacheController didDeleteMessage:message];
+
+            RLMRealm *realm = cacheController.store.realm;
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject allObjectsInRealm:realm];
+            expect(results.count).to.equal(10);
+        });
     });
 
 SpecEnd

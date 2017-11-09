@@ -37,4 +37,6 @@
 
 - (void)setMessages:(NSArray<SKYMessage *> *)messages;
 
+- (void)deleteMessages:(NSArray<SKYMessage *> *)messages;
+
 @end

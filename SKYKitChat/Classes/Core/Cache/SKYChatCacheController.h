@@ -38,4 +38,6 @@
 
 - (void)didSaveMessage:(SKYMessage *)message error:(NSError *)error;
 
+- (void)didDeleteMessage:(SKYMessage *)message;
+
 @end

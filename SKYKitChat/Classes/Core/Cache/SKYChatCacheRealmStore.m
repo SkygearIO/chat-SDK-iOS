@@ -95,4 +95,21 @@
     [self.realm commitWriteTransaction];
 }
 
+- (void)deleteMessages:(NSArray<SKYMessage *> *)messages
+{
+    [self.realm beginWriteTransaction];
+
+    for (SKYMessage *message in messages) {
+        SKYMessageCacheObject *cacheObject =
+            [SKYMessageCacheObject objectInRealm:self.realm
+                                   forPrimaryKey:message.recordID.recordName];
+
+        if (cacheObject) {
+            [self.realm deleteObject:cacheObject];
+        }
+    }
+
+    [self.realm commitWriteTransaction];
+}
+
 @end
