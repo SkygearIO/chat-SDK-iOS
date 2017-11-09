@@ -17,115 +17,144 @@
 //  limitations under the License.
 //
 
-#import "SKYChatCacheController.h"
 #import "SKYChatCacheController+Private.h"
+#import "SKYChatCacheController.h"
 
 #import "SKYMessageCacheObject.h"
 
 SpecBegin(SKYChatCacheController)
 
-describe(@"Cache Controller", ^{
-    __block SKYChatCacheController *cacheController = nil;
-    __block NSDate *baseDate = nil;
+    describe(@"Cache Controller", ^{
+        __block SKYChatCacheController *cacheController = nil;
+        __block NSDate *baseDate = nil;
 
-    /**
-     *  Fixture:
-     *  10 messages in total
-     *  odds in conversation c0, evens in conversation c1
-     */
-    beforeEach(^{
-        cacheController = [[SKYChatCacheController alloc] initWithStore:[[SKYChatCacheRealmStore alloc] initInMemoryWithName:@"ChatTest"]];
-        baseDate = [NSDate dateWithTimeIntervalSince1970:0];
+        /**
+         *  Fixture:
+         *  10 messages in total
+         *  odds in conversation c0, evens in conversation c1
+         */
+        beforeEach(^{
+            cacheController = [[SKYChatCacheController alloc]
+                initWithStore:[[SKYChatCacheRealmStore alloc] initInMemoryWithName:@"ChatTest"]];
+            baseDate = [NSDate dateWithTimeIntervalSince1970:0];
 
-        NSInteger messageCount = 10;
-        NSMutableArray<SKYMessageCacheObject *> *messages = [NSMutableArray arrayWithCapacity:messageCount];
+            NSInteger messageCount = 10;
+            NSMutableArray<SKYMessageCacheObject *> *messages =
+                [NSMutableArray arrayWithCapacity:messageCount];
 
-        for (NSInteger i = 0; i < messageCount; i++) {
-            SKYMessage *message = [[SKYMessage alloc] initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:[NSString stringWithFormat:@"m%ld", i]]];
-            message.conversationRef = [SKYReference referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation" name:[NSString stringWithFormat:@"c%ld", i % 2]]];
-            message.creationDate = [baseDate dateByAddingTimeInterval:i * 1000];
-            message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:i * 2000];
+            for (NSInteger i = 0; i < messageCount; i++) {
+                SKYMessage *message = [[SKYMessage alloc]
+                    initWithRecordData:[SKYRecord
+                                           recordWithRecordType:@"message"
+                                                           name:[NSString
+                                                                    stringWithFormat:@"m%ld", i]]];
+                message.conversationRef = [SKYReference
+                    referenceWithRecordID:[SKYRecordID
+                                              recordIDWithRecordType:@"conversation"
+                                                                name:[NSString
+                                                                         stringWithFormat:@"c%ld",
+                                                                                          i % 2]]];
+                message.creationDate = [baseDate dateByAddingTimeInterval:i * 1000];
+                message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:i * 2000];
 
-            SKYMessageCacheObject *messageCacheObject = [SKYMessageCacheObject cacheObjectFromMessage:message];
-            [messages addObject:messageCacheObject];
-        }
+                SKYMessageCacheObject *messageCacheObject =
+                    [SKYMessageCacheObject cacheObjectFromMessage:message];
+                [messages addObject:messageCacheObject];
+            }
 
-        RLMRealm *realm = cacheController.store.realm;
-        [realm transactionWithBlock:^{
-            [realm addObjects:messages];
-        }];
+            RLMRealm *realm = cacheController.store.realm;
+            [realm transactionWithBlock:^{
+                [realm addObjects:messages];
+            }];
+        });
+
+        afterEach(^{
+            RLMRealm *realm = cacheController.store.realm;
+            [realm transactionWithBlock:^{
+                [realm deleteAllObjects];
+            }];
+        });
+
+        it(@"store insert new record for new record id", ^{
+            SKYChatCacheRealmStore *store = cacheController.store;
+
+            SKYMessage *message = [[SKYMessage alloc]
+                initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"mm1"]];
+            message.conversationRef = [SKYReference
+                referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
+                                                                     name:@"c1"]];
+            message.creationDate = [baseDate dateByAddingTimeInterval:8000];
+            message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:8000];
+
+            [store setMessages:@[ message ]];
+
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject allObjectsInRealm:store.realm];
+            expect(results.count).to.equal(11);
+            expect([results objectsWhere:@"recordID == %@", @"mm1"].count).to.equal(1);
+        });
+
+        it(@"store update old record for existing record id", ^{
+            SKYChatCacheRealmStore *store = cacheController.store;
+
+            SKYMessage *message = [[SKYMessage alloc]
+                initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"m2"]];
+            message.conversationRef = [SKYReference
+                referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
+                                                                     name:@"c0"]];
+            message.creationDate = [baseDate dateByAddingTimeInterval:8000];
+            message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:8000];
+
+            [store setMessages:@[ message ]];
+
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject allObjectsInRealm:store.realm];
+            expect(results.count).to.equal(10);
+
+            RLMResults<SKYMessageCacheObject *> *updatedResults =
+                [results objectsWhere:@"recordID == %@", @"m2"];
+            expect(updatedResults.count).to.equal(1);
+
+            SKYMessageCacheObject *updatedMessage = [updatedResults objectAtIndex:0];
+            expect(updatedMessage.creationDate).to.equal([baseDate dateByAddingTimeInterval:8000]);
+            expect(updatedMessage.editionDate).to.equal([baseDate dateByAddingTimeInterval:8000]);
+        });
+
+        it(@"fetch all messages of conversation, sorted by creationDate", ^{
+            [cacheController
+                fetchMessagesWithConversationID:@"c0"
+                                          limit:100
+                                     beforeTime:nil
+                                          order:nil
+                                     completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                                  NSError *_Nullable error) {
+                                         expect(messageList.count).to.equal(5);
+                                         for (NSInteger i = 0; i < 5; i++) {
+                                             SKYMessage *message = messageList[4 - i];
+                                             expect(message.creationDate)
+                                                 .to.equal(
+                                                     [baseDate dateByAddingTimeInterval:i * 2000]);
+                                         }
+                                     }];
+        });
+
+        it(@"fetch messages of conversation, filtered by time and sorted by creationDate", ^{
+            [cacheController
+                fetchMessagesWithConversationID:@"c0"
+                                          limit:100
+                                     beforeTime:[baseDate dateByAddingTimeInterval:4000]
+                                          order:nil
+                                     completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                                  NSError *_Nullable error) {
+                                         expect(messageList.count).to.equal(2);
+                                         for (NSInteger i = 0; i < 2; i++) {
+                                             SKYMessage *message = messageList[1 - i];
+                                             expect(message.creationDate)
+                                                 .to.equal(
+                                                     [baseDate dateByAddingTimeInterval:i * 2000]);
+                                         }
+                                     }];
+        });
     });
-
-    afterEach(^{
-        RLMRealm *realm = cacheController.store.realm;
-        [realm transactionWithBlock:^{
-            [realm deleteAllObjects];
-        }];
-    });
-
-    it(@"store insert new record for new record id", ^{
-        SKYChatCacheRealmStore *store = cacheController.store;
-
-        SKYMessage *message = [[SKYMessage alloc] initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"mm1"]];
-        message.conversationRef = [SKYReference referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation" name:@"c1"]];
-        message.creationDate = [baseDate dateByAddingTimeInterval:8000];
-        message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:8000];
-
-        [store setMessages:@[message]];
-
-        RLMResults<SKYMessageCacheObject *> *results = [SKYMessageCacheObject allObjectsInRealm:store.realm];
-        expect(results.count).to.equal(11);
-        expect([results objectsWhere:@"recordID == %@", @"mm1"].count).to.equal(1);
-    });
-
-    it(@"store update old record for existing record id", ^{
-        SKYChatCacheRealmStore *store = cacheController.store;
-
-        SKYMessage *message = [[SKYMessage alloc] initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"m2"]];
-        message.conversationRef = [SKYReference referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation" name:@"c0"]];
-        message.creationDate = [baseDate dateByAddingTimeInterval:8000];
-        message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:8000];
-
-        [store setMessages:@[message]];
-
-        RLMResults<SKYMessageCacheObject *> *results = [SKYMessageCacheObject allObjectsInRealm:store.realm];
-        expect(results.count).to.equal(10);
-
-        RLMResults<SKYMessageCacheObject *> *updatedResults = [results objectsWhere:@"recordID == %@", @"m2"];
-        expect(updatedResults.count).to.equal(1);
-
-        SKYMessageCacheObject *updatedMessage = [updatedResults objectAtIndex:0];
-        expect(updatedMessage.creationDate).to.equal([baseDate dateByAddingTimeInterval:8000]);
-        expect(updatedMessage.editionDate).to.equal([baseDate dateByAddingTimeInterval:8000]);
-    });
-
-    it(@"fetch all messages of conversation, sorted by creationDate", ^{
-        [cacheController fetchMessagesWithConversationID:@"c0"
-                                                   limit:100
-                                              beforeTime:nil
-                                                   order:nil
-                                              completion:^(NSArray<SKYMessage *> * _Nullable messageList, NSError * _Nullable error) {
-                                                  expect(messageList.count).to.equal(5);
-                                                  for (NSInteger i = 0; i < 5; i++) {
-                                                      SKYMessage *message = messageList[4 - i];
-                                                      expect(message.creationDate).to.equal([baseDate dateByAddingTimeInterval:i * 2000]);
-                                                  }
-                                              }];
-    });
-
-    it(@"fetch messages of conversation, filtered by time and sorted by creationDate", ^{
-        [cacheController fetchMessagesWithConversationID:@"c0"
-                                                   limit:100
-                                              beforeTime:[baseDate dateByAddingTimeInterval:4000]
-                                                   order:nil
-                                              completion:^(NSArray<SKYMessage *> * _Nullable messageList, NSError * _Nullable error) {
-                                                  expect(messageList.count).to.equal(2);
-                                                  for (NSInteger i = 0; i < 2; i++) {
-                                                      SKYMessage *message = messageList[1 - i];
-                                                      expect(message.creationDate).to.equal([baseDate dateByAddingTimeInterval:i * 2000]);
-                                                  }
-                                              }];
-    });
-});
 
 SpecEnd

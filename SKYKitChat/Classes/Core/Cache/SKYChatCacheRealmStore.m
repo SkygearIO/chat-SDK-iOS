@@ -32,7 +32,7 @@
     RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
 
     NSString *dir =
-    NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+        NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
     NSURL *url = [NSURL URLWithString:[dir stringByAppendingPathComponent:name]];
     config.fileURL = url;
 
@@ -60,9 +60,9 @@
                                               order:(NSString *)order
 {
     RLMResults<SKYMessageCacheObject *> *results =
-    [[SKYMessageCacheObject objectsInRealm:self.realm withPredicate:predicate]
-     sortedResultsUsingKeyPath:order
-     ascending:NO];
+        [[SKYMessageCacheObject objectsInRealm:self.realm withPredicate:predicate]
+            sortedResultsUsingKeyPath:order
+                            ascending:NO];
     NSMutableArray<SKYMessage *> *messages = [NSMutableArray arrayWithCapacity:results.count];
 
     NSUInteger resultCount = results.count;
