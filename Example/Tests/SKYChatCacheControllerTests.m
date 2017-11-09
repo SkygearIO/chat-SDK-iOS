@@ -155,6 +155,70 @@ SpecBegin(SKYChatCacheController)
                                          }
                                      }];
         });
+
+        it(@"didFetch messages, update the cache", ^{
+            NSInteger messageCount = 5;
+            NSMutableArray<SKYMessage *> *messages =
+                [NSMutableArray arrayWithCapacity:messageCount];
+
+            for (NSInteger i = 0; i < messageCount; i++) {
+                SKYMessage *message = [[SKYMessage alloc]
+                    initWithRecordData:[SKYRecord
+                                           recordWithRecordType:@"message"
+                                                           name:[NSString
+                                                                    stringWithFormat:@"m%ld",
+                                                                                     (i + 3) * 2]]];
+                message.conversationRef = [SKYReference
+                    referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
+                                                                         name:@"c0"]];
+                message.creationDate = [baseDate dateByAddingTimeInterval:(i + 3) * 2000];
+                message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:50000];
+                message.body = @"fetched message";
+                [messages addObject:message];
+            }
+
+            [cacheController didFetchMessages:messages];
+
+            SKYChatCacheRealmStore *store = cacheController.store;
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject objectsInRealm:store.realm
+                                                where:@"conversationID == %@", @"c0"];
+            expect(results.count).to.equal(8);
+
+            results = [SKYMessageCacheObject
+                objectsInRealm:store.realm
+                         where:@"editionDate == %@", [baseDate dateByAddingTimeInterval:50000]];
+            expect(results.count).to.equal(5);
+
+            // simulate next time fetch result from cache
+            [cacheController
+                fetchMessagesWithConversationID:@"c0"
+                                          limit:100
+                                     beforeTime:nil
+                                          order:nil
+                                     completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                                  NSError *_Nullable error) {
+                                         expect(messageList.count).to.equal(8);
+                                         for (NSInteger i = 0; i < 8; i++) {
+                                             SKYMessage *message = messageList[7 - i];
+                                             expect(message.creationDate)
+                                                 .to.equal(
+                                                     [baseDate dateByAddingTimeInterval:i * 2000]);
+                                             if (i >= 3) {
+                                                 expect(message.body).to.equal(@"fetched message");
+                                                 expect(message.record[@"edited_at"])
+                                                     .to.equal(
+                                                         [baseDate dateByAddingTimeInterval:50000]);
+                                             } else {
+                                                 expect(message.body).to.beNil();
+                                                 expect(message.record[@"edited_at"])
+                                                     .to.equal([baseDate
+                                                         dateByAddingTimeInterval:i * 4000]);
+                                             }
+                                         }
+                                     }];
+        });
+
     });
 
 SpecEnd

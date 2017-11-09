@@ -32,6 +32,6 @@
                                   order:(NSString *)order
                              completion:(SKYChatFetchMessagesListCompletion)completion;
 
-- (void)setMessages:(NSArray<SKYMessage *> *)messages;
+- (void)didFetchMessages:(NSArray<SKYMessage *> *)messages;
 
 @end

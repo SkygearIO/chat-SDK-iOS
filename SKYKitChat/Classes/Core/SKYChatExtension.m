@@ -551,7 +551,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      }
                  }
 
-                 [[SKYChatCacheController defaultController] setMessages:returnArray];
+                 [[SKYChatCacheController defaultController] didFetchMessages:returnArray];
 
                  if (completion) {
                      completion(returnArray, error);

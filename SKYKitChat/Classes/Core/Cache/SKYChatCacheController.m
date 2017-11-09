@@ -78,7 +78,7 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     }
 }
 
-- (void)setMessages:(NSArray<SKYMessage *> *)messages
+- (void)didFetchMessages:(NSArray<SKYMessage *> *)messages
 {
     [self.store setMessages:messages];
 }
