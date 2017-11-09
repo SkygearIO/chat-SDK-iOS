@@ -1,0 +1,91 @@
+//
+//  SKYChatCacheRealmStore.m
+//  SKYKitChat
+//
+//  Copyright 2016 Oursky Ltd.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+#import "SKYChatCacheRealmStore.h"
+
+#import "SKYMessageCacheObject.h"
+
+@implementation SKYChatCacheRealmStore
+
+- (instancetype)initWithName:(NSString *)name
+{
+    self = [super init];
+    if (!self)
+        return nil;
+
+    RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
+
+    NSString *dir =
+    NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+    NSURL *url = [NSURL URLWithString:[dir stringByAppendingPathComponent:name]];
+    config.fileURL = url;
+
+    self.realm = [RLMRealm realmWithConfiguration:config error:nil];
+
+    return self;
+}
+
+- (instancetype)initInMemoryWithName:(NSString *)name
+{
+    self = [super init];
+    if (!self)
+        return nil;
+
+    RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
+    config.inMemoryIdentifier = name;
+
+    self.realm = [RLMRealm realmWithConfiguration:config error:nil];
+
+    return self;
+}
+
+- (NSArray<SKYMessage *> *)getMessagesWithPredicate:(NSPredicate *)predicate
+                                              limit:(NSInteger)limit
+                                              order:(NSString *)order
+{
+    RLMResults<SKYMessageCacheObject *> *results =
+    [[SKYMessageCacheObject objectsInRealm:self.realm withPredicate:predicate]
+     sortedResultsUsingKeyPath:order
+     ascending:NO];
+    NSMutableArray<SKYMessage *> *messages = [NSMutableArray arrayWithCapacity:results.count];
+
+    NSUInteger resultCount = results.count;
+
+    for (NSInteger i = 0; i < limit && i < resultCount; i++) {
+        SKYMessageCacheObject *cacheObject = results[i];
+        SKYMessage *message = [cacheObject messageRecord];
+        [messages addObject:message];
+    }
+
+    return [messages copy];
+}
+
+- (void)setMessages:(NSArray<SKYMessage *> *)messages
+{
+    [self.realm beginWriteTransaction];
+
+    for (SKYMessage *message in messages) {
+        SKYMessageCacheObject *cacheObject = [SKYMessageCacheObject cacheObjectFromMessage:message];
+        [self.realm addOrUpdateObject:cacheObject];
+    }
+
+    [self.realm commitWriteTransaction];
+}
+
+@end

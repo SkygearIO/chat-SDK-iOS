@@ -18,33 +18,11 @@
 //
 
 #import "SKYChatCacheController.h"
-#import <Realm/Realm.h>
+#import "SKYChatCacheController+Private.h"
 
 #import "SKYMessageCacheObject.h"
 
 static NSString *SKYChatCacheStoreName = @"SKYChatCache";
-
-@class SKYChatCacheRealmStore;
-
-@interface SKYChatCacheController ()
-
-@property SKYChatCacheRealmStore *store;
-
-@end
-
-@interface SKYChatCacheRealmStore : NSObject
-
-@property RLMRealm *realm;
-
-- (instancetype)initWithName:(NSString *)name;
-
-- (NSArray<SKYMessage *> *)getMessagesWithPredicate:(NSPredicate *)predicate
-                                              limit:(NSInteger)limit
-                                              order:(NSString *)order;
-
-- (void)setMessages:(NSArray<SKYMessage *> *)messages;
-
-@end
 
 @implementation SKYChatCacheController
 
@@ -103,61 +81,6 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 - (void)setMessages:(NSArray<SKYMessage *> *)messages
 {
     [self.store setMessages:messages];
-}
-
-@end
-
-@implementation SKYChatCacheRealmStore
-
-- (instancetype)initWithName:(NSString *)name
-{
-    self = [super init];
-    if (!self)
-        return nil;
-
-    RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
-
-    NSString *dir =
-        NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
-    NSURL *url = [NSURL URLWithString:[dir stringByAppendingPathComponent:name]];
-    config.fileURL = url;
-
-    self.realm = [RLMRealm realmWithConfiguration:config error:nil];
-
-    return self;
-}
-
-- (NSArray<SKYMessage *> *)getMessagesWithPredicate:(NSPredicate *)predicate
-                                              limit:(NSInteger)limit
-                                              order:(NSString *)order
-{
-    RLMResults<SKYMessageCacheObject *> *results =
-        [[SKYMessageCacheObject objectsInRealm:self.realm withPredicate:predicate]
-            sortedResultsUsingKeyPath:order
-                            ascending:NO];
-    NSMutableArray<SKYMessage *> *messages = [NSMutableArray arrayWithCapacity:results.count];
-
-    NSUInteger resultCount = results.count;
-
-    for (NSInteger i = 0; i < limit && i < resultCount; i++) {
-        SKYMessageCacheObject *cacheObject = results[i];
-        SKYMessage *message = [cacheObject messageRecord];
-        [messages addObject:message];
-    }
-
-    return [messages copy];
-}
-
-- (void)setMessages:(NSArray<SKYMessage *> *)messages
-{
-    [self.realm beginWriteTransaction];
-
-    for (SKYMessage *message in messages) {
-        SKYMessageCacheObject *cacheObject = [SKYMessageCacheObject cacheObjectFromMessage:message];
-        [self.realm addOrUpdateObject:cacheObject];
-    }
-
-    [self.realm commitWriteTransaction];
 }
 
 @end

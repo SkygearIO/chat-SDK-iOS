@@ -5,14 +5,14 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 target 'SKYKitChat_Example' do
   pod 'SKYKitChat', :path => '../'
-  target 'SKYKitChat_Tests' do
-    inherit! :search_paths
-
-    pod 'Specta'
-    pod 'Expecta'
-  end
 end
 
+target 'SKYKitChat_Tests' do
+  pod 'SKYKitChat', :path => '../'
+
+  pod 'Specta'
+  pod 'Expecta'
+end
 
 target 'Swift Example' do
   pod 'SKYKitChat', :path => '../'
