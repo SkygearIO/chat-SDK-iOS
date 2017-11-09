@@ -112,5 +112,21 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     [self.store deleteMessages:@[ message ]];
 }
 
+- (void)handleChangeEvent:(SKYChatRecordChangeEvent)event forMessage:(SKYMessage *)message
+{
+    switch (event) {
+        case SKYChatRecordChangeEventCreate:
+            [self didSaveMessage:message error:nil];
+            break;
+        case SKYChatRecordChangeEventUpdate:
+            [self didSaveMessage:message error:nil];
+            break;
+        case SKYChatRecordChangeEventDelete:
+            [self didDeleteMessage:message];
+            break;
+        default:
+            break;
+    }
+}
 
 @end

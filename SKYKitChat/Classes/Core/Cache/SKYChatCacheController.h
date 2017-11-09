@@ -40,4 +40,6 @@
 
 - (void)didDeleteMessage:(SKYMessage *)message;
 
+- (void)handleChangeEvent:(SKYChatRecordChangeEvent)event forMessage:(SKYMessage *)message;
+
 @end
