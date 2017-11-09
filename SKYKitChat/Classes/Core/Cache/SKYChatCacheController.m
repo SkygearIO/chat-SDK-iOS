@@ -83,4 +83,29 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     [self.store setMessages:messages];
 }
 
+- (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
+{
+    // TODO:
+    // cache unsaved message
+
+    if (completion) {
+        completion(message, nil);
+    }
+}
+
+- (void)didSaveMessage:(SKYMessage *)message error:(NSError *)error
+{
+    if (error) {
+        // TODO:
+        // invalidate unsaved message
+        return;
+    }
+
+    message.alreadySyncToServer = true;
+    message.fail = false;
+
+    [self.store setMessages:@[ message ]];
+}
+
+
 @end

@@ -34,6 +34,8 @@
 {
     SKYRecord *record = [NSKeyedUnarchiver unarchiveObjectWithData:self.recordData];
     SKYMessage *message = [SKYMessage recordWithRecord:record];
+    message.alreadySyncToServer = self.alreadySyncToServer;
+    message.fail = self.fail;
     return message;
 }
 
@@ -45,6 +47,8 @@
     cacheObject.conversationID = message.conversationRef.recordID.recordName;
     cacheObject.creationDate = message.record.creationDate;
     cacheObject.editionDate = [message.record objectForKey:@"edited_at"];
+    cacheObject.alreadySyncToServer = message.alreadySyncToServer;
+    cacheObject.fail = message.fail;
     cacheObject.recordData = [NSKeyedArchiver archivedDataWithRootObject:message.record];
 
     return cacheObject;

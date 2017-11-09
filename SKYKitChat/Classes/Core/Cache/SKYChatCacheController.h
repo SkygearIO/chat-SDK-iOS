@@ -34,4 +34,8 @@
 
 - (void)didFetchMessages:(NSArray<SKYMessage *> *)messages;
 
+- (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion;
+
+- (void)didSaveMessage:(SKYMessage *)message error:(NSError *)error;
+
 @end

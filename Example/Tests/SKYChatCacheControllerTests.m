@@ -219,6 +219,31 @@ SpecBegin(SKYChatCacheController)
                                      }];
         });
 
+        it(@"save message, update the cache", ^{
+            SKYMessage *messageToSave = [[SKYMessage alloc]
+                initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"mm1"]];
+            messageToSave.conversationRef = [SKYReference
+                referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
+                                                                     name:@"c0"]];
+            messageToSave.creationDate = [baseDate dateByAddingTimeInterval:50000];
+            messageToSave.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:50000];
+            messageToSave.body = @"new message";
+
+            // assume that the save message to cache operation is sync
+            RLMRealm *realm = cacheController.store.realm;
+
+            [cacheController didSaveMessage:messageToSave error:nil];
+
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"mm1"];
+            expect(results.count).to.equal(1);
+
+            SKYMessage *newMessage = [[results objectAtIndex:0] messageRecord];
+            expect(newMessage.body).to.equal(messageToSave.body);
+            expect(newMessage.alreadySyncToServer).to.equal(YES);
+            expect(newMessage.fail).to.equal(NO);
+        });
+
     });
 
 SpecEnd

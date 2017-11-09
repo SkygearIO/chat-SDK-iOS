@@ -76,6 +76,13 @@
     return [messages copy];
 }
 
+- (SKYMessage *)getMessageWithID:(NSString *)messageID
+{
+    SKYMessageCacheObject *cacheObject =
+        [SKYMessageCacheObject objectInRealm:self.realm forPrimaryKey:messageID];
+    return [cacheObject messageRecord];
+}
+
 - (void)setMessages:(NSArray<SKYMessage *> *)messages
 {
     [self.realm beginWriteTransaction];
