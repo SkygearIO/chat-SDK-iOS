@@ -20,8 +20,8 @@
 import UIKit
 
 public enum AvatarType {
-    case Asset
-    case URLString
+    case asset
+    case urlString
 }
 
 public class SKYChatUIModelCustomization {
@@ -29,7 +29,7 @@ public class SKYChatUIModelCustomization {
 
     public fileprivate(set) var userNameField = "username"
     public fileprivate(set) var userAvatarField = "avatar"
-    public fileprivate(set) var userAvatarType = AvatarType.Asset
+    public fileprivate(set) var userAvatarType = AvatarType.asset
 }
 
 // MARK: - Singleton

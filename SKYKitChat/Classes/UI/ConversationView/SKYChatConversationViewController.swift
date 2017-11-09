@@ -629,7 +629,7 @@ extension SKYChatConversationViewController {
         let modelCustomization = SKYChatUIModelCustomization.default()
         let avatarField = modelCustomization.userAvatarField
         switch modelCustomization.userAvatarType {
-        case .URLString:
+        case .urlString:
             if let url = sender?.object(forKey: avatarField) as? String {
                 if let data = self.dataCache.getData(forKey: url) {
                     return JSQMessagesAvatarImage.avatar(with: UIImage(data: data))
@@ -646,7 +646,7 @@ extension SKYChatConversationViewController {
                     self.collectionView.reloadItems(at: [indexPath])
                 })
             }
-        case .Asset:
+        case .asset:
             if let asset = sender?.object(forKey: avatarField) as? SKYAsset {
                 if let data = self.assetCache.get(asset: asset) {
                     return JSQMessagesAvatarImage.avatar(with: UIImage(data: data))

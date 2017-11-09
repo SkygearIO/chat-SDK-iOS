@@ -57,7 +57,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let _ = SKYChatUIModelCustomization.default()
             .update(userNameField: "name")
-            .update(userAvatarField: "profile_pic", avatarType: .URLString)
+            .update(userAvatarField: "profile_pic", avatarType: .urlString)
 
         return true
     }
