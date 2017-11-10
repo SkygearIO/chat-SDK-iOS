@@ -14,6 +14,7 @@ This is the client library for the Skygear Chat extension.
 
   s.ios.deployment_target = '8.2'
   s.default_subspecs = 'Core'
+  s.dependency 'Realm', '~> 3.0.1'
 
   s.subspec 'Core' do |sp|
     sp.source_files = 'SKYKitChat/Classes/Core/**/*'

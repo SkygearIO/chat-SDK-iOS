@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		38255ED8DD8B541888CD1C02 /* Pods_SKYKitChat_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3244C35DAEEFA309761CFCBE /* Pods_SKYKitChat_Tests.framework */; };
 		38BA24AF1DED659C00DFD045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BA249E1DED659C00DFD045 /* AppDelegate.swift */; };
 		38BA24B01DED659C00DFD045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 38BA249F1DED659C00DFD045 /* Assets.xcassets */; };
 		38BA24B11DED659C00DFD045 /* ConversationDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BA24A21DED659C00DFD045 /* ConversationDetailViewController.swift */; };
@@ -40,9 +39,11 @@
 		6072233A1E2E28BE0074AF53 /* ConversationListDemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607223391E2E28BE0074AF53 /* ConversationListDemoViewController.swift */; };
 		60762B8C1E38B92B003C8FA9 /* ConversationDemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60762B8B1E38B92B003C8FA9 /* ConversationDemoViewController.swift */; };
 		60C135971E2766B100F91903 /* UserQueryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C135961E2766B100F91903 /* UserQueryViewController.swift */; };
+		817BF52938BBE15B10CE1FA9 /* Pods_SKYKitChat_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3244C35DAEEFA309761CFCBE /* Pods_SKYKitChat_Tests.framework */; };
 		873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 873B8AEA1B1F5CCA007FD442 /* Main.storyboard */; };
-		AAA7068232A089DB513A0578 /* Pods_SKYKitChat_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45EA3ADFF482E1C38691B2B5 /* Pods_SKYKitChat_Example.framework */; };
+		A9C891E51FB404BF006B1112 /* SKYChatCacheControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A9C891E41FB404BF006B1112 /* SKYChatCacheControllerTests.m */; };
 		C1BD025F74EB41116E81E4FC /* Pods_Swift_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACF38D1BCF61531132635F9E /* Pods_Swift_Example.framework */; };
+		DA0F37082884C1BA17B3D8FA /* Pods_SKYKitChat_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45EA3ADFF482E1C38691B2B5 /* Pods_SKYKitChat_Example.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,6 +107,7 @@
 		63DF270E18DD1BAA3F08B34B /* Pods-SKYKitChat_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SKYKitChat_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-SKYKitChat_Tests/Pods-SKYKitChat_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		873B8AEA1B1F5CCA007FD442 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		94FB8118E49B25C79173C1F9 /* Pods-Swift Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Swift Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Swift Example/Pods-Swift Example.debug.xcconfig"; sourceTree = "<group>"; };
+		A9C891E41FB404BF006B1112 /* SKYChatCacheControllerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SKYChatCacheControllerTests.m; sourceTree = "<group>"; };
 		ACF38D1BCF61531132635F9E /* Pods_Swift_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Swift_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C166D4E46298323DA868EE04 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		D848F7ED663C1EAF1A0DB616 /* SKYKitChat.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = SKYKitChat.podspec; path = ../SKYKitChat.podspec; sourceTree = "<group>"; };
@@ -129,7 +131,7 @@
 				6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */,
 				6003F592195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F58E195388D20070C39A /* Foundation.framework in Frameworks */,
-				AAA7068232A089DB513A0578 /* Pods_SKYKitChat_Example.framework in Frameworks */,
+				DA0F37082884C1BA17B3D8FA /* Pods_SKYKitChat_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,7 +142,7 @@
 				6003F5B0195388D20070C39A /* XCTest.framework in Frameworks */,
 				6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F5B1195388D20070C39A /* Foundation.framework in Frameworks */,
-				38255ED8DD8B541888CD1C02 /* Pods_SKYKitChat_Tests.framework in Frameworks */,
+				817BF52938BBE15B10CE1FA9 /* Pods_SKYKitChat_Tests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -244,6 +246,7 @@
 			children = (
 				6003F5BB195388D20070C39A /* Tests.m */,
 				6003F5B6195388D20070C39A /* Supporting Files */,
+				A9C891E41FB404BF006B1112 /* SKYChatCacheControllerTests.m */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -537,11 +540,21 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-SKYKitChat_Tests/Pods-SKYKitChat_Tests-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/FMDB-iOS8.3/FMDB.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm-iOS8.3/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/SKYKit-iOS8.3/SKYKit.framework",
+				"${BUILT_PRODUCTS_DIR}/SKYKitChat/SKYKitChat.framework",
+				"${BUILT_PRODUCTS_DIR}/SocketRocket-iOS8.3/SocketRocket.framework",
 				"${BUILT_PRODUCTS_DIR}/Expecta/Expecta.framework",
 				"${BUILT_PRODUCTS_DIR}/Specta/Specta.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FMDB.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKitChat.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SocketRocket.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Expecta.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Specta.framework",
 			);
@@ -648,6 +661,7 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Swift Example/Pods-Swift Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/FMDB-iOS10.1/FMDB.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm-iOS10.1/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKit-iOS10.1/SKYKit.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKitChat.default-UI/SKYKitChat.framework",
 				"${BUILT_PRODUCTS_DIR}/SocketRocket-iOS10.1/SocketRocket.framework",
@@ -664,6 +678,7 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FMDB.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKitChat.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SocketRocket.framework",
@@ -768,6 +783,7 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-SKYKitChat_Example/Pods-SKYKitChat_Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/FMDB-iOS8.3/FMDB.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm-iOS8.3/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKit-iOS8.3/SKYKit.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKitChat/SKYKitChat.framework",
 				"${BUILT_PRODUCTS_DIR}/SocketRocket-iOS8.3/SocketRocket.framework",
@@ -775,6 +791,7 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FMDB.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKitChat.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SocketRocket.framework",
@@ -839,6 +856,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9C891E51FB404BF006B1112 /* SKYChatCacheControllerTests.m in Sources */,
 				6003F5BC195388D20070C39A /* Tests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
