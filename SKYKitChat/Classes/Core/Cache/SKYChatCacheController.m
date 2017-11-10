@@ -56,9 +56,10 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
                                   order:(NSString *)order
                              completion:(SKYChatFetchMessagesListCompletion)completion
 {
-    NSMutableArray *predicates = [NSMutableArray
-        arrayWithArray:@[ [NSPredicate
-                           predicateWithFormat:@"conversationID LIKE %@", conversationId] ]];
+    NSMutableArray *predicates = [NSMutableArray arrayWithArray:@[
+        [NSPredicate predicateWithFormat:@"conversationID LIKE %@", conversationId],
+        [NSPredicate predicateWithFormat:@"deleted == FALSE"]
+    ]];
     if (beforeTime) {
         [predicates addObject:[NSPredicate predicateWithFormat:@"creationDate < %@", beforeTime]];
     }
@@ -79,8 +80,13 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 }
 
 - (void)didFetchMessages:(NSArray<SKYMessage *> *)messages
+         deletedMessages:(NSArray<SKYMessage *> *)deletedMessages
 {
     [self.store setMessages:messages];
+
+    // soft delete
+    // so update the messages
+    [self.store setMessages:deletedMessages];
 }
 
 - (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
@@ -109,7 +115,9 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 
 - (void)didDeleteMessage:(SKYMessage *)message
 {
-    [self.store deleteMessages:@[ message ]];
+    // soft delete
+    // so update the messages
+    [self.store setMessages:@[ message ]];
 }
 
 - (void)handleChangeEvent:(SKYChatRecordChangeEvent)event forMessage:(SKYMessage *)message

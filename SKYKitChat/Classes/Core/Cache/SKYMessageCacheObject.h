@@ -28,6 +28,8 @@
 @property NSDate *creationDate;
 @property NSDate *editionDate;
 
+@property bool deleted;
+
 @property bool alreadySyncToServer;
 @property bool fail;
 

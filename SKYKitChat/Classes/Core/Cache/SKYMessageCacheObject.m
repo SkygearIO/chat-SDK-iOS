@@ -47,6 +47,7 @@
     cacheObject.conversationID = message.conversationRef.recordID.recordName;
     cacheObject.creationDate = message.record.creationDate;
     cacheObject.editionDate = [message.record objectForKey:@"edited_at"];
+    cacheObject.deleted = [message.record objectForKey:@"deleted"];
     cacheObject.alreadySyncToServer = message.alreadySyncToServer;
     cacheObject.fail = message.fail;
     cacheObject.recordData = [NSKeyedArchiver archivedDataWithRootObject:message.record];

@@ -551,7 +551,20 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      }
                  }
 
-                 [[SKYChatCacheController defaultController] didFetchMessages:returnArray];
+                 NSArray *deletedArray = [response objectForKey:@"deleted"];
+                 NSMutableArray *returnDeletedArray =
+                     [NSMutableArray arrayWithCapacity:deletedArray.count];
+                 for (NSDictionary *obj in deletedArray) {
+                     SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
+                     SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
+                     SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
+                     if (msg) {
+                         [returnDeletedArray addObject:msg];
+                     }
+                 }
+
+                 [[SKYChatCacheController defaultController] didFetchMessages:returnArray
+                                                              deletedMessages:returnDeletedArray];
 
                  if (completion) {
                      completion(returnArray, error);
