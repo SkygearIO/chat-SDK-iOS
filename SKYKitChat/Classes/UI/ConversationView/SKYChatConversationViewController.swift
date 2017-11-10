@@ -17,7 +17,6 @@
 //  limitations under the License.
 //
 
-import JSQMessagesViewController
 import ALCameraViewController
 import CTAssetsPickerController
 import AVFoundation
