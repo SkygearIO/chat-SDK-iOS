@@ -36,6 +36,7 @@
     SKYMessage *message = [SKYMessage recordWithRecord:record];
     message.alreadySyncToServer = self.alreadySyncToServer;
     message.fail = self.fail;
+    message.sendDate = self.sendDate;
     return message;
 }
 
@@ -46,10 +47,22 @@
     cacheObject.recordID = message.recordID.recordName;
     cacheObject.conversationID = message.conversationRef.recordID.recordName;
     cacheObject.creationDate = message.record.creationDate;
+
+    // creationDate of the record originally respresents the message creation date on server
+    // this overloads the meaning of creationDate, to also represents local creation date
+    // then creationDate can also be used to sort messages even not uploaded to server yet
+    //
+    // this will not affect the SKYMessage created from cache object
+    // because the deserializtion of message record data is based on recordData only
+    if (!cacheObject.creationDate && message.sendDate) {
+        cacheObject.creationDate = message.sendDate;
+    }
+
     cacheObject.editionDate = [message.record objectForKey:@"edited_at"];
     cacheObject.deleted = [message.record objectForKey:@"deleted"];
     cacheObject.alreadySyncToServer = message.alreadySyncToServer;
     cacheObject.fail = message.fail;
+    cacheObject.sendDate = message.sendDate;
     cacheObject.recordData = [NSKeyedArchiver archivedDataWithRootObject:message.record];
 
     return cacheObject;

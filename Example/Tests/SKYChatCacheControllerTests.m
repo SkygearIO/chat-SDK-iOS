@@ -238,15 +238,85 @@ SpecBegin(SKYChatCacheController)
             messageToSave.conversationRef = [SKYReference
                 referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
                                                                      name:@"c0"]];
+            messageToSave.body = @"new message";
+            messageToSave.sendDate = [baseDate dateByAddingTimeInterval:50000];
+
+            [cacheController
+                saveMessage:messageToSave
+                 completion:^(SKYMessage *_Nullable message, NSError *_Nullable error) {
+                     expect(message.recordID).to.equal(messageToSave.recordID);
+                     expect(message.sendDate).to.equal(messageToSave.sendDate);
+
+                     RLMRealm *realm = cacheController.store.realm;
+                     RLMResults<SKYMessageCacheObject *> *results =
+                         [SKYMessageCacheObject objectsInRealm:realm
+                                                         where:@"recordID == %@", @"mm1"];
+                     expect(results.count).to.equal(1);
+                     expect(results[0].recordID).to.equal(messageToSave.recordID.recordName);
+                     expect(results[0].sendDate).to.equal(messageToSave.sendDate);
+
+                     results = [SKYMessageCacheObject allObjectsInRealm:realm];
+                     expect(results.count).to.equal(11);
+                 }];
+
+            // assume that the save message to cache operation is sync
+            // simulate fetch result before receiving didSave callback
+            [cacheController
+                fetchMessagesWithConversationID:@"c0"
+                                          limit:100
+                                     beforeTime:nil
+                                          order:nil
+                                     completion:^(NSArray<SKYMessage *> *messageList,
+                                                  NSArray<SKYMessage *> *deletedMessageList,
+                                                  NSError *error) {
+                                         expect(messageList.count).to.equal(6);
+                                         for (NSInteger i = 1; i < 5; i++) {
+                                             SKYMessage *message = messageList[5 - i];
+                                             expect(message.creationDate)
+                                                 .to.equal(
+                                                     [baseDate dateByAddingTimeInterval:i * 2000]);
+                                         }
+
+                                         SKYMessage *latestMessage = messageList.firstObject;
+                                         expect(latestMessage.recordID)
+                                             .to.equal(messageToSave.recordID);
+                                         expect(latestMessage.sendDate)
+                                             .to.equal(messageToSave.sendDate);
+                                         expect(latestMessage.alreadySyncToServer).to.beFalsy();
+                                     }];
+
+            [cacheController didSaveMessage:messageToSave error:nil];
+
+            [cacheController
+                fetchMessagesWithConversationID:@"c0"
+                                          limit:1
+                                     beforeTime:nil
+                                          order:nil
+                                     completion:^(NSArray<SKYMessage *> *messageList,
+                                                  NSArray<SKYMessage *> *deletedMessageList,
+                                                  NSError *error) {
+                                         SKYMessage *latestMessage = messageList.firstObject;
+                                         expect(latestMessage.recordID)
+                                             .to.equal(messageToSave.recordID);
+                                         expect(latestMessage.sendDate)
+                                             .to.equal(messageToSave.sendDate);
+                                         expect(latestMessage.alreadySyncToServer).to.beTruthy();
+                                     }];
+        });
+
+        it(@"didSave message, update the cache", ^{
+            SKYMessage *messageToSave = [[SKYMessage alloc]
+                initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"mm1"]];
+            messageToSave.conversationRef = [SKYReference
+                referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
+                                                                     name:@"c0"]];
             messageToSave.creationDate = [baseDate dateByAddingTimeInterval:50000];
             messageToSave.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:50000];
             messageToSave.body = @"new message";
 
-            // assume that the save message to cache operation is sync
-            RLMRealm *realm = cacheController.store.realm;
-
             [cacheController didSaveMessage:messageToSave error:nil];
 
+            RLMRealm *realm = cacheController.store.realm;
             RLMResults<SKYMessageCacheObject *> *results =
                 [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"mm1"];
             expect(results.count).to.equal(1);

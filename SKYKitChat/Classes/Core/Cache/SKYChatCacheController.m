@@ -91,8 +91,8 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 
 - (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
 {
-    // TODO:
     // cache unsaved message
+    [self.store setMessages:@[ message ]];
 
     if (completion) {
         completion(message, nil);
@@ -102,8 +102,10 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 - (void)didSaveMessage:(SKYMessage *)message error:(NSError *)error
 {
     if (error) {
-        // TODO:
         // invalidate unsaved message
+        message.alreadySyncToServer = false;
+        message.fail = true;
+        [self.store setMessages:@[ message ]];
         return;
     }
 

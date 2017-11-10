@@ -27,6 +27,7 @@
 @property NSString *conversationID;
 @property NSDate *creationDate;
 @property NSDate *editionDate;
+@property NSDate *sendDate;
 
 @property bool deleted;
 
