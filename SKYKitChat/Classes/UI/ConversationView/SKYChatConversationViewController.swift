@@ -1287,7 +1287,7 @@ extension SKYChatConversationViewController {
             limit: Int(self.messagesFetchLimit),
             beforeTime: before,
                  order: nil,
-            completion: { (result, error) in
+            completion: { (result, _, error) in
                 self.isFetchingMessage = false
                 self.indicator?.stopAnimating()
                 guard error == nil else {

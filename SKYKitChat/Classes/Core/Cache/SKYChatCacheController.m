@@ -75,7 +75,7 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     if (completion) {
         NSArray<SKYMessage *> *messages =
             [self.store getMessagesWithPredicate:predicate limit:limit order:resolvedOrder];
-        completion(messages, nil);
+        completion(messages, nil, nil);
     }
 }
 

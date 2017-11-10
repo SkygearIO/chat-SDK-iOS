@@ -126,8 +126,9 @@ SpecBegin(SKYChatCacheController)
                                           limit:100
                                      beforeTime:nil
                                           order:nil
-                                     completion:^(NSArray<SKYMessage *> *_Nullable messageList,
-                                                  NSError *_Nullable error) {
+                                     completion:^(NSArray<SKYMessage *> *messageList,
+                                                  NSArray<SKYMessage *> *deletedMessageList,
+                                                  NSError *error) {
                                          expect(messageList.count).to.equal(5);
                                          for (NSInteger i = 0; i < 5; i++) {
                                              SKYMessage *message = messageList[4 - i];
@@ -144,8 +145,9 @@ SpecBegin(SKYChatCacheController)
                                           limit:100
                                      beforeTime:[baseDate dateByAddingTimeInterval:4000]
                                           order:nil
-                                     completion:^(NSArray<SKYMessage *> *_Nullable messageList,
-                                                  NSError *_Nullable error) {
+                                     completion:^(NSArray<SKYMessage *> *messageList,
+                                                  NSArray<SKYMessage *> *deletedMessageList,
+                                                  NSError *error) {
                                          expect(messageList.count).to.equal(2);
                                          for (NSInteger i = 0; i < 2; i++) {
                                              SKYMessage *message = messageList[1 - i];
@@ -206,8 +208,9 @@ SpecBegin(SKYChatCacheController)
                                           limit:100
                                      beforeTime:nil
                                           order:nil
-                                     completion:^(NSArray<SKYMessage *> *_Nullable messageList,
-                                                  NSError *_Nullable error) {
+                                     completion:^(NSArray<SKYMessage *> *messageList,
+                                                  NSArray<SKYMessage *> *deletedMessageList,
+                                                  NSError *error) {
                                          expect(messageList.count).to.equal(7);
                                          for (NSInteger i = 1; i < 8; i++) {
                                              SKYMessage *message = messageList[7 - i];

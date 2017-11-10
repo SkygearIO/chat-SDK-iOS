@@ -83,7 +83,7 @@ class ConversationRoomViewController: UIViewController,
         }
 
         // get conversation messages
-        chat.fetchMessages(conversation: conversation, limit: 100, beforeTime: Date(), order: nil) { (messages, error) in
+        chat.fetchMessages(conversation: conversation, limit: 100, beforeTime: Date(), order: nil) { (messages, _, error) in
             if let err = error {
                 let alert = UIAlertController(title: "Unable to fetch conversations", message: err.localizedDescription, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
