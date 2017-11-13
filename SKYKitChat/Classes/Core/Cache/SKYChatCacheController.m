@@ -122,6 +122,14 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     [self.store setMessages:@[ message ]];
 }
 
+- (void)handleRecordChange:(SKYChatRecordChange *)recordChange
+{
+    if ([recordChange.recordType isEqualToString:@"message"]) {
+        [self handleChangeEvent:recordChange.event
+                     forMessage:[[SKYMessage alloc] initWithRecordData:recordChange.record]];
+    }
+}
+
 - (void)handleChangeEvent:(SKYChatRecordChangeEvent)event forMessage:(SKYMessage *)message
 {
     switch (event) {

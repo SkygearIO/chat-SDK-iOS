@@ -55,4 +55,17 @@
     return self;
 }
 
+- (instancetype)initWithEvent:(SKYChatRecordChangeEvent)event record:(SKYRecord *)record
+{
+    self = [super init];
+    if (!self)
+        return nil;
+
+    _event = event;
+    _recordType = record.recordType;
+    _record = record;
+
+    return self;
+}
+
 @end

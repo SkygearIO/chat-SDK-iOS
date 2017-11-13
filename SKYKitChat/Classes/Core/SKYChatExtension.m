@@ -433,22 +433,32 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 - (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
 {
+    [[SKYChatCacheController defaultController]
+        saveMessage:message
+         completion:^(SKYMessage *_Nullable message, NSError *_Nullable error){
+             // TODO: call completion handler of the api
+         }];
+
     SKYDatabase *database = self.container.publicCloudDatabase;
-    [database saveRecord:message.record
-              completion:^(SKYRecord *record, NSError *error) {
-                  SKYMessage *msg = nil;
-                  if (error) {
-                      message.alreadySyncToServer = false;
-                      message.fail = true;
-                  } else {
-                      msg = [[SKYMessage alloc] initWithRecordData:record];
-                      msg.alreadySyncToServer = true;
-                      msg.fail = false;
-                  }
-                  if (completion) {
-                      completion(msg, error);
-                  }
-              }];
+    [database
+        saveRecord:message.record
+        completion:^(SKYRecord *record, NSError *error) {
+            SKYMessage *msg = nil;
+            if (error) {
+                message.alreadySyncToServer = false;
+                message.fail = true;
+                [[SKYChatCacheController defaultController] didSaveMessage:message error:error];
+            } else {
+                msg = [[SKYMessage alloc] initWithRecordData:record];
+                msg.alreadySyncToServer = true;
+                msg.fail = false;
+                [[SKYChatCacheController defaultController] didSaveMessage:msg error:error];
+            }
+
+            if (completion) {
+                completion(msg, error);
+            }
+        }];
 }
 
 - (void)addMessage:(SKYMessage *)message
@@ -529,6 +539,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                              completion:^(NSArray<SKYMessage *> *_Nullable messageList,
                                           NSArray<SKYMessage *> *_Nullable deletedMessageList,
                                           NSError *_Nullable error) {
+                                 // TODO: call completion handler of the api
                                  NSLog(@"get result from cache");
                              }];
 
@@ -679,12 +690,17 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     [self.container callLambda:@"chat:delete_message"
                      arguments:@[ message.recordID.recordName ]
              completionHandler:^(NSDictionary *response, NSError *error) {
-                 if (!completion) {
+                 if (error) {
+                     if (completion) {
+                         completion(nil, error);
+                     }
+
                      return;
                  }
-                 if (error) {
-                     completion(nil, error);
-                 } else {
+
+                 [[SKYChatCacheController defaultController] didDeleteMessage:message];
+
+                 if (completion) {
                      completion(conversation, nil);
                  }
              }];
@@ -914,6 +930,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         if (!recordChange) {
             return;
         }
+
+        [[SKYChatCacheController defaultController] handleRecordChange:recordChange];
 
         [[NSNotificationCenter defaultCenter]
             postNotificationName:SKYChatDidReceiveRecordChangeNotification
