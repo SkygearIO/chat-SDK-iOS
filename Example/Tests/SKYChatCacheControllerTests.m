@@ -129,7 +129,7 @@ SpecBegin(SKYChatCacheController)
                                           order:nil
                                      completion:^(NSArray<SKYMessage *> *messageList,
                                                   NSArray<SKYMessage *> *deletedMessageList,
-                                                  NSError *error) {
+                                                  BOOL isCached, NSError *error) {
                                          expect(messageList.count).to.equal(5);
                                          for (NSInteger i = 0; i < 5; i++) {
                                              SKYMessage *message = messageList[4 - i];
@@ -148,7 +148,7 @@ SpecBegin(SKYChatCacheController)
                                           order:nil
                                      completion:^(NSArray<SKYMessage *> *messageList,
                                                   NSArray<SKYMessage *> *deletedMessageList,
-                                                  NSError *error) {
+                                                  BOOL isCached, NSError *error) {
                                          expect(messageList.count).to.equal(2);
                                          for (NSInteger i = 0; i < 2; i++) {
                                              SKYMessage *message = messageList[1 - i];
@@ -211,7 +211,7 @@ SpecBegin(SKYChatCacheController)
                                           order:nil
                                      completion:^(NSArray<SKYMessage *> *messageList,
                                                   NSArray<SKYMessage *> *deletedMessageList,
-                                                  NSError *error) {
+                                                  BOOL isCached, NSError *error) {
                                          expect(messageList.count).to.equal(7);
                                          for (NSInteger i = 1; i < 8; i++) {
                                              SKYMessage *message = messageList[7 - i];
@@ -269,7 +269,7 @@ SpecBegin(SKYChatCacheController)
                                           order:nil
                                      completion:^(NSArray<SKYMessage *> *messageList,
                                                   NSArray<SKYMessage *> *deletedMessageList,
-                                                  NSError *error) {
+                                                  BOOL isCached, NSError *error) {
                                          expect(messageList.count).to.equal(6);
                                          for (NSInteger i = 1; i < 5; i++) {
                                              SKYMessage *message = messageList[5 - i];
@@ -295,7 +295,7 @@ SpecBegin(SKYChatCacheController)
                                           order:nil
                                      completion:^(NSArray<SKYMessage *> *messageList,
                                                   NSArray<SKYMessage *> *deletedMessageList,
-                                                  NSError *error) {
+                                                  BOOL isCached, NSError *error) {
                                          SKYMessage *latestMessage = messageList.firstObject;
                                          expect(latestMessage.recordID)
                                              .to.equal(messageToSave.recordID);

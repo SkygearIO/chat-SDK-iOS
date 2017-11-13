@@ -279,13 +279,23 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 - (void)fetchMessagesWithIDs:(NSArray<NSString *> *)messageIDs
                   completion:(SKYChatFetchMessagesListCompletion)completion
 {
+    if (completion) {
+        [[SKYChatCacheController defaultController]
+            fetchMessagesWithIDs:messageIDs
+                      completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                   NSArray<SKYMessage *> *_Nullable deletedMessageList,
+                                   BOOL isCached, NSError *_Nullable error){
+                          // TODO: call completion handler of the api
+                      }];
+    }
+
     [self.container callLambda:@"chat:get_messages_by_ids"
                      arguments:@[ messageIDs ]
              completionHandler:^(NSDictionary *response, NSError *error) {
                  if (error) {
                      NSLog(@"error calling chat:get_messages_by_ids: %@", error);
                      if (completion) {
-                         completion(nil, nil, error);
+                         completion(nil, nil, NO, error);
                      }
                      return;
                  }
@@ -307,7 +317,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      }
                  }
                  if (completion) {
-                     completion(returnArray, deletedReturnArray, error);
+                     completion(returnArray, deletedReturnArray, NO, error);
                  }
              }];
 }
@@ -531,17 +541,19 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         [arguments addObject:order];
     }
 
-    [[SKYChatCacheController defaultController]
-        fetchMessagesWithConversationID:conversationId
-                                  limit:limit
-                             beforeTime:beforeTime
-                                  order:order
-                             completion:^(NSArray<SKYMessage *> *_Nullable messageList,
-                                          NSArray<SKYMessage *> *_Nullable deletedMessageList,
-                                          NSError *_Nullable error) {
-                                 // TODO: call completion handler of the api
-                                 NSLog(@"get result from cache");
-                             }];
+    if (completion) {
+        [[SKYChatCacheController defaultController]
+            fetchMessagesWithConversationID:conversationId
+                                      limit:limit
+                                 beforeTime:beforeTime
+                                      order:order
+                                 completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                              NSArray<SKYMessage *> *_Nullable deletedMessageList,
+                                              BOOL isCached, NSError *_Nullable error) {
+                                     // TODO: call completion handler of the api
+                                     NSLog(@"get result from cache");
+                                 }];
+    }
 
     [self.container callLambda:@"chat:get_messages"
                      arguments:arguments
@@ -549,7 +561,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                  if (error) {
                      NSLog(@"error calling chat:get_messages: %@", error);
                      if (completion) {
-                         completion(nil, nil, error);
+                         completion(nil, nil, NO, error);
                      }
                      return;
                  }
@@ -583,7 +595,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                                               deletedMessages:returnDeletedArray];
 
                  if (completion) {
-                     completion(returnArray, returnDeletedArray, error);
+                     completion(returnArray, returnDeletedArray, NO, error);
                  }
 
                  // The SDK notifies the server that these messages are received
