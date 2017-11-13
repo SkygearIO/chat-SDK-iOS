@@ -126,8 +126,9 @@ SpecBegin(SKYChatCacheController)
                                           limit:100
                                      beforeTime:nil
                                           order:nil
-                                     completion:^(NSArray<SKYMessage *> *_Nullable messageList,
-                                                  NSError *_Nullable error) {
+                                     completion:^(NSArray<SKYMessage *> *messageList,
+                                                  NSArray<SKYMessage *> *deletedMessageList,
+                                                  NSError *error) {
                                          expect(messageList.count).to.equal(5);
                                          for (NSInteger i = 0; i < 5; i++) {
                                              SKYMessage *message = messageList[4 - i];
@@ -144,8 +145,9 @@ SpecBegin(SKYChatCacheController)
                                           limit:100
                                      beforeTime:[baseDate dateByAddingTimeInterval:4000]
                                           order:nil
-                                     completion:^(NSArray<SKYMessage *> *_Nullable messageList,
-                                                  NSError *_Nullable error) {
+                                     completion:^(NSArray<SKYMessage *> *messageList,
+                                                  NSArray<SKYMessage *> *deletedMessageList,
+                                                  NSError *error) {
                                          expect(messageList.count).to.equal(2);
                                          for (NSInteger i = 0; i < 2; i++) {
                                              SKYMessage *message = messageList[1 - i];
@@ -155,6 +157,239 @@ SpecBegin(SKYChatCacheController)
                                          }
                                      }];
         });
+
+        it(@"didFetch messages, update the cache", ^{
+            NSInteger messageCount = 5;
+            NSMutableArray<SKYMessage *> *messages =
+                [NSMutableArray arrayWithCapacity:messageCount];
+
+            for (NSInteger i = 0; i < messageCount; i++) {
+                SKYMessage *message = [[SKYMessage alloc]
+                    initWithRecordData:[SKYRecord
+                                           recordWithRecordType:@"message"
+                                                           name:[NSString
+                                                                    stringWithFormat:@"m%ld",
+                                                                                     (i + 3) * 2]]];
+                message.conversationRef = [SKYReference
+                    referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
+                                                                         name:@"c0"]];
+                message.creationDate = [baseDate dateByAddingTimeInterval:(i + 3) * 2000];
+                message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:50000];
+                message.body = @"fetched message";
+                [messages addObject:message];
+            }
+
+            SKYMessage *deletedMessage = [[SKYMessage alloc]
+                initWithRecordData:[SKYRecord recordWithRecordType:@"message"
+                                                              name:@"m0"
+                                                              data:@{
+                                                                  @"deleted" : @YES
+                                                              }]];
+            deletedMessage.conversationRef = [SKYReference
+                referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
+                                                                     name:@"c0"]];
+
+            [cacheController didFetchMessages:messages deletedMessages:@[ deletedMessage ]];
+
+            SKYChatCacheRealmStore *store = cacheController.store;
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject objectsInRealm:store.realm
+                                                where:@"conversationID == %@", @"c0"];
+            expect(results.count).to.equal(8);
+
+            results = [SKYMessageCacheObject
+                objectsInRealm:store.realm
+                         where:@"editionDate == %@", [baseDate dateByAddingTimeInterval:50000]];
+            expect(results.count).to.equal(5);
+
+            // simulate next time fetch result from cache
+            [cacheController
+                fetchMessagesWithConversationID:@"c0"
+                                          limit:100
+                                     beforeTime:nil
+                                          order:nil
+                                     completion:^(NSArray<SKYMessage *> *messageList,
+                                                  NSArray<SKYMessage *> *deletedMessageList,
+                                                  NSError *error) {
+                                         expect(messageList.count).to.equal(7);
+                                         for (NSInteger i = 1; i < 8; i++) {
+                                             SKYMessage *message = messageList[7 - i];
+                                             expect(message.creationDate)
+                                                 .to.equal(
+                                                     [baseDate dateByAddingTimeInterval:i * 2000]);
+                                             if (i >= 3) {
+                                                 expect(message.body).to.equal(@"fetched message");
+                                                 expect(message.record[@"edited_at"])
+                                                     .to.equal(
+                                                         [baseDate dateByAddingTimeInterval:50000]);
+                                             } else {
+                                                 expect(message.body).to.beNil();
+                                                 expect(message.record[@"edited_at"])
+                                                     .to.equal([baseDate
+                                                         dateByAddingTimeInterval:i * 4000]);
+                                             }
+                                         }
+                                     }];
+        });
+
+        it(@"save message, update the cache", ^{
+            SKYMessage *messageToSave = [[SKYMessage alloc]
+                initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"mm1"]];
+            messageToSave.conversationRef = [SKYReference
+                referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
+                                                                     name:@"c0"]];
+            messageToSave.creationDate = [baseDate dateByAddingTimeInterval:50000];
+            messageToSave.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:50000];
+            messageToSave.body = @"new message";
+
+            // assume that the save message to cache operation is sync
+            RLMRealm *realm = cacheController.store.realm;
+
+            [cacheController didSaveMessage:messageToSave error:nil];
+
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"mm1"];
+            expect(results.count).to.equal(1);
+
+            SKYMessage *newMessage = [[results objectAtIndex:0] messageRecord];
+            expect(newMessage.body).to.equal(messageToSave.body);
+            expect(newMessage.alreadySyncToServer).to.equal(YES);
+            expect(newMessage.fail).to.equal(NO);
+        });
+
+        it(@"delete message, update the cache", ^{
+            SKYMessage *message = [[SKYMessage alloc]
+                initWithRecordData:[SKYRecord recordWithRecordType:@"message"
+                                                              name:@"m1"
+                                                              data:@{
+                                                                  @"deleted" : @YES
+                                                              }]];
+
+            [cacheController didDeleteMessage:message];
+
+            RLMRealm *realm = cacheController.store.realm;
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"m1"];
+            expect(results.count).to.equal(1);
+            expect(results[0].deleted).to.beTruthy();
+        });
+
+        it(@"delete non-existed message", ^{
+            SKYMessage *message = [[SKYMessage alloc]
+                initWithRecordData:[SKYRecord recordWithRecordType:@"message"
+                                                              name:@"hello"
+                                                              data:@{
+                                                                  @"deleted" : @YES
+                                                              }]];
+
+            [cacheController didDeleteMessage:message];
+
+            RLMRealm *realm = cacheController.store.realm;
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject allObjectsInRealm:realm];
+            expect(results.count).to.equal(11);
+
+            results = [results objectsWhere:@"deleted == TRUE"];
+            expect(results.count).to.equal(1);
+            expect(results[0].recordID).to.equal(@"hello");
+        });
     });
+
+describe(@"Cache Controller handle change event", ^{
+    __block SKYChatCacheController *cacheController = nil;
+    __block NSDate *baseDate = nil;
+
+    beforeEach(^{
+        cacheController = [[SKYChatCacheController alloc]
+            initWithStore:[[SKYChatCacheRealmStore alloc] initInMemoryWithName:@"ChatTest"]];
+        baseDate = [NSDate dateWithTimeIntervalSince1970:0];
+    });
+
+    afterEach(^{
+        RLMRealm *realm = cacheController.store.realm;
+        [realm transactionWithBlock:^{
+            [realm deleteAllObjects];
+        }];
+    });
+
+    it(@"message create, update and delete", ^{
+        RLMRealm *realm = cacheController.store.realm;
+
+        // create
+        SKYMessage *message = [[SKYMessage alloc]
+            initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"m1"]];
+        message.record[@"edited_at"] = baseDate;
+
+        [cacheController handleChangeEvent:SKYChatRecordChangeEventCreate forMessage:message];
+
+        RLMResults<SKYMessageCacheObject *> *results =
+            [SKYMessageCacheObject allObjectsInRealm:realm];
+        expect(results.count).to.equal(1);
+        expect([results objectAtIndex:0].editionDate).to.equal(baseDate);
+
+        // update
+        message = [[SKYMessage alloc]
+            initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"m1"]];
+        message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:1000];
+
+        [cacheController handleChangeEvent:SKYChatRecordChangeEventUpdate forMessage:message];
+
+        results = [SKYMessageCacheObject allObjectsInRealm:realm];
+        expect(results.count).to.equal(1);
+        expect([results objectAtIndex:0].editionDate)
+            .to.equal([baseDate dateByAddingTimeInterval:1000]);
+
+        // delete
+        message =
+            [[SKYMessage alloc] initWithRecordData:[SKYRecord recordWithRecordType:@"message"
+                                                                              name:@"m1"
+                                                                              data:@{
+                                                                                  @"deleted" : @YES
+                                                                              }]];
+
+        [cacheController handleChangeEvent:SKYChatRecordChangeEventDelete forMessage:message];
+
+        results = [SKYMessageCacheObject allObjectsInRealm:realm];
+        expect(results.count).to.equal(1);
+        expect(results[0].deleted).to.beTruthy();
+    });
+
+    it(@"non-existing message updated", ^{
+        RLMRealm *realm = cacheController.store.realm;
+        SKYMessage *message =
+            [[SKYMessage alloc] initWithRecordData:[SKYRecord recordWithRecordType:@"message"
+                                                                              name:@"m1"
+                                                                              data:@{
+                                                                                  @"deleted" : @YES
+                                                                              }]];
+        message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:1000];
+
+        [cacheController handleChangeEvent:SKYChatRecordChangeEventUpdate forMessage:message];
+
+        RLMResults<SKYMessageCacheObject *> *results =
+            [SKYMessageCacheObject allObjectsInRealm:realm];
+        expect(results.count).to.equal(1);
+        expect([results objectAtIndex:0].editionDate)
+            .to.equal([baseDate dateByAddingTimeInterval:1000]);
+    });
+
+    it(@"non-existing message deleted", ^{
+        RLMRealm *realm = cacheController.store.realm;
+        SKYMessage *message =
+            [[SKYMessage alloc] initWithRecordData:[SKYRecord recordWithRecordType:@"message"
+                                                                              name:@"m1"
+                                                                              data:@{
+                                                                                  @"deleted" : @YES
+                                                                              }]];
+
+        [cacheController handleChangeEvent:SKYChatRecordChangeEventDelete forMessage:message];
+
+        // Nothing happened
+        RLMResults<SKYMessageCacheObject *> *results =
+            [SKYMessageCacheObject allObjectsInRealm:realm];
+        expect(results.count).to.equal(1);
+        expect(results[0].deleted).to.beTruthy();
+    });
+});
 
 SpecEnd

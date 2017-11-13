@@ -285,13 +285,14 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                  if (error) {
                      NSLog(@"error calling chat:get_messages_by_ids: %@", error);
                      if (completion) {
-                         completion(nil, error);
+                         completion(nil, nil, error);
                      }
                      return;
                  }
                  NSLog(@"Received response = %@", response);
                  NSArray *resultArray = [response objectForKey:@"results"];
                  NSMutableArray *returnArray = [[NSMutableArray alloc] init];
+                 NSMutableArray *deletedReturnArray = [[NSMutableArray alloc] init];
                  for (NSDictionary *obj in resultArray) {
                      SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
                      SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
@@ -299,12 +300,14 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
                      msg.alreadySyncToServer = true;
                      msg.fail = false;
-                     if (msg) {
+                     if (msg && msg.deleted) {
+                         [deletedReturnArray addObject:msg];
+                     } else if (msg && !msg.deleted) {
                          [returnArray addObject:msg];
                      }
                  }
                  if (completion) {
-                     completion(returnArray, error);
+                     completion(returnArray, deletedReturnArray, error);
                  }
              }];
 }
@@ -523,6 +526,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                              beforeTime:beforeTime
                                   order:order
                              completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                          NSArray<SKYMessage *> *_Nullable deletedMessageList,
                                           NSError *_Nullable error) {
                                  NSLog(@"get result from cache");
                              }];
@@ -533,7 +537,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                  if (error) {
                      NSLog(@"error calling chat:get_messages: %@", error);
                      if (completion) {
-                         completion(nil, error);
+                         completion(nil, nil, error);
                      }
                      return;
                  }
@@ -551,10 +555,23 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      }
                  }
 
-                 [[SKYChatCacheController defaultController] setMessages:returnArray];
+                 NSArray *deletedArray = [response objectForKey:@"deleted"];
+                 NSMutableArray *returnDeletedArray =
+                     [NSMutableArray arrayWithCapacity:deletedArray.count];
+                 for (NSDictionary *obj in deletedArray) {
+                     SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
+                     SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
+                     SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
+                     if (msg) {
+                         [returnDeletedArray addObject:msg];
+                     }
+                 }
+
+                 [[SKYChatCacheController defaultController] didFetchMessages:returnArray
+                                                              deletedMessages:returnDeletedArray];
 
                  if (completion) {
-                     completion(returnArray, error);
+                     completion(returnArray, returnDeletedArray, error);
                  }
 
                  // The SDK notifies the server that these messages are received

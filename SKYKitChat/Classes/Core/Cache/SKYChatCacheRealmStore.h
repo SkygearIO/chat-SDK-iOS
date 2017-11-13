@@ -33,6 +33,10 @@
                                               limit:(NSInteger)limit
                                               order:(NSString *)order;
 
+- (SKYMessage *)getMessageWithID:(NSString *)messageID;
+
 - (void)setMessages:(NSArray<SKYMessage *> *)messages;
+
+- (void)deleteMessages:(NSArray<SKYMessage *> *)messages;
 
 @end

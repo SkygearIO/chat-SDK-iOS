@@ -32,6 +32,15 @@
                                   order:(NSString *)order
                              completion:(SKYChatFetchMessagesListCompletion)completion;
 
-- (void)setMessages:(NSArray<SKYMessage *> *)messages;
+- (void)didFetchMessages:(NSArray<SKYMessage *> *)messages
+         deletedMessages:(NSArray<SKYMessage *> *)deletedMessages;
+
+- (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion;
+
+- (void)didSaveMessage:(SKYMessage *)message error:(NSError *)error;
+
+- (void)didDeleteMessage:(SKYMessage *)message;
+
+- (void)handleChangeEvent:(SKYChatRecordChangeEvent)event forMessage:(SKYMessage *)message;
 
 @end

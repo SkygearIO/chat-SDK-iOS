@@ -25,6 +25,7 @@ NSString *const SKYMessageBodyKey = @"body";
 NSString *const SKYMessageMetadataKey = @"metadata";
 NSString *const SKYMessageAttachmentKey = @"attachment";
 NSString *const SKYMessageStatusKey = @"message_status";
+NSString *const SKYMessageDeletedKey = @"deleted";
 
 @implementation SKYMessage
 
@@ -84,6 +85,11 @@ NSString *const SKYMessageStatusKey = @"message_status";
 - (void)setAttachment:(SKYAsset *)attachment
 {
     self.record[SKYMessageAttachmentKey] = attachment;
+}
+
+- (bool)deleted
+{
+    return self.record[SKYMessageDeletedKey];
 }
 
 - (SKYMessageConversationStatus)conversationStatus

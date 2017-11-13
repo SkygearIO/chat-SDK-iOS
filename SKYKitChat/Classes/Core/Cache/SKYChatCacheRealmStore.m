@@ -76,6 +76,13 @@
     return [messages copy];
 }
 
+- (SKYMessage *)getMessageWithID:(NSString *)messageID
+{
+    SKYMessageCacheObject *cacheObject =
+        [SKYMessageCacheObject objectInRealm:self.realm forPrimaryKey:messageID];
+    return [cacheObject messageRecord];
+}
+
 - (void)setMessages:(NSArray<SKYMessage *> *)messages
 {
     [self.realm beginWriteTransaction];
@@ -83,6 +90,23 @@
     for (SKYMessage *message in messages) {
         SKYMessageCacheObject *cacheObject = [SKYMessageCacheObject cacheObjectFromMessage:message];
         [self.realm addOrUpdateObject:cacheObject];
+    }
+
+    [self.realm commitWriteTransaction];
+}
+
+- (void)deleteMessages:(NSArray<SKYMessage *> *)messages
+{
+    [self.realm beginWriteTransaction];
+
+    for (SKYMessage *message in messages) {
+        SKYMessageCacheObject *cacheObject =
+            [SKYMessageCacheObject objectInRealm:self.realm
+                                   forPrimaryKey:message.recordID.recordName];
+
+        if (cacheObject) {
+            [self.realm deleteObject:cacheObject];
+        }
     }
 
     [self.realm commitWriteTransaction];

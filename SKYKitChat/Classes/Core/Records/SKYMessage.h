@@ -38,6 +38,7 @@ typedef NS_ENUM(NSInteger, SKYMessageConversationStatus) {
 @property (copy, nonatomic, nullable) NSString *body;
 @property (copy, nonatomic, nullable) NSDictionary<NSString *, id> *metadata;
 @property (strong, nonatomic, readwrite, nullable) SKYAsset *attachment;
+@property (assign, nonatomic, readonly) bool deleted;
 
 @property (assign, nonatomic) bool syncingToServer;
 @property (assign, nonatomic) bool alreadySyncToServer;
