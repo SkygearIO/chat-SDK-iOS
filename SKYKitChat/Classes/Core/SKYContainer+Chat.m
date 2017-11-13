@@ -29,7 +29,9 @@
 {
     SKYChatExtension *extension = objc_getAssociatedObject(self, @selector(chatExtension));
     if (!extension) {
-        extension = [[SKYChatExtension alloc] initWithContainer:self];
+        extension =
+            [[SKYChatExtension alloc] initWithContainer:self
+                                        cacheController:[SKYChatCacheController defaultController]];
         objc_setAssociatedObject(self, @selector(chatExtension), extension,
                                  OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
