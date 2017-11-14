@@ -73,7 +73,8 @@ typedef void (^SKYChatDeleteConversationCompletion)(NSNumber *_Nullable result,
                                                     NSError *_Nullable error);
 typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable conversation,
                                               NSError *_Nullable error);
-typedef void (^SKYChatMessageCompletion)(SKYMessage *_Nullable message, NSError *_Nullable error);
+typedef void (^SKYChatMessageCompletion)(SKYMessage *_Nullable message, BOOL isCached,
+                                         NSError *_Nullable error);
 typedef void (^SKYChatUnreadCountCompletion)(
     NSDictionary<NSString *, NSNumber *> *_Nullable response, NSError *_Nullable error);
 typedef void (^SKYChatChannelCompletion)(SKYUserChannel *_Nullable userChannel,

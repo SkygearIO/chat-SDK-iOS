@@ -446,10 +446,13 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 - (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
 {
-    [self.cacheController saveMessage:message
-                           completion:^(SKYMessage *_Nullable message, NSError *_Nullable error){
-                               // TODO: call completion handler of the api
-                           }];
+    [self.cacheController
+        saveMessage:message
+         completion:^(SKYMessage *_Nullable message, BOOL isCached, NSError *_Nullable error) {
+             if (completion) {
+                 completion(message, YES, error);
+             }
+         }];
 
     SKYDatabase *database = self.container.publicCloudDatabase;
     [database saveRecord:message.record
@@ -467,7 +470,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                   }
 
                   if (completion) {
-                      completion(msg, error);
+                      completion(msg, NO, error);
                   }
               }];
 }

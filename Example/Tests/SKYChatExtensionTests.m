@@ -117,6 +117,41 @@ SpecBegin(SKYChatExtension)
                     return
                         [OHHTTPStubsResponse responseWithData:payload statusCode:200 headers:@{}];
                 }];
+
+            [OHHTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+                NSArray<NSString *> *components = request.URL.pathComponents;
+                return [components[components.count - 2] isEqualToString:@"record"] &&
+                       [components.lastObject isEqualToString:@"save"];
+            }
+                withStubResponse:^OHHTTPStubsResponse *(NSURLRequest *request) {
+                    NSDictionary *result = @{
+                        @"_type" : @"record",
+                        @"_access" : [NSNull null],
+                        @"_created_at" : @"2017-12-25T00:00:00.000000Z",
+                        @"_created_by" : @"u1",
+                        @"_id" : @"message/mm1",
+                        @"_ownerID" : @"u1",
+                        @"_updated_at" : @"2017-12-25T00:00:00.000000Z",
+                        @"_updated_by" : @"u1",
+                        @"body" : @"new message 1",
+                        @"conversation" : @{@"$id" : @"conversation/c0", @"$type" : @"ref"},
+                        @"deleted" : @NO,
+                        @"edited_at" :
+                            @{@"$date" : @"2017-12-25T00:00:00.000000Z", @"$type" : @"date"},
+                        @"edited_by" : @{@"$id" : @"user/u1", @"$type" : @"ref"},
+                        @"revision" : @1,
+                        @"seq" : @25,
+                    };
+
+                    NSDictionary *parameters =
+                        @{ @"database_id" : @"_public",
+                           @"result" : @[ result ] };
+                    NSData *payload =
+                        [NSJSONSerialization dataWithJSONObject:parameters options:0 error:nil];
+
+                    return
+                        [OHHTTPStubsResponse responseWithData:payload statusCode:200 headers:@{}];
+                }];
         });
 
         afterEach(^{
@@ -179,6 +214,46 @@ SpecBegin(SKYChatExtension)
                                                done();
                                            }
                                        }];
+            });
+        });
+
+        it(@"save message", ^{
+            __block NSInteger checkPoint = 0;
+            SKYMessage *message = [SKYMessage
+                recordWithRecord:[SKYRecord recordWithRecordType:@"message" name:@"mm1"]];
+            SKYConversation *conversation = [SKYConversation
+                recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
+
+            void (^checkRealm)() = ^{
+                RLMRealm *realm = cacheController.store.realm;
+                RLMResults<SKYMessageCacheObject *> *results =
+                    [SKYMessageCacheObject allObjectsInRealm:realm];
+                expect(results.count).to.equal(11);
+            };
+
+            waitUntil(^(DoneCallback done) {
+                [chatExtension addMessage:message
+                           toConversation:conversation
+                               completion:^(SKYMessage *_Nullable message, BOOL isCached,
+                                            NSError *_Nullable error) {
+                                   expect(message.recordID.recordName).to.equal(@"mm1");
+                                   if (isCached) {
+                                       expect(message.alreadySyncToServer).to.beFalsy();
+                                       expect(message.creationDate).to.beNil();
+                                       expect(message.sendDate).toNot.beNil();
+                                       checkPoint++;
+                                   } else {
+                                       expect(message.alreadySyncToServer).to.beTruthy();
+                                       expect(message.creationDate).toNot.beNil();
+                                       expect(message.sendDate).to.beNil();
+                                       checkPoint++;
+                                   }
+
+                                   if (checkPoint == 2) {
+                                       checkRealm();
+                                       done();
+                                   }
+                               }];
             });
         });
     });

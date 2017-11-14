@@ -111,7 +111,7 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     [self.store setMessages:@[ message ]];
 
     if (completion) {
-        completion(message, nil);
+        completion(message, YES, nil);
     }
 }
 
