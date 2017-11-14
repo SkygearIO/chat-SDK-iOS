@@ -152,6 +152,37 @@ SpecBegin(SKYChatExtension)
                     return
                         [OHHTTPStubsResponse responseWithData:payload statusCode:200 headers:@{}];
                 }];
+
+            [OHHTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+                NSArray<NSString *> *components = request.URL.pathComponents;
+                return [components[components.count - 2] isEqualToString:@"chat"] &&
+                       [components.lastObject isEqualToString:@"delete_message"];
+            }
+                withStubResponse:^OHHTTPStubsResponse *(NSURLRequest *request) {
+                    NSDictionary *result = @{
+                        @"_access" : [NSNull null],
+                        @"_created_at" : @"2017-12-01T00:00:00.000000Z",
+                        @"_created_by" : @"u1",
+                        @"_id" : @"message/m1",
+                        @"_ownerID" : @"u1",
+                        @"_updated_at" : @"2017-12-01T00:00:00.000000Z",
+                        @"_updated_by" : @"u1",
+                        @"conversation" : @{@"$id" : @"conversation/c0", @"$type" : @"ref"},
+                        @"deleted" : @YES,
+                        @"edited_at" :
+                            @{@"$date" : @"2017-12-01T00:00:00.000000Z", @"$type" : @"date"},
+                        @"edited_by" : @{@"$id" : @"user/u1", @"$type" : @"ref"},
+                        @"revision" : @1,
+                        @"seq" : @1,
+                    };
+
+                    NSDictionary *parameters = @{@"result" : result};
+                    NSData *payload =
+                        [NSJSONSerialization dataWithJSONObject:parameters options:0 error:nil];
+
+                    return
+                        [OHHTTPStubsResponse responseWithData:payload statusCode:200 headers:@{}];
+                }];
         });
 
         afterEach(^{
@@ -254,6 +285,33 @@ SpecBegin(SKYChatExtension)
                                        done();
                                    }
                                }];
+            });
+        });
+
+        it(@"delete message", ^{
+            SKYMessage *message = [SKYMessage
+                recordWithRecord:[SKYRecord recordWithRecordType:@"message" name:@"m1"]];
+            SKYConversation *conversation = [SKYConversation
+                recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
+
+            waitUntil(^(DoneCallback done) {
+                [chatExtension deleteMessage:message
+                              inConversation:conversation
+                                  completion:^(SKYConversation *_Nullable conversation,
+                                               NSError *_Nullable error) {
+                                      expect(error).to.beNil();
+
+                                      RLMRealm *realm = cacheController.store.realm;
+                                      RLMResults<SKYMessageCacheObject *> *results =
+                                          [SKYMessageCacheObject allObjectsInRealm:realm];
+                                      expect(results.count).to.equal(10);
+
+                                      results = [SKYMessageCacheObject
+                                          objectsInRealm:realm
+                                                   where:@"deleted == %@", @YES];
+                                      expect(results.count).to.equal(1);
+                                      done();
+                                  }];
             });
         });
     });

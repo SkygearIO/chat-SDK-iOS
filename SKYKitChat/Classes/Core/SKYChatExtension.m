@@ -713,7 +713,11 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      return;
                  }
 
-                 [self.cacheController didDeleteMessage:message];
+                 SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
+                 SKYRecord *record = [deserializer recordWithDictionary:[response copy]];
+                 SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
+
+                 [self.cacheController didDeleteMessage:msg];
 
                  if (completion) {
                      completion(conversation, nil);
