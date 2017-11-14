@@ -786,7 +786,11 @@ extension SKYChatConversationViewController {
         self.skygear.chatExtension?.addMessage(
             msg,
             to: conv,
-            completion: {(result, error) in
+            completion: {(result, isCached, error) in
+                if isCached {
+                    return
+                }
+
                 guard error == nil else {
                     print("Failed to sent message: \(error!.localizedDescription)")
                     self.failedToSend(message: msg,
@@ -1287,7 +1291,12 @@ extension SKYChatConversationViewController {
             limit: Int(self.messagesFetchLimit),
             beforeTime: before,
                  order: nil,
-            completion: { (result, _, error) in
+            completion: { (result, _, isCached, error) in
+                if isCached {
+                    // TODO: handle cached result
+                    return
+                }
+
                 self.isFetchingMessage = false
                 self.indicator?.stopAnimating()
                 guard error == nil else {
