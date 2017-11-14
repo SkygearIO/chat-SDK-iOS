@@ -214,6 +214,8 @@ SpecBegin(SKYChatExtension)
                                            NSArray<SKYMessage *> *_Nullable messageList,
                                            NSArray<SKYMessage *> *_Nullable deletedMessageList,
                                            BOOL isCached, NSError *_Nullable error) {
+                                           expect(error).to.beNil();
+
                                            SKYMessage *message;
                                            if (isCached) {
                                                expect(messageList.count).to.equal(10);
@@ -267,6 +269,7 @@ SpecBegin(SKYChatExtension)
                            toConversation:conversation
                                completion:^(SKYMessage *_Nullable message, BOOL isCached,
                                             NSError *_Nullable error) {
+                                   expect(error).to.beNil();
                                    expect(message.recordID.recordName).to.equal(@"mm1");
                                    if (isCached) {
                                        expect(message.alreadySyncToServer).to.beFalsy();
@@ -315,5 +318,188 @@ SpecBegin(SKYChatExtension)
             });
         });
     });
+
+describe(@"Conversation messages, with error response", ^{
+    __block SKYChatCacheController *cacheController = nil;
+    __block SKYChatExtension *chatExtension = nil;
+    __block NSDate *baseDate = nil;
+
+    beforeEach(^{
+        cacheController = [[SKYChatCacheController alloc]
+            initWithStore:[[SKYChatCacheRealmStore alloc] initInMemoryWithName:@"ChatTest"]];
+        baseDate = [NSDate dateWithTimeIntervalSince1970:0];
+        [SKYContainer defaultContainer].endPointAddress =
+            [NSURL URLWithString:@"https://test.skygeario.com/"];
+        chatExtension = [[SKYChatExtension alloc] initWithContainer:[SKYContainer defaultContainer]
+                                                    cacheController:cacheController];
+
+        // Setup cache
+        NSInteger messageCount = 10;
+        NSMutableArray<SKYMessageCacheObject *> *messages =
+            [NSMutableArray arrayWithCapacity:messageCount];
+
+        for (NSInteger i = 0; i < messageCount; i++) {
+            SKYMessage *message = [[SKYMessage alloc]
+                initWithRecordData:[SKYRecord
+                                       recordWithRecordType:@"message"
+                                                       name:[NSString
+                                                                stringWithFormat:@"m%ld", i]]];
+            message.conversationRef = [SKYReference
+                referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
+                                                                     name:@"c0"]];
+            message.creationDate = [baseDate dateByAddingTimeInterval:i * 1000];
+            message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:i * 2000];
+            message.record[@"seq"] = @(i);
+
+            SKYMessageCacheObject *messageCacheObject =
+                [SKYMessageCacheObject cacheObjectFromMessage:message];
+            [messages addObject:messageCacheObject];
+        }
+
+        RLMRealm *realm = cacheController.store.realm;
+        [realm transactionWithBlock:^{
+            [realm addObjects:messages];
+        }];
+
+        // Setup network stub
+        [OHHTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+            return YES;
+        }
+            withStubResponse:^OHHTTPStubsResponse *(NSURLRequest *request) {
+                return
+                    [OHHTTPStubsResponse responseWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                               code:0
+                                                                           userInfo:nil]];
+            }];
+    });
+
+    afterEach(^{
+        RLMRealm *realm = cacheController.store.realm;
+        [realm transactionWithBlock:^{
+            [realm deleteAllObjects];
+        }];
+    });
+
+    it(@"fetch messages", ^{
+        __block NSInteger checkPoint = 0;
+        SKYConversation *conversation = [SKYConversation
+            recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
+
+        void (^checkRealm)() = ^{
+            RLMRealm *realm = cacheController.store.realm;
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject allObjectsInRealm:realm];
+            expect(results.count).to.equal(10);
+        };
+
+        waitUntil(^(DoneCallback done) {
+            [chatExtension
+                fetchMessagesWithConversation:conversation
+                                        limit:100
+                                   beforeTime:nil
+                                        order:nil
+                                   completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                                NSArray<SKYMessage *> *_Nullable deletedMessageList,
+                                                BOOL isCached, NSError *_Nullable error) {
+                                       SKYMessage *message;
+                                       if (isCached) {
+                                           expect(error).to.beNil();
+                                           expect(messageList.count).to.equal(10);
+                                           for (NSInteger i = 0; i < 10; i++) {
+                                               message = messageList[9 - i];
+                                               NSString *recordID =
+                                                   [NSString stringWithFormat:@"m%ld", i];
+                                               expect(message.recordID.recordName)
+                                                   .to.equal(recordID);
+                                               expect(message.record[@"seq"]).to.equal(@(i));
+                                           }
+                                           checkPoint++;
+                                       } else {
+                                           expect(messageList.count).to.equal(0);
+                                           expect(error).toNot.beNil();
+                                           checkPoint++;
+                                       }
+
+                                       if (checkPoint == 2) {
+                                           checkRealm();
+                                           done();
+                                       }
+                                   }];
+        });
+    });
+
+    it(@"save message", ^{
+        __block NSInteger checkPoint = 0;
+        SKYMessage *message =
+            [SKYMessage recordWithRecord:[SKYRecord recordWithRecordType:@"message" name:@"mm1"]];
+        SKYConversation *conversation = [SKYConversation
+            recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
+
+        void (^checkRealm)() = ^{
+            RLMRealm *realm = cacheController.store.realm;
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject allObjectsInRealm:realm];
+            expect(results.count).to.equal(11);
+
+            SKYMessageCacheObject *saved =
+                [SKYMessageCacheObject objectInRealm:realm forPrimaryKey:@"mm1"];
+            expect(saved.alreadySyncToServer).to.beFalsy();
+            expect(saved.fail).to.beTruthy();
+            expect(saved.sendDate).toNot.beNil();
+        };
+
+        waitUntil(^(DoneCallback done) {
+            [chatExtension addMessage:message
+                       toConversation:conversation
+                           completion:^(SKYMessage *_Nullable message, BOOL isCached,
+                                        NSError *_Nullable error) {
+                               if (isCached) {
+                                   expect(message.recordID.recordName).to.equal(@"mm1");
+                                   expect(message.alreadySyncToServer).to.beFalsy();
+                                   expect(message.creationDate).to.beNil();
+                                   expect(message.sendDate).toNot.beNil();
+                                   expect(error).to.beNil();
+                                   checkPoint++;
+                               } else {
+                                   expect(message).to.beNil();
+                                   expect(error).toNot.beNil();
+                                   checkPoint++;
+                               }
+
+                               if (checkPoint == 2) {
+                                   checkRealm();
+                                   done();
+                               }
+                           }];
+        });
+    });
+
+    it(@"delete message", ^{
+        SKYMessage *message =
+            [SKYMessage recordWithRecord:[SKYRecord recordWithRecordType:@"message" name:@"m1"]];
+        SKYConversation *conversation = [SKYConversation
+            recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
+
+        waitUntil(^(DoneCallback done) {
+            [chatExtension deleteMessage:message
+                          inConversation:conversation
+                              completion:^(SKYConversation *_Nullable conversation,
+                                           NSError *_Nullable error) {
+                                  expect(error).toNot.beNil();
+
+                                  RLMRealm *realm = cacheController.store.realm;
+                                  RLMResults<SKYMessageCacheObject *> *results =
+                                      [SKYMessageCacheObject allObjectsInRealm:realm];
+                                  expect(results.count).to.equal(10);
+
+                                  results =
+                                      [SKYMessageCacheObject objectsInRealm:realm
+                                                                      where:@"deleted == %@", @YES];
+                                  expect(results.count).to.equal(0);
+                                  done();
+                              }];
+        });
+    });
+});
 
 SpecEnd
