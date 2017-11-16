@@ -131,6 +131,14 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
 
     public var cameraButton: UIButton?
 
+    public var conversationView: SKYChatConversationView? {
+        guard let view = self.collectionView as? SKYChatConversationView else {
+            return nil
+        }
+
+        return view
+    }
+
     public var incomingMessageBubbleColor: UIColor? {
         didSet {
             self.incomingMessageBubble = self.bubbleFactory?
@@ -165,15 +173,40 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     var audioDict: [String: SKYChatConversationAudioItem] = [:]
     var audioTime: TimeInterval?
     var indicator: UIActivityIndicatorView?
-}
 
-// MARK: - Initializing
-
-extension SKYChatConversationViewController {
+    // MARK: - Initializing
 
     public class func create() -> SKYChatConversationViewController {
-        return SKYChatConversationViewController(nibName: "JSQMessagesViewController",
-                                                 bundle: Bundle(for: JSQMessagesViewController.self))
+        return SKYChatConversationViewController()
+    }
+
+    public class func defaultConversationView() -> SKYChatConversationView {
+        let frame = UIApplication.shared.keyWindow?.frame ??
+                CGRect(x: 0, y: 0, width: 375, height: 667)
+        return SKYChatConversationView(frame: frame,
+                                       collectionViewLayout: JSQMessagesCollectionViewFlowLayout())
+    }
+
+    public init(conversationView: SKYChatConversationView) {
+        super.init(collectionView: conversationView,
+                   inputToolBar: JSQMessagesViewController.defaultInputToolbar())
+
+    }
+
+    public convenience init() {
+        self.init(conversationView: SKYChatConversationViewController.defaultConversationView())
+    }
+
+    public required convenience init?(coder aDecoder: NSCoder) {
+        self.init()
+    }
+
+    open override func awakeFromNib() {
+        if (self.collectionView == nil) {
+            self.collectionView = SKYChatConversationViewController.defaultConversationView()
+        }
+
+        super.awakeFromNib()
     }
 }
 
@@ -642,7 +675,7 @@ extension SKYChatConversationViewController {
 
                     // notify to update the avatar when download is done
                     self.dataCache.set(data: downloadedData, forKey: url)
-                    self.collectionView.reloadItems(at: [indexPath])
+                    self.conversationView?.reloadItems(at: [indexPath])
                 })
             }
         case .asset:
@@ -659,7 +692,7 @@ extension SKYChatConversationViewController {
 
                     // notify to update the avatar when download is done
                     self.assetCache.set(data: downloadedData, for: asset)
-                    self.collectionView.reloadItems(at: [indexPath])
+                    self.conversationView?.reloadItems(at: [indexPath])
                 })
             }
         }
@@ -1182,14 +1215,14 @@ extension SKYChatConversationViewController {
             case .update:
                 if let foundIndex = idx {
                     self.messages[foundIndex] = msg
-                    self.collectionView.reloadData()
-                    self.collectionView.layoutIfNeeded()
+                    self.conversationView?.reloadData()
+                    self.conversationView?.layoutIfNeeded()
                 }
             case .delete:
                 if let foundIndex = idx {
                     self.messages.remove(at: foundIndex)
-                    self.collectionView.reloadData()
-                    self.collectionView.layoutIfNeeded()
+                    self.conversationView?.reloadData()
+                    self.conversationView?.layoutIfNeeded()
                 }
             }
         }
@@ -1366,7 +1399,7 @@ extension SKYChatConversationViewController {
 
                 self.finishReceivingMessage()
                 self.scroll(to: IndexPath(row: msgs.count, section: 0), animated: false)
-                self.collectionView.flashScrollIndicators()
+                self.conversationView?.flashScrollIndicators()
         })
     }
 
