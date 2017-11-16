@@ -42,7 +42,7 @@ extension ConversationDemoViewController: SKYChatConversationViewControllerDeleg
     func conversationViewController(
         _ controller: SKYChatConversationViewController,
         dateStringAt indexPath: IndexPath) -> NSAttributedString {
-        let msg = self.messageAt(indexPath)
+        let msg = self.messageList.messageAt(indexPath.row)
         let date = msg.creationDate()
 
         let dateFormatter: DateFormatter
