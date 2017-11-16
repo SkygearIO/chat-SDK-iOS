@@ -20,16 +20,51 @@
 import UIKit
 
 public extension UIImage {
-    class func avatarImage(forInitialsOfName name: String) -> UIImage? {
-        let defaultGradientColors = [
+    class func getAvatarDefaultGradientColors() -> [UIColor] {
+        return [
             UIColor(red: 0, green: 0.474509804, blue: 0.823529412, alpha: 1.0),
             UIColor(red: 0.011764706, green: 0.721568627, blue: 0.760784314, alpha: 1.0)
         ]
-        return UIImage.avatarImage(forInitialsOfName: name, gradientColors: defaultGradientColors)
     }
 
-    class func avatarImage(forInitialsOfName name: String, gradientColors colors: [UIColor]) -> UIImage? {
-        return UIImage.avatarImage(forInitialsOfName: name, gradientColors: colors, size: CGSize(width: 100, height: 100))
+    class func getAvatarDefaultSize() -> CGSize {
+        return CGSize(width: 100, height: 100)
+    }
+
+    class func getAvatarDefaultTextColor() -> UIColor {
+        return UIColor.white
+    }
+
+    class func avatarImage(forInitialsOfName name: String) -> UIImage? {
+        return UIImage.avatarImage(forInitialsOfName: name,
+                                   gradientColors: self.getAvatarDefaultGradientColors())
+    }
+
+    class func avatarImage(forInitialsOfName name: String,
+                           backgroundColor: UIColor?,
+                           textColor: UIColor?) -> UIImage?
+    {
+        var gradientColors: [UIColor]
+        if let bgColor = backgroundColor {
+            gradientColors = [bgColor, bgColor]
+        } else {
+            gradientColors = self.getAvatarDefaultGradientColors()
+        }
+
+        let txtSize = self.getAvatarDefaultSize()
+        let txtColor = textColor ?? self.getAvatarDefaultTextColor()
+
+        return self.avatarImage(forInitialsOfName: name,
+                                gradientColors: gradientColors,
+                                textColor: txtColor,
+                                size: txtSize)
+    }
+
+    class func avatarImage(forInitialsOfName name: String, gradientColors colors: [UIColor]) -> UIImage?
+    {
+        return UIImage.avatarImage(forInitialsOfName: name,
+                                   gradientColors: colors,
+                                   size: self.getAvatarDefaultSize())
     }
 
     class func avatarImage(forInitialsOfName name: String,
@@ -37,7 +72,7 @@ public extension UIImage {
                            size: CGSize) -> UIImage? {
         return UIImage.avatarImage(forInitialsOfName: name,
                                    gradientColors: colors,
-                                   textColor: UIColor.white,
+                                   textColor: self.getAvatarDefaultTextColor(),
                                    size: size)
     }
 

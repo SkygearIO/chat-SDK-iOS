@@ -699,7 +699,10 @@ extension SKYChatConversationViewController {
 
         // fallback: generate from user name
         let senderName = self.getSenderName(forMessage: msg) ?? ""
-        if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName),
+
+        if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName,
+                                             backgroundColor: self.conversationView?.avatarBackgroundColor,
+                                             textColor: self.conversationView?.avatarTextColor),
             let roundedImage = UIImage.circleImage(fromImage: avatarImage)
         {
             return JSQMessagesAvatarImage.avatar(with: roundedImage)

@@ -59,6 +59,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             .update(userNameField: "name")
             .update(userAvatarField: "profile_pic", avatarType: .urlString)
 
+        SKYChatConversationView.appearance().avatarBackgroundColor
+            = UIColor(red: 0, green: 0.4745, blue: 0.8235, alpha: 1.0)
+
         return true
     }
 

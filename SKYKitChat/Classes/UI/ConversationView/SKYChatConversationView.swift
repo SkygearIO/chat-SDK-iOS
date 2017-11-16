@@ -18,4 +18,6 @@
 //
 
 open class SKYChatConversationView: JSQMessagesCollectionView {
+    @objc dynamic public var avatarBackgroundColor: UIColor?
+    @objc dynamic public var avatarTextColor: UIColor?
 }
