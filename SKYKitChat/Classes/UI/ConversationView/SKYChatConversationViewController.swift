@@ -693,51 +693,49 @@ extension SKYChatConversationViewController {
         }
 
         // get from avatar field
-        let modelCustomization = SKYChatUIModelCustomization.default()
-        let avatarField = modelCustomization.userAvatarField
-        switch modelCustomization.userAvatarType {
-        case .urlString:
-            if let url = sender?.object(forKey: avatarField) as? String {
-                if let data = self.dataCache.getData(forKey: url) {
-                    return JSQMessagesAvatarImage.avatar(with: UIImage(data: data))
+        let avatarField = SKYChatUIModelCustomization.default().userAvatarField
+        let senderAvatar = sender?.object(forKey: avatarField)
+        switch senderAvatar {
+        case let senderAvatarUrl as String:
+            if let data = self.dataCache.getData(forKey: senderAvatarUrl) {
+                return JSQMessagesAvatarImage.avatar(with: UIImage(data: data))
+            }
+
+            // download from url
+            let _ = self.downloadDispatcher.download(senderAvatarUrl, compltion: { data in
+                guard let downloadedData = data else {
+                    return
                 }
 
-                // download from url
-                let _ = self.downloadDispatcher.download(url, compltion: { data in
+                // notify to update the avatar when download is done
+                self.dataCache.set(data: downloadedData, forKey: senderAvatarUrl)
+                self.conversationView?.reloadItems(at: [indexPath])
+            })
+        case let senderAvatarAsset as SKYAsset:
+            if let data = self.assetCache.get(asset: senderAvatarAsset) {
+                return JSQMessagesAvatarImage.avatar(with: UIImage(data: data))
+            }
+
+            // download asset
+            let _ = self.downloadDispatcher.download(
+                senderAvatarAsset.url.absoluteString,
+                compltion: { data in
                     guard let downloadedData = data else {
                         return
                     }
 
                     // notify to update the avatar when download is done
-                    self.dataCache.set(data: downloadedData, forKey: url)
+                    self.assetCache.set(data: downloadedData, for: senderAvatarAsset)
                     self.conversationView?.reloadItems(at: [indexPath])
-                })
-            }
-        case .asset:
-            if let asset = sender?.object(forKey: avatarField) as? SKYAsset {
-                if let data = self.assetCache.get(asset: asset) {
-                    return JSQMessagesAvatarImage.avatar(with: UIImage(data: data))
-                }
-
-                // download asset
-                let _ = self.downloadDispatcher.download(asset.url.absoluteString, compltion: { data in
-                    guard let downloadedData = data else {
-                        return
-                    }
-
-                    // notify to update the avatar when download is done
-                    self.assetCache.set(data: downloadedData, for: asset)
-                    self.conversationView?.reloadItems(at: [indexPath])
-                })
-            }
+            })
+        default: ()
         }
 
         // fallback: generate from user name
         let senderName = self.getSenderName(forMessage: msg) ?? ""
-
         if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName,
-                                             backgroundColor: self.conversationView?.avatarBackgroundColor,
-                                             textColor: self.conversationView?.avatarTextColor),
+                                                 backgroundColor: self.conversationView?.avatarBackgroundColor,
+                                                 textColor: self.conversationView?.avatarTextColor),
             let roundedImage = UIImage.circleImage(fromImage: avatarImage)
         {
             return JSQMessagesAvatarImage.avatar(with: roundedImage)

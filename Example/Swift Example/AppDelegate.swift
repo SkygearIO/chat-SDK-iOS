@@ -55,9 +55,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             categories: nil
         ))
 
-        let _ = SKYChatUIModelCustomization.default()
+        SKYChatUIModelCustomization.default()
             .update(userNameField: "name")
-            .update(userAvatarField: "profile_pic", avatarType: .urlString)
+            .update(userAvatarField: "profile_pic")
 
         SKYChatConversationView.appearance().avatarBackgroundColor
             = UIColor(red: 0, green: 0.4745, blue: 0.8235, alpha: 1.0)
