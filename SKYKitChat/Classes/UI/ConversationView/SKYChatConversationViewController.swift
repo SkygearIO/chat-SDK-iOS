@@ -249,6 +249,12 @@ extension SKYChatConversationViewController {
         self.subscribeTypingIndicatorChanges()
     }
 
+    open override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        self.updateViewsAfterAppear()
+    }
+
     override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
@@ -456,6 +462,30 @@ extension SKYChatConversationViewController {
             self.navigationItem.title = namelist
         } else {
             self.navigationItem.title = nil
+        }
+    }
+
+    open func updateViewsAfterAppear() {
+        // UIAppearance got the values from proxy after it is attached to screen
+        if self.conversationView?.avatarHiddenForIncomingMessages == true {
+            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize
+                = CGSize(width: 0, height: 0)
+        } else {
+            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize = CGSize(
+                width: kJSQMessagesCollectionViewAvatarSizeDefault,
+                height: kJSQMessagesCollectionViewAvatarSizeDefault
+            )
+        }
+
+        // UIAppearance got the values from proxy after it is attached to screen
+        if self.conversationView?.avatarHiddenForOutgoingMessages == true {
+            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize
+                = CGSize(width: 0, height: 0)
+        } else {
+            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize = CGSize(
+                width: kJSQMessagesCollectionViewAvatarSizeDefault,
+                height: kJSQMessagesCollectionViewAvatarSizeDefault
+            )
         }
     }
 

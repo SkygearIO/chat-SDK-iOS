@@ -20,4 +20,12 @@
 open class SKYChatConversationView: JSQMessagesCollectionView {
     @objc dynamic public var avatarBackgroundColor: UIColor?
     @objc dynamic public var avatarTextColor: UIColor?
+    @objc dynamic public var avatarHiddenForOutgoingMessages: Bool = false
+    @objc dynamic public var avatarHiddenForIncomingMessages: Bool = false
+    @objc dynamic public var avatarHidden: Bool = false {
+        didSet {
+            self.avatarHiddenForIncomingMessages = self.avatarHidden
+            self.avatarHiddenForOutgoingMessages = self.avatarHidden
+        }
+    }
 }
