@@ -89,7 +89,7 @@ NSString *const SKYMessageDeletedKey = @"deleted";
 
 - (bool)deleted
 {
-    return self.record[SKYMessageDeletedKey];
+    return [self.record[SKYMessageDeletedKey] boolValue];
 }
 
 - (SKYMessageConversationStatus)conversationStatus
