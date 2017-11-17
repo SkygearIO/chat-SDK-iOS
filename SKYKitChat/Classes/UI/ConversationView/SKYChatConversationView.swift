@@ -17,10 +17,16 @@
 //  limitations under the License.
 //
 
+@objc public enum SKYChatConversationViewUserAvatarType: Int {
+    case initial
+    case image
+}
+
 open class SKYChatConversationView: JSQMessagesCollectionView {
     @objc dynamic public var avatarBackgroundColor: UIColor?
     @objc dynamic public var avatarTextColor: UIColor?
     @objc dynamic public var messageSenderTextColor: UIColor?
+    @objc dynamic public var avatarType: SKYChatConversationViewUserAvatarType = .initial
     @objc dynamic public var avatarHiddenForOutgoingMessages: Bool = false
     @objc dynamic public var avatarHiddenForIncomingMessages: Bool = false
     @objc dynamic public var avatarHidden: Bool = false {
