@@ -61,6 +61,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         SKYChatConversationView.appearance().avatarBackgroundColor
             = UIColor(red: 0, green: 0.4745, blue: 0.8235, alpha: 1.0)
+        SKYChatConversationView.appearance().messageSenderTextColor = UIColor.black
         SKYChatConversationView.appearance().avatarHidden = true
         SKYChatConversationView.appearance().avatarHiddenForIncomingMessages = false
 

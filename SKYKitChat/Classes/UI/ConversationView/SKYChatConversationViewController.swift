@@ -632,7 +632,12 @@ extension SKYChatConversationViewController {
         let msg = self.messages[indexPath.row]
         let senderName = self.getSenderName(forMessage: msg) ?? ""
 
-        return NSAttributedString(string: senderName)
+        let attrStr = NSMutableAttributedString(string: senderName)
+        if let color = self.conversationView?.messageSenderTextColor {
+            attrStr.setAttributes([NSForegroundColorAttributeName: color],
+                                  range: NSMakeRange(0, attrStr.length))
+        }
+        return attrStr
     }
     
     open override func collectionView(
