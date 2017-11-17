@@ -152,12 +152,29 @@ open class MessageList {
         }
     }
 
+    public func removeAll() {
+        self.messageIDs.removeAllObjects()
+        self.messages.removeAll()
+    }
+
+    public func indexOf(_ message: SKYMessage) -> Int {
+        return self.messageIDs.index(of: message.recordID().recordName)
+    }
+
     public func messageAt(_ index: Int) -> SKYMessage {
         if let msgID = self.messageIDs[index] as? String {
             return self.messages[msgID]!
         }
 
         fatalError("messageIDs contains non String object")
+    }
+
+    public func first() -> SKYMessage {
+        return self.messageAt(0)
+    }
+
+    public func last() -> SKYMessage {
+        return self.messageAt(self.count - 1)
     }
 }
 
@@ -171,7 +188,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     public var messageList: MessageList = MessageList()
     public var messagesFetchLimit: UInt = 25
     public var typingIndicatorShowDuration: TimeInterval = TimeInterval(5)
-    public var offsetYToLoadMore: CGFloat = CGFloat(40)
+    public var offsetYToLoadMore: CGFloat = CGFloat(400)
     fileprivate var hasMoreMessageToFetch: Bool = false
     fileprivate var isFetchingMessage: Bool = false
 
@@ -1329,7 +1346,12 @@ extension SKYChatConversationViewController {
             return
         }
 
-        self.indicator?.startAnimating()
+        var firstTimeFetch = false
+        if self.messageList.count == 0 {
+            self.indicator?.startAnimating()
+            firstTimeFetch = true
+        }
+
         let chatExt = self.skygear.chatExtension
         self.isFetchingMessage = true
 
@@ -1341,18 +1363,20 @@ extension SKYChatConversationViewController {
                  order: nil,
             completion: { (result, _, isCached, error) in
                 if isCached {
-                    return
-                }
+                    if (result?.count ?? 0) > 0 {
+                        self.indicator?.stopAnimating()
+                    }
+                } else {
+                    self.isFetchingMessage = false
+                    self.indicator?.stopAnimating()
 
-                self.isFetchingMessage = false
-                self.indicator?.stopAnimating()
+                    guard error == nil else {
+                        print("Failed to fetch messages: \(error?.localizedDescription ?? "")")
+                        self.delegate?.conversationViewController?(
+                            self, failedFetchingMessagesWithError: error!)
 
-                guard error == nil else {
-                    print("Failed to fetch messages: \(error?.localizedDescription ?? "")")
-                    self.delegate?.conversationViewController?(
-                        self, failedFetchingMessagesWithError: error!)
-
-                    return
+                        return
+                    }
                 }
 
                 guard let msgs = result else {
@@ -1366,23 +1390,52 @@ extension SKYChatConversationViewController {
                     return
                 }
 
-                if self.messageList.count == 0, let first = msgs.first {
-                    // this is the first page
-                    chatExt?.markReadMessages(msgs, completion: nil)
-                    chatExt?.markLastReadMessage(first,
-                                                 in: self.conversation!,
-                                                 completion: nil)
+                var currentVisibleMessage: SKYMessage?
+                var offsetToVisibleMessage: CGFloat = 0
+                if !firstTimeFetch {
+                    let visibleOrigin = self.collectionView.contentOffset
+                    let visibleSize = self.collectionView.bounds.size
+                    let visibleRect = CGRect(origin: visibleOrigin, size: visibleSize)
+                    let visiblePoint = CGPoint(x: visibleRect.midX, y: visibleRect.midY)
+                    let visibleIndexPath = self.collectionView.indexPathForItem(at: visiblePoint)
+                    if let indexPath = visibleIndexPath {
+                        currentVisibleMessage = self.messageList.messageAt(indexPath.row)
+                        let layout = self.collectionView.layoutAttributesForItem(at: indexPath)
+                        offsetToVisibleMessage = visibleRect.midY - layout!.frame.origin.y
+                    }
                 }
 
                 self.messageList.merge(msgs)
 
+                if !isCached {
+                    if msgs.count > 0, let first = msgs.first {
+                        // this is the first page
+                        chatExt?.markReadMessages(msgs, completion: nil)
+                        chatExt?.markLastReadMessage(first,
+                                                     in: self.conversation!,
+                                                     completion: nil)
+                    }
+
+                    self.delegate?.conversationViewController?(self, didFetchedMessages: msgs)
+                }
+
                 self.hasMoreMessageToFetch = msgs.count > 0
-
-                self.delegate?.conversationViewController?(self, didFetchedMessages: msgs)
-
                 self.finishReceivingMessage()
-                self.scroll(to: IndexPath(row: msgs.count, section: 0), animated: false)
                 self.collectionView.flashScrollIndicators()
+
+                // try to keep current scroll position
+                if let currentMessage = currentVisibleMessage {
+                    let targetIndex = self.messageList.indexOf(currentMessage)
+                    if targetIndex != NSNotFound {
+                        let targetIndexPath = IndexPath(row: targetIndex, section: 0)
+                        let layout = self.collectionView.layoutAttributesForItem(at: targetIndexPath)
+                        if let ll = layout {
+                            var contentOffset = self.collectionView.contentOffset
+                            contentOffset.y = ll.frame.origin.y - self.collectionView.frame.size.height / 2 + offsetToVisibleMessage
+                            self.collectionView.contentOffset = contentOffset
+                        }
+                    }
+                }
         })
     }
 
