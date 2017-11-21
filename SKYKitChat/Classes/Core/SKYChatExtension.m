@@ -287,8 +287,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
             fetchMessagesWithIDs:messageIDs
                       completion:^(NSArray<SKYMessage *> *_Nullable messageList,
                                    NSArray<SKYMessage *> *_Nullable deletedMessageList,
-                                   BOOL isCached, NSError *_Nullable error){
-                          // TODO: call completion handler of the api
+                                   BOOL isCached, NSError *_Nullable error) {
+                          completion(messageList, deletedMessageList, YES, nil);
                       }];
     }
 
