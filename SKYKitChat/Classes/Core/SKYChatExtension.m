@@ -501,6 +501,13 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                   }];
 }
 
+- (void)fetchUnsentMessagesWithConversationID:(NSString *)conversationId
+                                   completion:(void (^)(NSArray<SKYMessage *> *_Nonnull))completion
+{
+    [self.cacheController fetchUnsentMessagesWithConversationID:conversationId
+                                                     completion:completion];
+}
+
 - (void)fetchMessagesWithConversation:(SKYConversation *)conversation
                                 limit:(NSInteger)limit
                            beforeTime:(NSDate *)beforeTime

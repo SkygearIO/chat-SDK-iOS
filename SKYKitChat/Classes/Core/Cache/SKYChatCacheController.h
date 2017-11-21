@@ -46,4 +46,8 @@
 
 - (void)handleRecordChange:(SKYChatRecordChange *)recordChange;
 
+- (void)fetchUnsentMessagesWithConversationID:(NSString *)conversationId
+                                   completion:(void (^_Nullable)(NSArray<SKYMessage *> *_Nonnull))
+                                                  completion;
+
 @end

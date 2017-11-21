@@ -58,7 +58,11 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 {
     NSMutableArray *predicates = [NSMutableArray arrayWithArray:@[
         [NSPredicate predicateWithFormat:@"conversationID LIKE %@", conversationId],
-        [NSPredicate predicateWithFormat:@"deleted == FALSE"]
+        [NSPredicate predicateWithFormat:@"deleted == FALSE"],
+        [NSCompoundPredicate orPredicateWithSubpredicates:@[
+            [NSPredicate predicateWithFormat:@"alreadySyncToServer != FALSE AND fail != TRUE"],
+            [NSPredicate predicateWithFormat:@"sendDate == nil"],
+        ]],
     ]];
     if (beforeTime) {
         [predicates addObject:[NSPredicate predicateWithFormat:@"creationDate < %@", beforeTime]];
@@ -160,6 +164,24 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
             break;
         default:
             break;
+    }
+}
+
+- (void)fetchUnsentMessagesWithConversationID:(NSString *)conversationId
+                                   completion:(void (^_Nullable)(NSArray<SKYMessage *> *_Nonnull))
+                                                  completion
+{
+    NSMutableArray *predicates = [NSMutableArray arrayWithArray:@[
+        [NSPredicate predicateWithFormat:@"conversationID LIKE %@", conversationId],
+        [NSPredicate predicateWithFormat:@"sendDate != nil"],
+        [NSPredicate predicateWithFormat:@"alreadySyncToServer == FALSE OR fail == TRUE"],
+    ]];
+    NSPredicate *predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+
+    if (completion) {
+        NSArray<SKYMessage *> *messages =
+            [self.store getMessagesWithPredicate:predicate limit:-1 order:@"creationDate"];
+        completion(messages);
     }
 }
 

@@ -262,7 +262,6 @@ SpecBegin(SKYChatCacheController)
                  }];
 
             // assume that the save message to cache operation is sync
-            // simulate fetch result before receiving didSave callback
             [cacheController
                 fetchMessagesWithConversationID:@"c0"
                                           limit:100
@@ -271,21 +270,24 @@ SpecBegin(SKYChatCacheController)
                                      completion:^(NSArray<SKYMessage *> *messageList,
                                                   NSArray<SKYMessage *> *deletedMessageList,
                                                   BOOL isCached, NSError *error) {
-                                         expect(messageList.count).to.equal(6);
+                                         expect(messageList.count).to.equal(5);
                                          for (NSInteger i = 1; i < 5; i++) {
-                                             SKYMessage *message = messageList[5 - i];
+                                             SKYMessage *message = messageList[4 - i];
                                              expect(message.creationDate)
                                                  .to.equal(
                                                      [baseDate dateByAddingTimeInterval:i * 2000]);
                                          }
-
-                                         SKYMessage *latestMessage = messageList.firstObject;
-                                         expect(latestMessage.recordID)
-                                             .to.equal(messageToSave.recordID);
-                                         expect(latestMessage.sendDate)
-                                             .to.equal(messageToSave.sendDate);
-                                         expect(latestMessage.alreadySyncToServer).to.beFalsy();
                                      }];
+
+            [cacheController
+                fetchUnsentMessagesWithConversationID:@"c0"
+                                           completion:^(NSArray<SKYMessage *> *_Nonnull messages) {
+                                               expect(messages.count).to.equal(1);
+                                               expect(messages[0].recordID.recordName)
+                                                   .to.equal(messageToSave.recordID.recordName);
+                                               expect(messages[0].sendDate)
+                                                   .to.equal(messageToSave.sendDate);
+                                           }];
 
             [cacheController didSaveMessage:messageToSave error:nil];
 

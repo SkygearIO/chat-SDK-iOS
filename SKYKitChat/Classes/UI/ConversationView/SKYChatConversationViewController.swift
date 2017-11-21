@@ -301,6 +301,7 @@ extension SKYChatConversationViewController {
         }
 
         if self.messageList.count == 0 {
+            self.fetchUnsentMessages()
             self.fetchMessages(before: nil)
         }
 
@@ -1351,6 +1352,15 @@ extension SKYChatConversationViewController {
                 self.collectionView?.layoutIfNeeded()
 
             }, perRecordErrorHandler: nil)
+    }
+
+    open func fetchUnsentMessages() {
+        let chatExt = self.skygear.chatExtension
+        chatExt?.fetchUnsentMessages(conversationID: self.conversation!.recordID().recordName,
+                                     completion: { (unsentMessages) in
+                                        self.messageList.merge(unsentMessages)
+                                        self.finishReceivingMessage()
+        })
     }
 
     open func fetchMessages(before: Date?) {

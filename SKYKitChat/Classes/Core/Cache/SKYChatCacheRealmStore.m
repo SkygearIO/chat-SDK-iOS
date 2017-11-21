@@ -67,7 +67,7 @@
 
     NSUInteger resultCount = results.count;
 
-    for (NSInteger i = 0; i < limit && i < resultCount; i++) {
+    for (NSInteger i = 0; (limit == -1 || i < limit) && i < resultCount; i++) {
         SKYMessageCacheObject *cacheObject = results[i];
         SKYMessage *message = [cacheObject messageRecord];
         [messages addObject:message];
