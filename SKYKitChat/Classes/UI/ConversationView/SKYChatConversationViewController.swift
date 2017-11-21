@@ -594,6 +594,11 @@ extension SKYChatConversationViewController {
             return nil
         }
 
+        if msg.fail {
+            return NSAttributedString(string: NSLocalizedString("Failed", comment: ""),
+                                      attributes: [NSForegroundColorAttributeName: UIColor.red])
+        }
+
         switch msg.conversationStatus {
         case .allRead:
             return NSAttributedString(string: NSLocalizedString("All read", comment: ""))
@@ -923,7 +928,7 @@ extension SKYChatConversationViewController {
                       errorMessage: String)
     {
         if let msg = message {
-            self.messageList.remove([msg])
+            self.messageList.update([msg])
             self.collectionView?.reloadData()
         }
 
@@ -1012,6 +1017,39 @@ extension SKYChatConversationViewController {
             self.fetchMessages(before: firstMessage.creationDate())
         }
     }
+
+    open override func collectionView(_ collectionView: JSQMessagesCollectionView!, didTapMessageBubbleAt indexPath: IndexPath!) {
+        let message = self.messageList.messageAt(indexPath.row)
+        if message.fail {
+            self.didTapFailed(message: message)
+        }
+    }
+
+    open func didTapFailed(message: SKYMessage) {
+        let alert = UIAlertController(title: nil,
+                                      message: nil,
+                                      preferredStyle: .actionSheet)
+
+        alert.addAction(
+            UIAlertAction(title: "Resend", style: .default, handler: { (action) in
+                self.messageList.remove([message])
+                self.beforeSending(message: message)
+                self.send(message: message)
+                self.collectionView.reloadData()
+            })
+        )
+
+        alert.addAction(
+            UIAlertAction(title: "Delete", style: .destructive, handler: { (action) in
+                self.messageList.remove([message])
+                self.collectionView.reloadData()
+            })
+        )
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+
 }
 
 // MARK: - Default accessory action handler
