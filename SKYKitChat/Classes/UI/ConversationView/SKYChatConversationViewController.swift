@@ -1355,6 +1355,8 @@ extension SKYChatConversationViewController {
         let chatExt = self.skygear.chatExtension
         self.isFetchingMessage = true
 
+        let cachedResult = NSMutableArray()
+
         self.delegate?.startFetchingMessages?(self)
         chatExt?.fetchMessages(
             conversation: self.conversation!,
@@ -1366,6 +1368,8 @@ extension SKYChatConversationViewController {
                     if (result?.count ?? 0) > 0 {
                         self.indicator?.stopAnimating()
                     }
+
+                    cachedResult.addObjects(from: result!)
                 } else {
                     self.isFetchingMessage = false
                     self.indicator?.stopAnimating()
@@ -1405,6 +1409,9 @@ extension SKYChatConversationViewController {
                     }
                 }
 
+                if !isCached {
+                    self.messageList.remove(cachedResult as! [SKYMessage])
+                }
                 self.messageList.merge(msgs)
 
                 if !isCached {
