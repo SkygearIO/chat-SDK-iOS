@@ -28,4 +28,6 @@
  */
 + (BOOL)isRecordChangeEventType:(NSString *_Nullable)eventType;
 
+- (instancetype)initWithEvent:(SKYChatRecordChangeEvent)event record:(SKYRecord *_Nonnull)record;
+
 @end

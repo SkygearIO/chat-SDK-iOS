@@ -19,6 +19,7 @@
 
 #import "SKYChatCacheController+Private.h"
 #import "SKYChatCacheController.h"
+#import "SKYChatRecordChange_Private.h"
 
 #import "SKYMessageCacheObject.h"
 
@@ -128,7 +129,7 @@ SpecBegin(SKYChatCacheController)
                                           order:nil
                                      completion:^(NSArray<SKYMessage *> *messageList,
                                                   NSArray<SKYMessage *> *deletedMessageList,
-                                                  NSError *error) {
+                                                  BOOL isCached, NSError *error) {
                                          expect(messageList.count).to.equal(5);
                                          for (NSInteger i = 0; i < 5; i++) {
                                              SKYMessage *message = messageList[4 - i];
@@ -147,7 +148,7 @@ SpecBegin(SKYChatCacheController)
                                           order:nil
                                      completion:^(NSArray<SKYMessage *> *messageList,
                                                   NSArray<SKYMessage *> *deletedMessageList,
-                                                  NSError *error) {
+                                                  BOOL isCached, NSError *error) {
                                          expect(messageList.count).to.equal(2);
                                          for (NSInteger i = 0; i < 2; i++) {
                                              SKYMessage *message = messageList[1 - i];
@@ -210,7 +211,7 @@ SpecBegin(SKYChatCacheController)
                                           order:nil
                                      completion:^(NSArray<SKYMessage *> *messageList,
                                                   NSArray<SKYMessage *> *deletedMessageList,
-                                                  NSError *error) {
+                                                  BOOL isCached, NSError *error) {
                                          expect(messageList.count).to.equal(7);
                                          for (NSInteger i = 1; i < 8; i++) {
                                              SKYMessage *message = messageList[7 - i];
@@ -243,7 +244,8 @@ SpecBegin(SKYChatCacheController)
 
             [cacheController
                 saveMessage:messageToSave
-                 completion:^(SKYMessage *_Nullable message, NSError *_Nullable error) {
+                 completion:^(SKYMessage *_Nullable message, BOOL isCached,
+                              NSError *_Nullable error) {
                      expect(message.recordID).to.equal(messageToSave.recordID);
                      expect(message.sendDate).to.equal(messageToSave.sendDate);
 
@@ -268,7 +270,7 @@ SpecBegin(SKYChatCacheController)
                                           order:nil
                                      completion:^(NSArray<SKYMessage *> *messageList,
                                                   NSArray<SKYMessage *> *deletedMessageList,
-                                                  NSError *error) {
+                                                  BOOL isCached, NSError *error) {
                                          expect(messageList.count).to.equal(6);
                                          for (NSInteger i = 1; i < 5; i++) {
                                              SKYMessage *message = messageList[5 - i];
@@ -294,7 +296,7 @@ SpecBegin(SKYChatCacheController)
                                           order:nil
                                      completion:^(NSArray<SKYMessage *> *messageList,
                                                   NSArray<SKYMessage *> *deletedMessageList,
-                                                  NSError *error) {
+                                                  BOOL isCached, NSError *error) {
                                          SKYMessage *latestMessage = messageList.firstObject;
                                          expect(latestMessage.recordID)
                                              .to.equal(messageToSave.recordID);
@@ -386,11 +388,11 @@ describe(@"Cache Controller handle change event", ^{
         RLMRealm *realm = cacheController.store.realm;
 
         // create
-        SKYMessage *message = [[SKYMessage alloc]
-            initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"m1"]];
-        message.record[@"edited_at"] = baseDate;
-
-        [cacheController handleChangeEvent:SKYChatRecordChangeEventCreate forMessage:message];
+        SKYRecord *messageRecord = [SKYRecord recordWithRecordType:@"message" name:@"m1"];
+        messageRecord[@"edited_at"] = baseDate;
+        [cacheController handleRecordChange:[[SKYChatRecordChange alloc]
+                                                initWithEvent:SKYChatRecordChangeEventCreate
+                                                       record:messageRecord]];
 
         RLMResults<SKYMessageCacheObject *> *results =
             [SKYMessageCacheObject allObjectsInRealm:realm];
@@ -398,11 +400,11 @@ describe(@"Cache Controller handle change event", ^{
         expect([results objectAtIndex:0].editionDate).to.equal(baseDate);
 
         // update
-        message = [[SKYMessage alloc]
-            initWithRecordData:[SKYRecord recordWithRecordType:@"message" name:@"m1"]];
-        message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:1000];
-
-        [cacheController handleChangeEvent:SKYChatRecordChangeEventUpdate forMessage:message];
+        messageRecord = [SKYRecord recordWithRecordType:@"message" name:@"m1"];
+        messageRecord[@"edited_at"] = [baseDate dateByAddingTimeInterval:1000];
+        [cacheController handleRecordChange:[[SKYChatRecordChange alloc]
+                                                initWithEvent:SKYChatRecordChangeEventUpdate
+                                                       record:messageRecord]];
 
         results = [SKYMessageCacheObject allObjectsInRealm:realm];
         expect(results.count).to.equal(1);
@@ -410,14 +412,13 @@ describe(@"Cache Controller handle change event", ^{
             .to.equal([baseDate dateByAddingTimeInterval:1000]);
 
         // delete
-        message =
-            [[SKYMessage alloc] initWithRecordData:[SKYRecord recordWithRecordType:@"message"
-                                                                              name:@"m1"
-                                                                              data:@{
-                                                                                  @"deleted" : @YES
-                                                                              }]];
-
-        [cacheController handleChangeEvent:SKYChatRecordChangeEventDelete forMessage:message];
+        messageRecord =
+            [SKYRecord recordWithRecordType:@"message" name:@"m1" data:@{
+                @"deleted" : @YES
+            }];
+        [cacheController handleRecordChange:[[SKYChatRecordChange alloc]
+                                                initWithEvent:SKYChatRecordChangeEventDelete
+                                                       record:messageRecord]];
 
         results = [SKYMessageCacheObject allObjectsInRealm:realm];
         expect(results.count).to.equal(1);
@@ -426,15 +427,11 @@ describe(@"Cache Controller handle change event", ^{
 
     it(@"non-existing message updated", ^{
         RLMRealm *realm = cacheController.store.realm;
-        SKYMessage *message =
-            [[SKYMessage alloc] initWithRecordData:[SKYRecord recordWithRecordType:@"message"
-                                                                              name:@"m1"
-                                                                              data:@{
-                                                                                  @"deleted" : @YES
-                                                                              }]];
-        message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:1000];
-
-        [cacheController handleChangeEvent:SKYChatRecordChangeEventUpdate forMessage:message];
+        SKYRecord *messageRecord = [SKYRecord recordWithRecordType:@"message" name:@"m1"];
+        messageRecord[@"edited_at"] = [baseDate dateByAddingTimeInterval:1000];
+        [cacheController handleRecordChange:[[SKYChatRecordChange alloc]
+                                                initWithEvent:SKYChatRecordChangeEventUpdate
+                                                       record:messageRecord]];
 
         RLMResults<SKYMessageCacheObject *> *results =
             [SKYMessageCacheObject allObjectsInRealm:realm];
@@ -445,14 +442,13 @@ describe(@"Cache Controller handle change event", ^{
 
     it(@"non-existing message deleted", ^{
         RLMRealm *realm = cacheController.store.realm;
-        SKYMessage *message =
-            [[SKYMessage alloc] initWithRecordData:[SKYRecord recordWithRecordType:@"message"
-                                                                              name:@"m1"
-                                                                              data:@{
-                                                                                  @"deleted" : @YES
-                                                                              }]];
-
-        [cacheController handleChangeEvent:SKYChatRecordChangeEventDelete forMessage:message];
+        SKYRecord *messageRecord =
+            [SKYRecord recordWithRecordType:@"message" name:@"m1" data:@{
+                @"deleted" : @YES
+            }];
+        [cacheController handleRecordChange:[[SKYChatRecordChange alloc]
+                                                initWithEvent:SKYChatRecordChangeEventDelete
+                                                       record:messageRecord]];
 
         // Nothing happened
         RLMResults<SKYMessageCacheObject *> *results =

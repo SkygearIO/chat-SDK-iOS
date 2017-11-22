@@ -73,7 +73,8 @@ typedef void (^SKYChatDeleteConversationCompletion)(NSNumber *_Nullable result,
                                                     NSError *_Nullable error);
 typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable conversation,
                                               NSError *_Nullable error);
-typedef void (^SKYChatMessageCompletion)(SKYMessage *_Nullable message, NSError *_Nullable error);
+typedef void (^SKYChatMessageCompletion)(SKYMessage *_Nullable message, BOOL isCached,
+                                         NSError *_Nullable error);
 typedef void (^SKYChatUnreadCountCompletion)(
     NSDictionary<NSString *, NSNumber *> *_Nullable response, NSError *_Nullable error);
 typedef void (^SKYChatChannelCompletion)(SKYUserChannel *_Nullable userChannel,
@@ -82,7 +83,7 @@ typedef void (^SKYChatFetchConversationListCompletion)(
     NSArray<SKYConversation *> *_Nullable conversationList, NSError *_Nullable error);
 typedef void (^SKYChatFetchMessagesListCompletion)(
     NSArray<SKYMessage *> *_Nullable messageList,
-    NSArray<SKYMessage *> *_Nullable deletedMessageList, NSError *_Nullable error);
+    NSArray<SKYMessage *> *_Nullable deletedMessageList, BOOL isCached, NSError *_Nullable error);
 /**
  Gets or sets whether messages fetched from server are automatically marked as delivered.
 

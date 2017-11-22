@@ -17,6 +17,7 @@
 //  limitations under the License.
 //
 
+#import "SKYChatCacheController.h"
 #import "SKYChatExtension.h"
 
 @interface SKYChatExtension ()
@@ -27,6 +28,8 @@
 @property (assign, nonatomic, readonly, nonnull)
     SKYContainer *container; // SKYContainer will keep a strong reference of this object.
 
+@property (assign, nonatomic, readonly, nonnull) SKYChatCacheController *cacheController;
+
 /**
  Creates an instance of SKYChatExtension.
 
@@ -36,6 +39,7 @@
  @param container the SKYContainer that contains user credentials and server configuration
  @return an instance of SKYChatExtension
  */
-- (nullable instancetype)initWithContainer:(nonnull SKYContainer *)container;
+- (nullable instancetype)initWithContainer:(nonnull SKYContainer *)container
+                           cacheController:(nonnull SKYChatCacheController *)cacheController;
 
 @end

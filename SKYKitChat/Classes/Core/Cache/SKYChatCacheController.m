@@ -75,7 +75,23 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     if (completion) {
         NSArray<SKYMessage *> *messages =
             [self.store getMessagesWithPredicate:predicate limit:limit order:resolvedOrder];
-        completion(messages, nil, nil);
+        completion(messages, nil, YES, nil);
+    }
+}
+
+- (void)fetchMessagesWithIDs:(NSArray<NSString *> *)messageIDs
+                  completion:(SKYChatFetchMessagesListCompletion)completion
+{
+    NSPredicate *predicate = [NSCompoundPredicate andPredicateWithSubpredicates:@[
+        [NSPredicate predicateWithFormat:@"recordID IN %@", messageIDs],
+        [NSPredicate predicateWithFormat:@"deleted == FALSE"]
+    ]];
+
+    if (completion) {
+        NSArray<SKYMessage *> *messages = [self.store getMessagesWithPredicate:predicate
+                                                                         limit:messageIDs.count
+                                                                         order:@"creationDate"];
+        completion(messages, nil, YES, nil);
     }
 }
 
@@ -95,7 +111,7 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     [self.store setMessages:@[ message ]];
 
     if (completion) {
-        completion(message, nil);
+        completion(message, YES, nil);
     }
 }
 
@@ -120,6 +136,14 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     // soft delete
     // so update the messages
     [self.store setMessages:@[ message ]];
+}
+
+- (void)handleRecordChange:(SKYChatRecordChange *)recordChange
+{
+    if ([recordChange.recordType isEqualToString:@"message"]) {
+        [self handleChangeEvent:recordChange.event
+                     forMessage:[[SKYMessage alloc] initWithRecordData:recordChange.record]];
+    }
 }
 
 - (void)handleChangeEvent:(SKYChatRecordChangeEvent)event forMessage:(SKYMessage *)message

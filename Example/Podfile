@@ -12,6 +12,7 @@ target 'SKYKitChat_Tests' do
 
   pod 'Specta'
   pod 'Expecta'
+  pod 'OHHTTPStubs'
 end
 
 target 'Swift Example' do

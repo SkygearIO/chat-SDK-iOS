@@ -50,6 +50,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 }
 
 - (instancetype)initWithContainer:(SKYContainer *_Nonnull)container
+                  cacheController:(nonnull SKYChatCacheController *)cacheController
 {
     if ((self = [super init])) {
         if (!container) {
@@ -69,6 +70,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                         // want the UI to keep notified for changes intended for previous user.
                         [self unsubscribeFromUserChannel];
                     }];
+
+        _cacheController = cacheController;
     }
     return self;
 }
@@ -279,13 +282,23 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 - (void)fetchMessagesWithIDs:(NSArray<NSString *> *)messageIDs
                   completion:(SKYChatFetchMessagesListCompletion)completion
 {
+    if (completion) {
+        [self.cacheController
+            fetchMessagesWithIDs:messageIDs
+                      completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                   NSArray<SKYMessage *> *_Nullable deletedMessageList,
+                                   BOOL isCached, NSError *_Nullable error) {
+                          completion(messageList, deletedMessageList, YES, nil);
+                      }];
+    }
+
     [self.container callLambda:@"chat:get_messages_by_ids"
                      arguments:@[ messageIDs ]
              completionHandler:^(NSDictionary *response, NSError *error) {
                  if (error) {
                      NSLog(@"error calling chat:get_messages_by_ids: %@", error);
                      if (completion) {
-                         completion(nil, nil, error);
+                         completion(nil, nil, NO, error);
                      }
                      return;
                  }
@@ -307,7 +320,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      }
                  }
                  if (completion) {
-                     completion(returnArray, deletedReturnArray, error);
+                     completion(returnArray, deletedReturnArray, NO, error);
                  }
              }];
 }
@@ -433,6 +446,14 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 - (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
 {
+    [self.cacheController
+        saveMessage:message
+         completion:^(SKYMessage *_Nullable message, BOOL isCached, NSError *_Nullable error) {
+             if (completion) {
+                 completion(message, YES, error);
+             }
+         }];
+
     SKYDatabase *database = self.container.publicCloudDatabase;
     [database saveRecord:message.record
               completion:^(SKYRecord *record, NSError *error) {
@@ -440,13 +461,16 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                   if (error) {
                       message.alreadySyncToServer = false;
                       message.fail = true;
+                      [self.cacheController didSaveMessage:message error:error];
                   } else {
                       msg = [[SKYMessage alloc] initWithRecordData:record];
                       msg.alreadySyncToServer = true;
                       msg.fail = false;
+                      [self.cacheController didSaveMessage:msg error:error];
                   }
+
                   if (completion) {
-                      completion(msg, error);
+                      completion(msg, NO, error);
                   }
               }];
 }
@@ -455,7 +479,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     toConversation:(SKYConversation *)conversation
         completion:(SKYChatMessageCompletion)completion
 {
-    message.conversationRef = [SKYReference referenceWithRecord:conversation];
+    message.conversationRef = [SKYReference referenceWithRecord:conversation.record];
     message.sendDate = [NSDate date];
     if (!message.attachment || !message.attachment.url.isFileURL) {
         [self saveMessage:message completion:completion];
@@ -521,67 +545,69 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         [arguments addObject:order];
     }
 
-    [[SKYChatCacheController defaultController]
-        fetchMessagesWithConversationID:conversationId
-                                  limit:limit
-                             beforeTime:beforeTime
-                                  order:order
-                             completion:^(NSArray<SKYMessage *> *_Nullable messageList,
-                                          NSArray<SKYMessage *> *_Nullable deletedMessageList,
-                                          NSError *_Nullable error) {
-                                 NSLog(@"get result from cache");
-                             }];
+    if (completion) {
+        [self.cacheController
+            fetchMessagesWithConversationID:conversationId
+                                      limit:limit
+                                 beforeTime:beforeTime
+                                      order:order
+                                 completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                              NSArray<SKYMessage *> *_Nullable deletedMessageList,
+                                              BOOL isCached, NSError *_Nullable error) {
+                                     completion(messageList, deletedMessageList, YES, error);
+                                 }];
+    }
 
-    [self.container callLambda:@"chat:get_messages"
-                     arguments:arguments
-             completionHandler:^(NSDictionary *response, NSError *error) {
-                 if (error) {
-                     NSLog(@"error calling chat:get_messages: %@", error);
-                     if (completion) {
-                         completion(nil, nil, error);
-                     }
-                     return;
-                 }
-                 NSArray *resultArray = [response objectForKey:@"results"];
-                 NSMutableArray *returnArray = [[NSMutableArray alloc] init];
-                 for (NSDictionary *obj in resultArray) {
-                     SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
-                     SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
+    [self.container
+               callLambda:@"chat:get_messages"
+                arguments:arguments
+        completionHandler:^(NSDictionary *response, NSError *error) {
+            if (error) {
+                NSLog(@"error calling chat:get_messages: %@", error);
+                if (completion) {
+                    completion(nil, nil, NO, error);
+                }
+                return;
+            }
+            NSArray *resultArray = [response objectForKey:@"results"];
+            NSMutableArray *returnArray = [[NSMutableArray alloc] init];
+            for (NSDictionary *obj in resultArray) {
+                SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
+                SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
 
-                     SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
-                     msg.alreadySyncToServer = true;
-                     msg.fail = false;
-                     if (msg) {
-                         [returnArray addObject:msg];
-                     }
-                 }
+                SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
+                msg.alreadySyncToServer = true;
+                msg.fail = false;
+                if (msg) {
+                    [returnArray addObject:msg];
+                }
+            }
 
-                 NSArray *deletedArray = [response objectForKey:@"deleted"];
-                 NSMutableArray *returnDeletedArray =
-                     [NSMutableArray arrayWithCapacity:deletedArray.count];
-                 for (NSDictionary *obj in deletedArray) {
-                     SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
-                     SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
-                     SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
-                     if (msg) {
-                         [returnDeletedArray addObject:msg];
-                     }
-                 }
+            NSArray *deletedArray = [response objectForKey:@"deleted"];
+            NSMutableArray *returnDeletedArray =
+                [NSMutableArray arrayWithCapacity:deletedArray.count];
+            for (NSDictionary *obj in deletedArray) {
+                SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
+                SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
+                SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
+                if (msg) {
+                    [returnDeletedArray addObject:msg];
+                }
+            }
 
-                 [[SKYChatCacheController defaultController] didFetchMessages:returnArray
-                                                              deletedMessages:returnDeletedArray];
+            [self.cacheController didFetchMessages:returnArray deletedMessages:returnDeletedArray];
 
-                 if (completion) {
-                     completion(returnArray, returnDeletedArray, error);
-                 }
+            if (completion) {
+                completion(returnArray, returnDeletedArray, NO, error);
+            }
 
-                 // The SDK notifies the server that these messages are received
-                 // from the client side. The app developer is not required
-                 // to call this method.
-                 if (returnArray.count && self.automaticallyMarkMessagesAsDelivered) {
-                     [self markDeliveredMessages:returnArray completion:nil];
-                 }
-             }];
+            // The SDK notifies the server that these messages are received
+            // from the client side. The app developer is not required
+            // to call this method.
+            if (returnArray.count && self.automaticallyMarkMessagesAsDelivered) {
+                [self markDeliveredMessages:returnArray completion:nil];
+            }
+        }];
 }
 
 #pragma mark Delivery and Read Status
@@ -679,12 +705,21 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     [self.container callLambda:@"chat:delete_message"
                      arguments:@[ message.recordID.recordName ]
              completionHandler:^(NSDictionary *response, NSError *error) {
-                 if (!completion) {
+                 if (error) {
+                     if (completion) {
+                         completion(nil, error);
+                     }
+
                      return;
                  }
-                 if (error) {
-                     completion(nil, error);
-                 } else {
+
+                 SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
+                 SKYRecord *record = [deserializer recordWithDictionary:[response copy]];
+                 SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
+
+                 [self.cacheController didDeleteMessage:msg];
+
+                 if (completion) {
                      completion(conversation, nil);
                  }
              }];
@@ -914,6 +949,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         if (!recordChange) {
             return;
         }
+
+        [self.cacheController handleRecordChange:recordChange];
 
         [[NSNotificationCenter defaultCenter]
             postNotificationName:SKYChatDidReceiveRecordChangeNotification

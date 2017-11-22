@@ -32,6 +32,9 @@
                                   order:(NSString *)order
                              completion:(SKYChatFetchMessagesListCompletion)completion;
 
+- (void)fetchMessagesWithIDs:(NSArray<NSString *> *)messageIDs
+                  completion:(SKYChatFetchMessagesListCompletion)completion;
+
 - (void)didFetchMessages:(NSArray<SKYMessage *> *)messages
          deletedMessages:(NSArray<SKYMessage *> *)deletedMessages;
 
@@ -41,6 +44,6 @@
 
 - (void)didDeleteMessage:(SKYMessage *)message;
 
-- (void)handleChangeEvent:(SKYChatRecordChangeEvent)event forMessage:(SKYMessage *)message;
+- (void)handleRecordChange:(SKYChatRecordChange *)recordChange;
 
 @end
