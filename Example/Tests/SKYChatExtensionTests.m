@@ -210,10 +210,8 @@ SpecBegin(SKYChatExtension)
                                             limit:100
                                        beforeTime:nil
                                             order:nil
-                                       completion:^(
-                                           NSArray<SKYMessage *> *_Nullable messageList,
-                                           NSArray<SKYMessage *> *_Nullable deletedMessageList,
-                                           BOOL isCached, NSError *_Nullable error) {
+                                       completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                                    BOOL isCached, NSError *_Nullable error) {
                                            expect(error).to.beNil();
 
                                            SKYMessage *message;
@@ -399,7 +397,6 @@ describe(@"Conversation messages, with error response", ^{
                                    beforeTime:nil
                                         order:nil
                                    completion:^(NSArray<SKYMessage *> *_Nullable messageList,
-                                                NSArray<SKYMessage *> *_Nullable deletedMessageList,
                                                 BOOL isCached, NSError *_Nullable error) {
                                        SKYMessage *message;
                                        if (isCached) {

@@ -1386,7 +1386,7 @@ extension SKYChatConversationViewController {
             limit: Int(self.messagesFetchLimit),
             beforeTime: before,
                  order: nil,
-            completion: { (result, _, isCached, error) in
+            completion: { (result, isCached, error) in
                 if isCached {
                     if (result?.count ?? 0) > 0 {
                         self.indicator?.stopAnimating()
@@ -1433,7 +1433,9 @@ extension SKYChatConversationViewController {
                 }
 
                 if !isCached {
-                    self.messageList.remove(cachedResult as! [SKYMessage])
+                    if let cachedMessages = cachedResult as? [SKYMessage] {
+                        self.messageList.remove(cachedMessages)
+                    }
                 }
                 self.messageList.merge(msgs)
 
