@@ -25,6 +25,9 @@ import SKPhotoBrowser
 
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
+    @objc optional func messagesFetchLimitInConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UInt
+
     /**
      * For customizing message date display
      */
@@ -186,11 +189,21 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     public var conversation: SKYConversation?
     public var participants: [String: SKYRecord] = [:]
     public var messageList: MessageList = MessageList()
-    public var messagesFetchLimit: UInt = 25
     public var typingIndicatorShowDuration: TimeInterval = TimeInterval(5)
     public var offsetYToLoadMore: CGFloat = CGFloat(400)
     fileprivate var hasMoreMessageToFetch: Bool = false
     fileprivate var isFetchingMessage: Bool = false
+
+    public var messagesFetchLimit: UInt {
+        get {
+            if let limit = self.delegate?.messagesFetchLimitInConversationViewController?(self) {
+                return limit
+            }
+
+            // default fetch limit
+            return 50
+        }
+    }
 
     public var messageChangeObserver: Any?
     public var typingIndicatorChangeObserver: Any?
