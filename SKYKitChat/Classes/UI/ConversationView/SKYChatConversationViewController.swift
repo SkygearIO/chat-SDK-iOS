@@ -281,6 +281,13 @@ extension SKYChatConversationViewController {
         // update the display name after fetching participants
         self.senderDisplayName = NSLocalizedString("me", comment: "")
 
+        UIMenuController.shared.menuItems = [
+            UIMenuItem.init(title: "Resend", action: #selector(SKYChatConversationViewController.resendFailedMessage(_:))),
+            UIMenuItem.init(title: "Delete", action: #selector(SKYChatConversationViewController.deleteFailedMessage(_:))),
+        ]
+        JSQMessagesCollectionViewCell.registerMenuAction(#selector(SKYChatConversationViewController.resendFailedMessage(_:)))
+        JSQMessagesCollectionViewCell.registerMenuAction(#selector(SKYChatConversationViewController.deleteFailedMessage(_:)))
+
         self.incomingMessageBubbleColor = UIColor.lightGray
         self.outgoingMessageBubbleColor = UIColor.jsq_messageBubbleBlue()
     }
@@ -1018,38 +1025,41 @@ extension SKYChatConversationViewController {
         }
     }
 
-    open override func collectionView(_ collectionView: JSQMessagesCollectionView!, didTapMessageBubbleAt indexPath: IndexPath!) {
+    open override func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
         let message = self.messageList.messageAt(indexPath.row)
-        if message.fail {
-            self.didTapFailed(message: message)
+        if !message.fail {
+            return super.collectionView(collectionView, canPerformAction: action, forItemAt: indexPath, withSender: sender)
+        }
+
+        if action == #selector(SKYChatConversationViewController.resendFailedMessage(_:)) || action == #selector(SKYChatConversationViewController.deleteFailedMessage(_:)) {
+            return true
+        }
+
+        return false
+    }
+
+    open override func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
+        super.collectionView(collectionView, performAction: action, forItemAt: indexPath, withSender: sender)
+
+        let message = self.messageList.messageAt(indexPath.row)
+        if action == #selector(SKYChatConversationViewController.resendFailedMessage(_:)) {
+            self.resendFailedMessage(message)
+        } else if action == #selector(SKYChatConversationViewController.deleteFailedMessage(_:)) {
+            self.deleteFailedMessage(message)
         }
     }
 
-    open func didTapFailed(message: SKYMessage) {
-        let alert = UIAlertController(title: nil,
-                                      message: nil,
-                                      preferredStyle: .actionSheet)
-
-        alert.addAction(
-            UIAlertAction(title: "Resend", style: .default, handler: { (action) in
-                self.messageList.remove([message])
-                self.beforeSending(message: message)
-                self.send(message: message)
-                self.collectionView.reloadData()
-            })
-        )
-
-        alert.addAction(
-            UIAlertAction(title: "Delete", style: .destructive, handler: { (action) in
-                self.messageList.remove([message])
-                self.collectionView.reloadData()
-            })
-        )
-
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        self.present(alert, animated: true, completion: nil)
+    @objc func resendFailedMessage(_ message: SKYMessage) {
+        self.messageList.remove([message])
+        self.beforeSending(message: message)
+        self.send(message: message)
+        self.collectionView.reloadData()
     }
 
+    @objc func deleteFailedMessage(_ message: SKYMessage) {
+        self.messageList.remove([message])
+        self.collectionView.reloadData()
+    }
 }
 
 // MARK: - Default accessory action handler
