@@ -59,7 +59,7 @@
     }
 
     cacheObject.editionDate = [message.record objectForKey:@"edited_at"];
-    cacheObject.deleted = [message.record objectForKey:@"deleted"];
+    cacheObject.deleted = message.deleted;
     cacheObject.alreadySyncToServer = message.alreadySyncToServer;
     cacheObject.fail = message.fail;
     cacheObject.sendDate = message.sendDate;

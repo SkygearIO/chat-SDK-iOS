@@ -25,6 +25,9 @@ import SKPhotoBrowser
 
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
+    @objc optional func messagesFetchLimitInConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UInt
+
     /**
      * For customizing message date display
      */
@@ -97,6 +100,87 @@ import SKPhotoBrowser
         failedFetchingMessagesWithError error: Error)
 }
 
+open class MessageList {
+
+    public var messageIDs: NSMutableOrderedSet = NSMutableOrderedSet()
+    public var messages: [String: SKYMessage] = [:]
+    public var count: Int {
+        get {
+            return self.messages.count
+        }
+    }
+
+    public func compare(messageA: SKYMessage, messageB: SKYMessage) -> Bool {
+        return messageA.creationDate() < messageB.creationDate()
+    }
+
+    public func contains(_ messageID: String) -> Bool {
+        return self.messageIDs.index(of: messageID) != NSNotFound
+    }
+
+    public func update(_ messages: [SKYMessage]) {
+        messages.forEach { (msg: SKYMessage) in
+            let msgID = msg.recordID().recordName
+            self.messages[msgID] = msg
+        }
+    }
+
+    public func append(_ messages: [SKYMessage]) {
+        let msgs = Array(messages)
+        let msgIDs = msgs.map { (msg: SKYMessage) -> String in
+            return msg.recordID().recordName
+        }
+
+        self.messageIDs.addObjects(from: msgIDs)
+        self.update(msgs)
+    }
+
+    public func merge(_ messages: [SKYMessage]) {
+        self.append(messages)
+
+        self.messageIDs = NSMutableOrderedSet(array: self.messageIDs
+            .flatMap { $0 as? String }
+            .sorted(by: { (id1: String, id2: String) -> Bool in
+                let m1 = self.messages[id1]!
+                let m2 = self.messages[id2]!
+                return self.compare(messageA: m1, messageB: m2)
+            }))
+    }
+
+    public func remove(_ messages: [SKYMessage]) {
+        messages.forEach { (msg: SKYMessage) in
+            let msgID = msg.recordID().recordName
+            self.messageIDs.remove(msgID)
+            self.messages.removeValue(forKey: msgID)
+        }
+    }
+
+    public func removeAll() {
+        self.messageIDs.removeAllObjects()
+        self.messages.removeAll()
+    }
+
+    public func indexOf(_ message: SKYMessage) -> Int {
+        return self.messageIDs.index(of: message.recordID().recordName)
+    }
+
+    public func messageAt(_ index: Int) -> SKYMessage {
+        if let msgID = self.messageIDs[index] as? String {
+            return self.messages[msgID]!
+        }
+
+        fatalError("messageIDs contains non String object")
+    }
+
+    public func first() -> SKYMessage {
+        return self.messageAt(0)
+    }
+
+    public func last() -> SKYMessage {
+        return self.messageAt(self.count - 1)
+    }
+}
+
 open class SKYChatConversationViewController: JSQMessagesViewController, AVAudioRecorderDelegate, SKYChatConversationImageItemDelegate {
 
     weak public var delegate: SKYChatConversationViewControllerDelegate?
@@ -104,12 +188,22 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     public var skygear: SKYContainer = SKYContainer.default()
     public var conversation: SKYConversation?
     public var participants: [String: SKYRecord] = [:]
-    public var messages: [SKYMessage] = []
-    public var messagesFetchLimit: UInt = 25
+    public var messageList: MessageList = MessageList()
     public var typingIndicatorShowDuration: TimeInterval = TimeInterval(5)
-    public var offsetYToLoadMore: CGFloat = CGFloat(40)
+    public var offsetYToLoadMore: CGFloat = CGFloat(400)
     fileprivate var hasMoreMessageToFetch: Bool = false
     fileprivate var isFetchingMessage: Bool = false
+
+    public var messagesFetchLimit: UInt {
+        get {
+            if let limit = self.delegate?.messagesFetchLimitInConversationViewController?(self) {
+                return limit
+            }
+
+            // default fetch limit
+            return 50
+        }
+    }
 
     public var messageChangeObserver: Any?
     public var typingIndicatorChangeObserver: Any?
@@ -206,7 +300,7 @@ extension SKYChatConversationViewController {
             self.fetchParticipants()
         }
 
-        if self.messages.count == 0 {
+        if self.messageList.count == 0 {
             self.fetchMessages(before: nil)
         }
 
@@ -426,12 +520,12 @@ extension SKYChatConversationViewController {
 
     open override func collectionView(_ collectionView: UICollectionView,
                                       numberOfItemsInSection section: Int) -> Int {
-        return self.messages.count
+        return self.messageList.count
     }
 
     open override func collectionView(_ collectionView: JSQMessagesCollectionView!,
                                       messageDataForItemAt indexPath: IndexPath!) -> JSQMessageData! {
-        let msg = self.messages[indexPath.row]
+        let msg = self.messageList.messageAt(indexPath.row)
 
         var msgSenderName: String = ""
         if let sender = self.getSender(forMessage: msg),
@@ -480,8 +574,8 @@ extension SKYChatConversationViewController {
         _ collectionView: JSQMessagesCollectionView!,
         messageBubbleImageDataForItemAt indexPath: IndexPath!
     ) -> JSQMessageBubbleImageDataSource! {
+        let msg = self.messageList.messageAt(indexPath.row)
 
-        let msg = self.messages[indexPath.row]
         if msg.creatorUserRecordID() == self.senderId {
             return self.outgoingMessageBubble
         }
@@ -493,8 +587,7 @@ extension SKYChatConversationViewController {
         _ collectionView: JSQMessagesCollectionView!,
         attributedTextForCellBottomLabelAt indexPath: IndexPath!
     ) -> NSAttributedString! {
-
-        let msg = self.messages[indexPath.row]
+        let msg = self.messageList.messageAt(indexPath.row)
 
         if msg.creatorUserRecordID() != self.senderId {
             return nil
@@ -527,8 +620,8 @@ extension SKYChatConversationViewController {
         if let ds = self.delegate?.conversationViewController?(self, dateStringAt: indexPath) {
             return ds
         }
-        
-        let msg = self.messages[indexPath.row]
+
+        let msg = self.messageList.messageAt(indexPath.row)
         let date = msg.creationDate()
         
         let dateFormatter: DateFormatter
@@ -571,7 +664,7 @@ extension SKYChatConversationViewController {
         _ collectionView: JSQMessagesCollectionView!,
         attributedTextForMessageBubbleTopLabelAt indexPath: IndexPath!
         ) -> NSAttributedString! {
-        let msg = self.messages[indexPath.row]
+        let msg = self.messageList.messageAt(indexPath.row)
         var senderName: String = ""
         if let user = self.getSender(forMessage: msg),
             let userName = user.object(forKey: "username") as? String {
@@ -593,7 +686,7 @@ extension SKYChatConversationViewController {
         } else {
             // default behaviour
             // skip when it is "me" or only two members or sender name is the same as previous one
-            let msg = self.messages[indexPath.row]
+            let msg = self.messageList.messageAt(indexPath.row)
             if msg.creatorUserRecordID() == self.senderId || self.participants.count < 3 {
                 shouldShow = false
             } else if indexPath.row == 0 {
@@ -619,8 +712,7 @@ extension SKYChatConversationViewController {
         _ collectionView: JSQMessagesCollectionView!,
         avatarImageDataForItemAt indexPath: IndexPath!
     ) -> JSQMessageAvatarImageDataSource! {
-
-        let msg = self.messages[indexPath.row]
+        let msg = self.messageList.messageAt(indexPath.row)
         var senderName: String = ""
         if let user = self.getSender(forMessage: msg),
             let userName = user.object(forKey: "username") as? String {
@@ -760,8 +852,7 @@ extension SKYChatConversationViewController {
 
     func beforeSending(message msg: SKYMessage) {
         // push the "sending" message to message list
-
-        self.messages.append(msg)
+        self.messageList.append([msg])
         self.collectionView?.reloadData()
 
         self.setRecordButton()
@@ -813,17 +904,11 @@ extension SKYChatConversationViewController {
     }
 
     func successfullySending(message: SKYMessage) {
-        let foundIdx = self.messages
-            .map { $0.recordID().recordName }
-            .index(of: message.recordID().recordName )
+        self.messageList.update([message])
+        self.collectionView?.reloadData()
 
-        if let idx = foundIdx {
-            self.messages[idx] = message
-            self.collectionView?.reloadData()
-
-            self.delegate?.conversationViewController?(self,
-                                                       finishSendingMessage: message)
-        }
+        self.delegate?.conversationViewController?(self,
+                                                   finishSendingMessage: message)
 
         /**
          * [JSQMessageViewController finishSendingMessageAnimated:] will set this to false,
@@ -837,13 +922,8 @@ extension SKYChatConversationViewController {
                       errorMessage: String)
     {
         if let msg = message {
-            let foundIdx = self.messages
-                .map { $0.recordID().recordName }
-                .index(of: msg.recordID().recordName)
-            if let idx = foundIdx {
-                self.messages.remove(at: idx)
-                self.collectionView?.reloadData()
-            }
+            self.messageList.remove([msg])
+            self.collectionView?.reloadData()
         }
 
         let err = self.errorCreator.error(with: errorCode, message: errorMessage)
@@ -927,7 +1007,7 @@ extension SKYChatConversationViewController {
 
     open func loadMoreMessage() {
         if !self.isFetchingMessage && self.hasMoreMessageToFetch {
-            let firstMessage = self.messages[0]
+            let firstMessage = self.messageList.messageAt(0)
             self.fetchMessages(before: firstMessage.creationDate())
         }
     }
@@ -1124,17 +1204,15 @@ extension SKYChatConversationViewController {
         self.unsubscribeMessageChanges()
 
         let handler: ((SKYChatRecordChangeEvent, SKYMessage) -> Void) = {(event, msg) in
-            let idx = self.messages
-                .map({ $0.recordID().recordName })
-                .index(of: msg.recordID().recordName
-            )
+            let msgID = msg.recordID().recordName
+            let foundMessage = self.messageList.contains(msgID)
 
             switch event {
             case .create:
-                if let foundIndex = idx {
-                    self.messages[foundIndex] = msg
+                if foundMessage {
+                    self.messageList.update([msg])
                 } else {
-                    self.messages.append(msg)
+                    self.messageList.append([msg])
                 }
 
                 self.skygear.chatExtension?.markReadMessages([msg], completion: nil)
@@ -1146,14 +1224,14 @@ extension SKYChatConversationViewController {
 
                 self.finishReceivingMessage()
             case .update:
-                if let foundIndex = idx {
-                    self.messages[foundIndex] = msg
+                if foundMessage {
+                    self.messageList.update([msg])
                     self.collectionView.reloadData()
                     self.collectionView.layoutIfNeeded()
                 }
             case .delete:
-                if let foundIndex = idx {
-                    self.messages.remove(at: foundIndex)
+                if foundMessage {
+                    self.messageList.remove([msg])
                     self.collectionView.reloadData()
                     self.collectionView.layoutIfNeeded()
                 }
@@ -1281,9 +1359,16 @@ extension SKYChatConversationViewController {
             return
         }
 
-        self.indicator?.startAnimating()
+        var firstTimeFetch = false
+        if self.messageList.count == 0 {
+            self.indicator?.startAnimating()
+            firstTimeFetch = true
+        }
+
         let chatExt = self.skygear.chatExtension
         self.isFetchingMessage = true
+
+        let cachedResult = NSMutableArray()
 
         self.delegate?.startFetchingMessages?(self)
         chatExt?.fetchMessages(
@@ -1293,18 +1378,22 @@ extension SKYChatConversationViewController {
                  order: nil,
             completion: { (result, _, isCached, error) in
                 if isCached {
-                    // TODO: handle cached result
-                    return
-                }
+                    if (result?.count ?? 0) > 0 {
+                        self.indicator?.stopAnimating()
+                    }
 
-                self.isFetchingMessage = false
-                self.indicator?.stopAnimating()
-                guard error == nil else {
-                    print("Failed to fetch messages: \(error?.localizedDescription ?? "")")
-                    self.delegate?.conversationViewController?(
-                        self, failedFetchingMessagesWithError: error!)
+                    cachedResult.addObjects(from: result!)
+                } else {
+                    self.isFetchingMessage = false
+                    self.indicator?.stopAnimating()
 
-                    return
+                    guard error == nil else {
+                        print("Failed to fetch messages: \(error?.localizedDescription ?? "")")
+                        self.delegate?.conversationViewController?(
+                            self, failedFetchingMessagesWithError: error!)
+
+                        return
+                    }
                 }
 
                 guard let msgs = result else {
@@ -1318,25 +1407,55 @@ extension SKYChatConversationViewController {
                     return
                 }
 
-                if self.messages.count == 0, let first = msgs.first {
-                    // this is the first page
-                    chatExt?.markReadMessages(msgs, completion: nil)
-                    chatExt?.markLastReadMessage(first,
-                                                 in: self.conversation!,
-                                                 completion: nil)
+                var currentVisibleMessage: SKYMessage?
+                var offsetToVisibleMessage: CGFloat = 0
+                if !firstTimeFetch {
+                    let visibleOrigin = self.collectionView.contentOffset
+                    let visibleSize = self.collectionView.bounds.size
+                    let visibleRect = CGRect(origin: visibleOrigin, size: visibleSize)
+                    let visiblePoint = CGPoint(x: visibleRect.midX, y: visibleRect.midY)
+                    let visibleIndexPath = self.collectionView.indexPathForItem(at: visiblePoint)
+                    if let indexPath = visibleIndexPath {
+                        currentVisibleMessage = self.messageList.messageAt(indexPath.row)
+                        let layout = self.collectionView.layoutAttributesForItem(at: indexPath)
+                        offsetToVisibleMessage = visibleRect.midY - layout!.frame.origin.y
+                    }
                 }
 
-                // prepend new messages
-                var newMessages = Array(msgs.reversed())
-                newMessages.append(contentsOf: self.messages)
-                self.messages = newMessages
+                if !isCached {
+                    self.messageList.remove(cachedResult as! [SKYMessage])
+                }
+                self.messageList.merge(msgs)
+
+                if !isCached {
+                    if msgs.count > 0, let first = msgs.first {
+                        // this is the first page
+                        chatExt?.markReadMessages(msgs, completion: nil)
+                        chatExt?.markLastReadMessage(first,
+                                                     in: self.conversation!,
+                                                     completion: nil)
+                    }
+
+                    self.delegate?.conversationViewController?(self, didFetchedMessages: msgs)
+                }
+
                 self.hasMoreMessageToFetch = msgs.count > 0
-
-                self.delegate?.conversationViewController?(self, didFetchedMessages: msgs)
-
                 self.finishReceivingMessage()
-                self.scroll(to: IndexPath(row: msgs.count, section: 0), animated: false)
                 self.collectionView.flashScrollIndicators()
+
+                // try to keep current scroll position
+                if let currentMessage = currentVisibleMessage {
+                    let targetIndex = self.messageList.indexOf(currentMessage)
+                    if targetIndex != NSNotFound {
+                        let targetIndexPath = IndexPath(row: targetIndex, section: 0)
+                        let layout = self.collectionView.layoutAttributesForItem(at: targetIndexPath)
+                        if let ll = layout {
+                            var contentOffset = self.collectionView.contentOffset
+                            contentOffset.y = ll.frame.origin.y - self.collectionView.frame.size.height / 2 + offsetToVisibleMessage
+                            self.collectionView.contentOffset = contentOffset
+                        }
+                    }
+                }
         })
     }
 
