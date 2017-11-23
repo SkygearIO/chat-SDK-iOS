@@ -1530,10 +1530,8 @@ extension SKYChatConversationViewController {
             return
         }
 
-        var firstTimeFetch = false
         if self.messageList.count == 0 {
             self.indicator?.startAnimating()
-            firstTimeFetch = true
         }
 
         let chatExt = self.skygear.chatExtension
@@ -1578,21 +1576,6 @@ extension SKYChatConversationViewController {
                     return
                 }
 
-                var currentVisibleMessage: SKYMessage?
-                var offsetToVisibleMessage: CGFloat = 0
-                if !firstTimeFetch {
-                    let visibleOrigin = self.collectionView.contentOffset
-                    let visibleSize = self.collectionView.bounds.size
-                    let visibleRect = CGRect(origin: visibleOrigin, size: visibleSize)
-                    let visiblePoint = CGPoint(x: visibleRect.midX, y: visibleRect.midY)
-                    let visibleIndexPath = self.collectionView.indexPathForItem(at: visiblePoint)
-                    if let indexPath = visibleIndexPath {
-                        currentVisibleMessage = self.messageList.messageAt(indexPath.row)
-                        let layout = self.collectionView.layoutAttributesForItem(at: indexPath)
-                        offsetToVisibleMessage = visibleRect.midY - layout!.frame.origin.y
-                    }
-                }
-
                 if !isCached {
                     if let cachedMessages = cachedResult as? [SKYMessage] {
                         self.messageList.remove(cachedMessages)
@@ -1613,24 +1596,19 @@ extension SKYChatConversationViewController {
                 }
 
                 self.hasMoreMessageToFetch = msgs.count > 0
+
+                let bottomOffset = self.collectionView.contentSize.height - self.collectionView.contentOffset.y
+
                 self.finishReceivingMessage()
 
-                self.scroll(to: IndexPath(row: msgs.count, section: 0), animated: false)
-                self.collectionView.flashScrollIndicators()
+                // force collection view layout
+                // to allow new content offset calculated
+                self.collectionView.layoutIfNeeded()
 
-                // try to keep current scroll position
-                if let currentMessage = currentVisibleMessage {
-                    let targetIndex = self.messageList.indexOf(currentMessage)
-                    if targetIndex != NSNotFound {
-                        let targetIndexPath = IndexPath(row: targetIndex, section: 0)
-                        let layout = self.collectionView.layoutAttributesForItem(at: targetIndexPath)
-                        if let ll = layout {
-                            var contentOffset = self.collectionView.contentOffset
-                            contentOffset.y = ll.frame.origin.y - self.collectionView.frame.size.height / 2 + offsetToVisibleMessage
-                            self.collectionView.contentOffset = contentOffset
-                        }
-                    }
-                }
+                let offsetY = max(min(self.collectionView.contentSize.height - self.collectionView.frame.size.height,
+                                  self.collectionView.contentSize.height - bottomOffset), 0)
+                self.collectionView.contentOffset = CGPoint(x: 0, y: offsetY)
+                self.collectionView.flashScrollIndicators()
         })
     }
 
