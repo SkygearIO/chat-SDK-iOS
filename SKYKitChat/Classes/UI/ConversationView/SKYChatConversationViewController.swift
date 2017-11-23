@@ -177,6 +177,19 @@ open class MessageList {
         fatalError("messageIDs contains non String object")
     }
 
+    public func firstSuccessMessage() -> SKYMessage? {
+        for var messageID in self.messageIDs {
+            if let id = messageID as? String {
+                let msg = self.messages[id]
+                if !msg.fail {
+                    return msg
+                }
+            }
+        }
+
+        return nil
+    }
+
     public func first() -> SKYMessage {
         return self.messageAt(0)
     }
@@ -1132,8 +1145,11 @@ extension SKYChatConversationViewController {
 
     open func loadMoreMessage() {
         if !self.isFetchingMessage && self.hasMoreMessageToFetch {
-            let firstMessage = self.messageList.messageAt(0)
-            self.fetchMessages(before: firstMessage.creationDate())
+            if let firstMessage = self.messageList.firstSuccessMessage() {
+                self.fetchMessages(before: firstMessage.creationDate())
+            } else {
+                self.fetchMessages(before: nil)
+            }
         }
     }
 
