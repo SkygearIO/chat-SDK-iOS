@@ -17,8 +17,6 @@
 //  limitations under the License.
 //
 
-import JSQMessagesViewController
-
 private let maxDisplaySize: CGFloat = 240
 private let minDisplaySize: CGFloat = 80
 
@@ -133,22 +131,18 @@ extension SKYChatConversationImageItem {
         }
 
         if let cache = self.assetCache {
-            if let cachedImage = cache.get(asset: asset!) as? UIImage {
-                return cachedImage
+            if let cachedImageData = cache.get(asset: asset!) {
+                return UIImage(data: cachedImageData)
             }
         }
 
         let assetUrl = (asset?.url)!
-        let data = try? Data(contentsOf: assetUrl)
-        if data == nil {
+        guard let data = try? Data(contentsOf: assetUrl) else {
             return nil
         }
 
-        let image = UIImage(data: data!)
-        if image != nil, let cache = self.assetCache {
-            cache.set(value: image!, for: asset!)
-        }
-        return image
+        self.assetCache?.set(data: data, for: asset!)
+        return UIImage(data: data)
     }
 
     fileprivate static func calculateDisplaySize(from imageSize: CGSize) -> CGSize {

@@ -19,6 +19,7 @@
 
 import UIKit
 import SKYKit
+import SKYKitChat
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -53,6 +54,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             types: [.alert, .badge, .sound],
             categories: nil
         ))
+
+        SKYChatUIModelCustomization.default()
+            .update(userNameField: "name")
+            .update(userAvatarField: "profile_pic")
+
+        SKYChatConversationView.appearance().avatarBackgroundColor
+            = UIColor(red: 0, green: 0.4745, blue: 0.8235, alpha: 1.0)
+        SKYChatConversationView.appearance().messageSenderTextColor = UIColor.black
+        SKYChatConversationView.appearance().avatarType = .image
+        SKYChatConversationView.appearance().avatarHidden = true
+        SKYChatConversationView.appearance().avatarHiddenForIncomingMessages = false
 
         return true
     }

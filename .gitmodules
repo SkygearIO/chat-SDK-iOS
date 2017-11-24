@@ -1,0 +1,3 @@
+[submodule "lib/JSQMessagesViewController"]
+	path = lib/JSQMessagesViewController
+	url = https://github.com/SkygearIO/JSQMessagesViewController.git

@@ -17,8 +17,6 @@
 //  limitations under the License.
 //
 
-import JSQMessagesViewController
-
 private let maxDisplaySize: CGFloat = 240
 private let minDisplaySize: CGFloat = 80
 
@@ -56,7 +54,7 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
         self.assetCache = assetCache
         self.asset = asset
 
-        if let data = self.assetCache?.get(asset: asset) as? Data {
+        if let data = self.assetCache?.get(asset: asset) {
             self.audioData = data
         } else {
             DispatchQueue.global().async { [weak self] in
@@ -69,7 +67,7 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
                 }
 
                 myself.audioData = data
-                myself.assetCache?.set(value: data, for: asset)
+                myself.assetCache?.set(data: data, for: asset)
 
                 DispatchQueue.main.sync {  [weak self] in
                     guard let myself = self else {

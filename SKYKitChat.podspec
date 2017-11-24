@@ -28,15 +28,23 @@ This is the client library for the Skygear Chat extension.
   end
 
   s.subspec 'UI' do |sp|
-    sp.source_files = 'SKYKitChat/Classes/UI/**/*'
+
+    sp.source_files = 'SKYKitChat/Classes/UI/**/*', 'lib/JSQMessagesViewController/**/*.{h,m}'
+    sp.exclude_files = 'lib/JSQMessagesViewController/JSQMessagesTests/**/*', 'lib/JSQMessagesViewController/JSQMessagesDemo/**/*'
+
+	s.resources = [
+        'lib/JSQMessagesViewController/JSQMessagesViewController/Assets/JSQMessagesAssets.bundle',
+        'lib/JSQMessagesViewController/JSQMessagesViewController/**/*.{xib}'
+    ]
+
     sp.dependency 'SKYKitChat/Core'
     sp.dependency 'SKYKit/Core',               '~> 1.1'
-    sp.dependency 'JSQMessagesViewController', '~> 7.3.0'
     sp.dependency 'SVProgressHUD',             '~> 2.1.0'
     sp.dependency 'ALCameraViewController',    '~> 2.0'
     sp.dependency 'LruCache',                  '~> 0.1'
     sp.dependency 'CTAssetsPickerController',  '~> 3.3.1'
     sp.dependency 'SKPhotoBrowser',            '~> 4.1.1'
+    sp.dependency 'JSQSystemSoundPlayer',      '~> 2.0.1'
   end
 
 end

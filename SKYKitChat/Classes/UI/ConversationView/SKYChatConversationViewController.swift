@@ -17,7 +17,6 @@
 //  limitations under the License.
 //
 
-import JSQMessagesViewController
 import ALCameraViewController
 import CTAssetsPickerController
 import AVFoundation
@@ -63,6 +62,12 @@ import SKPhotoBrowser
     @objc optional func conversationViewController(
         _ controller: SKYChatConversationViewController,
         shouldShowSenderNameAt indexPath: IndexPath) -> Bool
+
+    @objc optional func conversationViewController(
+        _ controller: SKYChatConversationViewController,
+        avatarForMessage message: SKYMessage,
+        withAuthor author: SKYRecord?,
+        atIndexPath indexPath: IndexPath) -> UIImage?
 
     /**
      * Hooks on send message flow
@@ -213,15 +218,20 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     public var incomingMessageBubble: JSQMessagesBubbleImage?
     public var outgoingMessageBubble: JSQMessagesBubbleImage?
 
-    var defaultMediaDataFactory: JSQMessageMediaDataFactory = JSQMessageMediaDataFactory()
-    open var messageMediaDataFactory: JSQMessageMediaDataFactory {
-        get {
-            return defaultMediaDataFactory
-        }
-    }
-
+    let downloadDispatcher = SimpleDownloadDispatcher.default()
+    public var dataCache: DataCache = MemoryDataCache.shared()
+    public var assetCache: SKYAssetCache = SKYAssetMemoryCache.shared()
+    public var messageMediaDataFactory = JSQMessageMediaDataFactory()
 
     public var cameraButton: UIButton?
+
+    public var conversationView: SKYChatConversationView? {
+        guard let view = self.collectionView as? SKYChatConversationView else {
+            return nil
+        }
+
+        return view
+    }
 
     public var incomingMessageBubbleColor: UIColor? {
         didSet {
@@ -257,15 +267,40 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     var audioDict: [String: SKYChatConversationAudioItem] = [:]
     var audioTime: TimeInterval?
     var indicator: UIActivityIndicatorView?
-}
 
-// MARK: - Initializing
-
-extension SKYChatConversationViewController {
+    // MARK: - Initializing
 
     public class func create() -> SKYChatConversationViewController {
-        return SKYChatConversationViewController(nibName: "JSQMessagesViewController",
-                                                 bundle: Bundle(for: JSQMessagesViewController.self))
+        return SKYChatConversationViewController()
+    }
+
+    public class func defaultConversationView() -> SKYChatConversationView {
+        let frame = UIApplication.shared.keyWindow?.frame ??
+                CGRect(x: 0, y: 0, width: 375, height: 667)
+        return SKYChatConversationView(frame: frame,
+                                       collectionViewLayout: JSQMessagesCollectionViewFlowLayout())
+    }
+
+    public init(conversationView: SKYChatConversationView) {
+        super.init(collectionView: conversationView,
+                   inputToolBar: JSQMessagesViewController.defaultInputToolbar())
+
+    }
+
+    public convenience init() {
+        self.init(conversationView: SKYChatConversationViewController.defaultConversationView())
+    }
+
+    public required convenience init?(coder aDecoder: NSCoder) {
+        self.init()
+    }
+
+    open override func awakeFromNib() {
+        if (self.collectionView == nil) {
+            self.collectionView = SKYChatConversationViewController.defaultConversationView()
+        }
+
+        super.awakeFromNib()
     }
 }
 
@@ -306,6 +341,12 @@ extension SKYChatConversationViewController {
 
         self.subscribeMessageChanges()
         self.subscribeTypingIndicatorChanges()
+    }
+
+    open override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        self.updateViewsAfterAppear()
     }
 
     override open func viewDidDisappear(_ animated: Bool) {
@@ -518,6 +559,30 @@ extension SKYChatConversationViewController {
         }
     }
 
+    open func updateViewsAfterAppear() {
+        // UIAppearance got the values from proxy after it is attached to screen
+        if self.conversationView?.avatarHiddenForIncomingMessages == true {
+            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize
+                = CGSize(width: 0, height: 0)
+        } else {
+            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize = CGSize(
+                width: kJSQMessagesCollectionViewAvatarSizeDefault,
+                height: kJSQMessagesCollectionViewAvatarSizeDefault
+            )
+        }
+
+        // UIAppearance got the values from proxy after it is attached to screen
+        if self.conversationView?.avatarHiddenForOutgoingMessages == true {
+            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize
+                = CGSize(width: 0, height: 0)
+        } else {
+            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize = CGSize(
+                width: kJSQMessagesCollectionViewAvatarSizeDefault,
+                height: kJSQMessagesCollectionViewAvatarSizeDefault
+            )
+        }
+    }
+
     open override func collectionView(_ collectionView: UICollectionView,
                                       numberOfItemsInSection section: Int) -> Int {
         return self.messageList.count
@@ -528,15 +593,11 @@ extension SKYChatConversationViewController {
         let msg = self.messageList.messageAt(indexPath.row)
 
         var msgSenderName: String = ""
-        if let sender = self.getSender(forMessage: msg),
-            let senderName = sender.object(forKey: "username") as? String {
-
-            msgSenderName = senderName
+        if let sender = self.getSenderName(forMessage: msg) as? String {
+            msgSenderName = sender
         }
 
         let isOutgoingMessage = msg.creatorUserRecordID() == self.senderId
-
-
         let mediaData = self.messageMediaDataFactory.mediaData(with: msg,
                                                                markedAsOutgoing: isOutgoingMessage)
         let jsqMessage: JSQMessage
@@ -550,7 +611,7 @@ extension SKYChatConversationViewController {
                                     senderDisplayName: msgSenderName,
                                     date: msg.creationDate(),
                                     media: mediaData)
-            
+
             /* Need to store strong reference for audio data
                https://github.com/jessesquires/JSQMessagesViewController/issues/1705
             */
@@ -656,24 +717,25 @@ extension SKYChatConversationViewController {
                 shouldShow = thisString?.string != lastString?.string
             }
         }
-        
+
         return shouldShow ? CGFloat(20) : CGFloat(0)
     }
-    
+
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
         attributedTextForMessageBubbleTopLabelAt indexPath: IndexPath!
-        ) -> NSAttributedString! {
+        ) -> NSAttributedString!
+    {
         let msg = self.messageList.messageAt(indexPath.row)
-        var senderName: String = ""
-        if let user = self.getSender(forMessage: msg),
-            let userName = user.object(forKey: "username") as? String {
-            senderName = userName
+        let senderName = self.getSenderName(forMessage: msg) ?? ""
+        let attrStr = NSMutableAttributedString(string: senderName)
+        if let color = self.conversationView?.messageSenderTextColor {
+            attrStr.setAttributes([NSForegroundColorAttributeName: color],
+                                  range: NSMakeRange(0, attrStr.length))
         }
-        
-        return NSAttributedString(string: senderName)
+        return attrStr
     }
-    
+
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
         layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!,
@@ -704,25 +766,75 @@ extension SKYChatConversationViewController {
                 shouldShow = thisString?.string != lastString?.string
             }
         }
-        
         return shouldShow ? CGFloat(14) : CGFloat(0)
     }
-    
+
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
         avatarImageDataForItemAt indexPath: IndexPath!
     ) -> JSQMessageAvatarImageDataSource! {
-        let msg = self.messageList.messageAt(indexPath.row)
-        var senderName: String = ""
-        if let user = self.getSender(forMessage: msg),
-            let userName = user.object(forKey: "username") as? String {
 
-            senderName = userName
+        let msg = self.messageList.messageAt(indexPath.row)
+        let sender = self.getSender(forMessage: msg)
+
+        // get from delegate
+        if let image = self.delegate?.conversationViewController?(
+            self,
+            avatarForMessage: msg,
+            withAuthor: sender,
+            atIndexPath: indexPath)
+        {
+            return JSQMessagesAvatarImage.avatar(with: image)
         }
 
-        if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName),
-            let roundedImage = UIImage.circleImage(fromImage: avatarImage) {
+        if self.conversationView?.avatarType == .image {
+            // get from avatar field
+            let avatarField = SKYChatUIModelCustomization.default().userAvatarField
+            let senderAvatar = sender?.object(forKey: avatarField)
+            switch senderAvatar {
+            case let senderAvatarUrl as String:
+                if let data = self.dataCache.getData(forKey: senderAvatarUrl) {
+                    return JSQMessagesAvatarImage.avatar(with: UIImage(data: data))
+                }
 
+                // download from url
+                let _ = self.downloadDispatcher.download(senderAvatarUrl, compltion: { data in
+                    guard let downloadedData = data else {
+                        return
+                    }
+
+                    // notify to update the avatar when download is done
+                    self.dataCache.set(data: downloadedData, forKey: senderAvatarUrl)
+                    self.conversationView?.reloadItems(at: [indexPath])
+                })
+            case let senderAvatarAsset as SKYAsset:
+                if let data = self.assetCache.get(asset: senderAvatarAsset) {
+                    return JSQMessagesAvatarImage.avatar(with: UIImage(data: data))
+                }
+
+                // download asset
+                let _ = self.downloadDispatcher.download(
+                    senderAvatarAsset.url.absoluteString,
+                    compltion: { data in
+                        guard let downloadedData = data else {
+                            return
+                        }
+
+                        // notify to update the avatar when download is done
+                        self.assetCache.set(data: downloadedData, for: senderAvatarAsset)
+                        self.conversationView?.reloadItems(at: [indexPath])
+                })
+            default: ()
+            }
+        }
+
+        // fallback: generate from user name
+        let senderName = self.getSenderName(forMessage: msg) ?? ""
+        if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName,
+                                                 backgroundColor: self.conversationView?.avatarBackgroundColor,
+                                                 textColor: self.conversationView?.avatarTextColor),
+            let roundedImage = UIImage.circleImage(fromImage: avatarImage)
+        {
             return JSQMessagesAvatarImage.avatar(with: roundedImage)
         }
 
@@ -1336,10 +1448,11 @@ extension SKYChatConversationViewController {
                     participants.append(v)
                 }
 
-                if let senderRecord = self.participants[self.senderId],
-                    let senderName = senderRecord.object(forKey: "username") as? String {
-
-                    self.senderDisplayName = senderName
+                if let senderRecord = self.participants[self.senderId] {
+                    let userNameField = SKYChatUIModelCustomization.default().userNameField
+                    if let senderName = senderRecord.object(forKey: userNameField) as? String {
+                        self.senderDisplayName = senderName
+                    }
                 }
 
                 self.updateTitle()
@@ -1441,6 +1554,8 @@ extension SKYChatConversationViewController {
 
                 self.hasMoreMessageToFetch = msgs.count > 0
                 self.finishReceivingMessage()
+
+                self.scroll(to: IndexPath(row: msgs.count, section: 0), animated: false)
                 self.collectionView.flashScrollIndicators()
 
                 // try to keep current scroll position
@@ -1460,12 +1575,23 @@ extension SKYChatConversationViewController {
     }
 
     open func getSender(forMessage message: SKYMessage) -> SKYRecord? {
-        guard self.participants.count > 0 else {
-            print("Warning: No participants are fetched")
+        let msgAuthorID = message.creatorUserRecordID()
+
+        guard self.participants.keys.contains(msgAuthorID) else {
+            print("Warning: Participant ID \(msgAuthorID) is not fetched")
             return nil
         }
 
-        return self.participants[message.creatorUserRecordID()]
+        return self.participants[msgAuthorID]
+    }
+
+    open func getSenderName(forMessage message: SKYMessage) -> String? {
+        guard let sender = self.getSender(forMessage: message) else {
+            return nil
+        }
+
+        let userNameField = SKYChatUIModelCustomization.default().userNameField
+        return sender.object(forKey: userNameField) as? String
     }
 }
 
