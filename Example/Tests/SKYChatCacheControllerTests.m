@@ -127,9 +127,8 @@ SpecBegin(SKYChatCacheController)
                                           limit:100
                                      beforeTime:nil
                                           order:nil
-                                     completion:^(NSArray<SKYMessage *> *messageList,
-                                                  NSArray<SKYMessage *> *deletedMessageList,
-                                                  BOOL isCached, NSError *error) {
+                                     completion:^(NSArray<SKYMessage *> *messageList, BOOL isCached,
+                                                  NSError *error) {
                                          expect(messageList.count).to.equal(5);
                                          for (NSInteger i = 0; i < 5; i++) {
                                              SKYMessage *message = messageList[4 - i];
@@ -146,9 +145,8 @@ SpecBegin(SKYChatCacheController)
                                           limit:100
                                      beforeTime:[baseDate dateByAddingTimeInterval:4000]
                                           order:nil
-                                     completion:^(NSArray<SKYMessage *> *messageList,
-                                                  NSArray<SKYMessage *> *deletedMessageList,
-                                                  BOOL isCached, NSError *error) {
+                                     completion:^(NSArray<SKYMessage *> *messageList, BOOL isCached,
+                                                  NSError *error) {
                                          expect(messageList.count).to.equal(2);
                                          for (NSInteger i = 0; i < 2; i++) {
                                              SKYMessage *message = messageList[1 - i];
@@ -209,9 +207,8 @@ SpecBegin(SKYChatCacheController)
                                           limit:100
                                      beforeTime:nil
                                           order:nil
-                                     completion:^(NSArray<SKYMessage *> *messageList,
-                                                  NSArray<SKYMessage *> *deletedMessageList,
-                                                  BOOL isCached, NSError *error) {
+                                     completion:^(NSArray<SKYMessage *> *messageList, BOOL isCached,
+                                                  NSError *error) {
                                          expect(messageList.count).to.equal(7);
                                          for (NSInteger i = 1; i < 8; i++) {
                                              SKYMessage *message = messageList[7 - i];
@@ -262,30 +259,31 @@ SpecBegin(SKYChatCacheController)
                  }];
 
             // assume that the save message to cache operation is sync
-            // simulate fetch result before receiving didSave callback
             [cacheController
                 fetchMessagesWithConversationID:@"c0"
                                           limit:100
                                      beforeTime:nil
                                           order:nil
-                                     completion:^(NSArray<SKYMessage *> *messageList,
-                                                  NSArray<SKYMessage *> *deletedMessageList,
-                                                  BOOL isCached, NSError *error) {
-                                         expect(messageList.count).to.equal(6);
+                                     completion:^(NSArray<SKYMessage *> *messageList, BOOL isCached,
+                                                  NSError *error) {
+                                         expect(messageList.count).to.equal(5);
                                          for (NSInteger i = 1; i < 5; i++) {
-                                             SKYMessage *message = messageList[5 - i];
+                                             SKYMessage *message = messageList[4 - i];
                                              expect(message.creationDate)
                                                  .to.equal(
                                                      [baseDate dateByAddingTimeInterval:i * 2000]);
                                          }
-
-                                         SKYMessage *latestMessage = messageList.firstObject;
-                                         expect(latestMessage.recordID)
-                                             .to.equal(messageToSave.recordID);
-                                         expect(latestMessage.sendDate)
-                                             .to.equal(messageToSave.sendDate);
-                                         expect(latestMessage.alreadySyncToServer).to.beFalsy();
                                      }];
+
+            [cacheController
+                fetchUnsentMessagesWithConversationID:@"c0"
+                                           completion:^(NSArray<SKYMessage *> *_Nonnull messages) {
+                                               expect(messages.count).to.equal(1);
+                                               expect(messages[0].recordID.recordName)
+                                                   .to.equal(messageToSave.recordID.recordName);
+                                               expect(messages[0].sendDate)
+                                                   .to.equal(messageToSave.sendDate);
+                                           }];
 
             [cacheController didSaveMessage:messageToSave error:nil];
 
@@ -294,9 +292,8 @@ SpecBegin(SKYChatCacheController)
                                           limit:1
                                      beforeTime:nil
                                           order:nil
-                                     completion:^(NSArray<SKYMessage *> *messageList,
-                                                  NSArray<SKYMessage *> *deletedMessageList,
-                                                  BOOL isCached, NSError *error) {
+                                     completion:^(NSArray<SKYMessage *> *messageList, BOOL isCached,
+                                                  NSError *error) {
                                          SKYMessage *latestMessage = messageList.firstObject;
                                          expect(latestMessage.recordID)
                                              .to.equal(messageToSave.recordID);

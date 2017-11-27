@@ -316,6 +316,13 @@ extension SKYChatConversationViewController {
         // update the display name after fetching participants
         self.senderDisplayName = NSLocalizedString("me", comment: "")
 
+        UIMenuController.shared.menuItems = [
+            UIMenuItem.init(title: "Resend", action: #selector(SKYChatConversationViewController.resendFailedMessage(_:))),
+            UIMenuItem.init(title: "Delete", action: #selector(SKYChatConversationViewController.deleteFailedMessage(_:))),
+        ]
+        JSQMessagesCollectionViewCell.registerMenuAction(#selector(SKYChatConversationViewController.resendFailedMessage(_:)))
+        JSQMessagesCollectionViewCell.registerMenuAction(#selector(SKYChatConversationViewController.deleteFailedMessage(_:)))
+
         self.incomingMessageBubbleColor = UIColor.lightGray
         self.outgoingMessageBubbleColor = UIColor.jsq_messageBubbleBlue()
     }
@@ -336,6 +343,7 @@ extension SKYChatConversationViewController {
         }
 
         if self.messageList.count == 0 {
+            self.fetchUnsentMessages()
             self.fetchMessages(before: nil)
         }
 
@@ -652,6 +660,11 @@ extension SKYChatConversationViewController {
 
         if msg.creatorUserRecordID() != self.senderId {
             return nil
+        }
+
+        if msg.fail {
+            return NSAttributedString(string: NSLocalizedString("Failed", comment: ""),
+                                      attributes: [NSForegroundColorAttributeName: UIColor.red])
         }
 
         switch msg.conversationStatus {
@@ -1034,7 +1047,7 @@ extension SKYChatConversationViewController {
                       errorMessage: String)
     {
         if let msg = message {
-            self.messageList.remove([msg])
+            self.messageList.update([msg])
             self.collectionView?.reloadData()
         }
 
@@ -1122,6 +1135,42 @@ extension SKYChatConversationViewController {
             let firstMessage = self.messageList.messageAt(0)
             self.fetchMessages(before: firstMessage.creationDate())
         }
+    }
+
+    open override func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
+        let message = self.messageList.messageAt(indexPath.row)
+        if !message.fail {
+            return super.collectionView(collectionView, canPerformAction: action, forItemAt: indexPath, withSender: sender)
+        }
+
+        if action == #selector(SKYChatConversationViewController.resendFailedMessage(_:)) || action == #selector(SKYChatConversationViewController.deleteFailedMessage(_:)) {
+            return true
+        }
+
+        return false
+    }
+
+    open override func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
+        super.collectionView(collectionView, performAction: action, forItemAt: indexPath, withSender: sender)
+
+        let message = self.messageList.messageAt(indexPath.row)
+        if action == #selector(SKYChatConversationViewController.resendFailedMessage(_:)) {
+            self.resendFailedMessage(message)
+        } else if action == #selector(SKYChatConversationViewController.deleteFailedMessage(_:)) {
+            self.deleteFailedMessage(message)
+        }
+    }
+
+    @objc func resendFailedMessage(_ message: SKYMessage) {
+        self.messageList.remove([message])
+        self.beforeSending(message: message)
+        self.send(message: message)
+        self.collectionView.reloadData()
+    }
+
+    @objc func deleteFailedMessage(_ message: SKYMessage) {
+        self.messageList.remove([message])
+        self.collectionView.reloadData()
     }
 }
 
@@ -1466,6 +1515,15 @@ extension SKYChatConversationViewController {
             }, perRecordErrorHandler: nil)
     }
 
+    open func fetchUnsentMessages() {
+        let chatExt = self.skygear.chatExtension
+        chatExt?.fetchUnsentMessages(conversationID: self.conversation!.recordID().recordName,
+                                     completion: { (unsentMessages) in
+                                        self.messageList.merge(unsentMessages)
+                                        self.finishReceivingMessage()
+        })
+    }
+
     open func fetchMessages(before: Date?) {
         guard self.conversation != nil else {
             print("Cannot fetch messages with nil conversation")
@@ -1489,7 +1547,7 @@ extension SKYChatConversationViewController {
             limit: Int(self.messagesFetchLimit),
             beforeTime: before,
                  order: nil,
-            completion: { (result, _, isCached, error) in
+            completion: { (result, isCached, error) in
                 if isCached {
                     if (result?.count ?? 0) > 0 {
                         self.indicator?.stopAnimating()
@@ -1536,7 +1594,9 @@ extension SKYChatConversationViewController {
                 }
 
                 if !isCached {
-                    self.messageList.remove(cachedResult as! [SKYMessage])
+                    if let cachedMessages = cachedResult as? [SKYMessage] {
+                        self.messageList.remove(cachedMessages)
+                    }
                 }
                 self.messageList.merge(msgs)
 

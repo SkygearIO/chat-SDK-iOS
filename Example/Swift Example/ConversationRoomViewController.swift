@@ -83,7 +83,7 @@ class ConversationRoomViewController: UIViewController,
         }
 
         // get conversation messages
-        chat.fetchMessages(conversation: conversation, limit: 100, beforeTime: Date(), order: nil) { (messages, _, isCached, error) in
+        chat.fetchMessages(conversation: conversation, limit: 100, beforeTime: Date(), order: nil) { (messages, isCached, error) in
             if isCached {
                 // TODO: handle cached result
                 return

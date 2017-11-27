@@ -283,13 +283,11 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                   completion:(SKYChatFetchMessagesListCompletion)completion
 {
     if (completion) {
-        [self.cacheController
-            fetchMessagesWithIDs:messageIDs
-                      completion:^(NSArray<SKYMessage *> *_Nullable messageList,
-                                   NSArray<SKYMessage *> *_Nullable deletedMessageList,
-                                   BOOL isCached, NSError *_Nullable error) {
-                          completion(messageList, deletedMessageList, YES, nil);
-                      }];
+        [self.cacheController fetchMessagesWithIDs:messageIDs
+                                        completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                                     BOOL isCached, NSError *_Nullable error) {
+                                            completion(messageList, YES, nil);
+                                        }];
     }
 
     [self.container callLambda:@"chat:get_messages_by_ids"
@@ -298,7 +296,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                  if (error) {
                      NSLog(@"error calling chat:get_messages_by_ids: %@", error);
                      if (completion) {
-                         completion(nil, nil, NO, error);
+                         completion(nil, NO, error);
                      }
                      return;
                  }
@@ -320,7 +318,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      }
                  }
                  if (completion) {
-                     completion(returnArray, deletedReturnArray, NO, error);
+                     completion(returnArray, NO, error);
                  }
              }];
 }
@@ -501,6 +499,13 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                   }];
 }
 
+- (void)fetchUnsentMessagesWithConversationID:(NSString *)conversationId
+                                   completion:(void (^)(NSArray<SKYMessage *> *_Nonnull))completion
+{
+    [self.cacheController fetchUnsentMessagesWithConversationID:conversationId
+                                                     completion:completion];
+}
+
 - (void)fetchMessagesWithConversation:(SKYConversation *)conversation
                                 limit:(NSInteger)limit
                            beforeTime:(NSDate *)beforeTime
@@ -552,9 +557,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                  beforeTime:beforeTime
                                       order:order
                                  completion:^(NSArray<SKYMessage *> *_Nullable messageList,
-                                              NSArray<SKYMessage *> *_Nullable deletedMessageList,
                                               BOOL isCached, NSError *_Nullable error) {
-                                     completion(messageList, deletedMessageList, YES, error);
+                                     completion(messageList, YES, error);
                                  }];
     }
 
@@ -565,7 +569,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
             if (error) {
                 NSLog(@"error calling chat:get_messages: %@", error);
                 if (completion) {
-                    completion(nil, nil, NO, error);
+                    completion(nil, NO, error);
                 }
                 return;
             }
@@ -598,7 +602,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
             [self.cacheController didFetchMessages:returnArray deletedMessages:returnDeletedArray];
 
             if (completion) {
-                completion(returnArray, returnDeletedArray, NO, error);
+                completion(returnArray, NO, error);
             }
 
             // The SDK notifies the server that these messages are received
