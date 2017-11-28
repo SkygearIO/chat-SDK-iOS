@@ -28,6 +28,15 @@ class ConversationDemoViewController: SKYChatConversationViewController {
         self.messageMediaDataFactory = JSQMessageMediaDataFactory(with: assetCache)
     }
 
+    lazy var dateFormatter: DateFormatter = {
+        let dateFormatter: DateFormatter
+        dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .short
+        dateFormatter.doesRelativeDateFormatting = true
+        return dateFormatter
+    }()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -42,12 +51,7 @@ extension ConversationDemoViewController: SKYChatConversationViewControllerDeleg
         let msg = self.messageList.messageAt(indexPath.row)
         let date = msg.creationDate()
 
-        let dateFormatter: DateFormatter
-        dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .short
-        dateFormatter.timeStyle = .short
-        dateFormatter.doesRelativeDateFormatting = true
-        let dateString = dateFormatter.string(from: date)
+        let dateString = self.dateFormatter.string(from: date)
 
         return NSAttributedString(string: "\(dateString)")
     }
