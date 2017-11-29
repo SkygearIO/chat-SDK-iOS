@@ -10,7 +10,7 @@ This is the client library for the Skygear Chat extension.
   s.homepage         = 'https://github.com/SkygearIO/chat-SDK-iOS'
   s.license          = 'Apache License, Version 2.0'
   s.author           = { "Oursky Ltd." => "hello@oursky.com" }
-  s.source           = { :git => 'https://github.com/SkygearIO/chat-SDK-iOS.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/SkygearIO/chat-SDK-iOS.git', :tag => s.version.to_s, :submodules => true }
 
   s.ios.deployment_target = '8.2'
   s.default_subspecs = 'Core'
