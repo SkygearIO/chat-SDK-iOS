@@ -180,9 +180,11 @@ open class MessageList {
     public func firstSuccessMessage() -> SKYMessage? {
         for var messageID in self.messageIDs {
             if let id = messageID as? String {
-                let msg = self.messages[id]
-                if !msg.fail {
-                    return msg
+                let message = self.messages[id]
+                if let msg = message {
+                    if !msg.fail {
+                        return msg
+                    }
                 }
             }
         }
