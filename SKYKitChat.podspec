@@ -24,8 +24,9 @@ This is the client library for the Skygear Chat extension.
         ]
     }
 
-    sp.dependency 'SKYKit/Core', '~> 1.1'
+    sp.dependency 'SKYKit/Core', '~> 1.1.1'
   end
+
 
   s.subspec 'UI' do |sp|
 
@@ -38,7 +39,7 @@ This is the client library for the Skygear Chat extension.
     ]
 
     sp.dependency 'SKYKitChat/Core'
-    sp.dependency 'SKYKit/Core',               '~> 1.1'
+    sp.dependency 'SKYKit/Core',               '~> 1.1.1'
     sp.dependency 'SVProgressHUD',             '~> 2.1.0'
     sp.dependency 'ALCameraViewController',    '~> 2.0'
     sp.dependency 'LruCache',                  '~> 0.1'
