@@ -98,7 +98,8 @@ import SKPhotoBrowser
     @objc optional func startFetchingMessages(_ controller: SKYChatConversationViewController)
 
     @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
-                                                   didFetchedMessages messages: [SKYMessage])
+                                                   didFetchedMessages messages: [SKYMessage],
+                                                   isCached isCached: Bool)
 
     @objc optional func conversationViewController(
         _ controller: SKYChatConversationViewController,
@@ -1399,7 +1400,7 @@ extension SKYChatConversationViewController {
                                                                 in: self.conversation!,
                                                                 completion: nil)
 
-                self.delegate?.conversationViewController?(self, didFetchedMessages: [msg])
+                self.delegate?.conversationViewController?(self, didFetchedMessages: [msg], isCached: false)
 
                 self.finishReceivingMessage()
             case .update:
@@ -1537,6 +1538,7 @@ extension SKYChatConversationViewController {
         let chatExt = self.skygear.chatExtension
         chatExt?.fetchUnsentMessages(conversationID: self.conversation!.recordID().recordName,
                                      completion: { (unsentMessages) in
+                                        self.delegate?.conversationViewController?(self, didFetchedMessages: unsentMessages, isCached: true)
                                         self.messageList.merge(unsentMessages)
                                         self.finishReceivingMessage()
         })
@@ -1609,9 +1611,9 @@ extension SKYChatConversationViewController {
                                                      in: self.conversation!,
                                                      completion: nil)
                     }
-
-                    self.delegate?.conversationViewController?(self, didFetchedMessages: msgs)
                 }
+
+                self.delegate?.conversationViewController?(self, didFetchedMessages: msgs, isCached: isCached)
 
                 self.hasMoreMessageToFetch = msgs.count > 0
 
