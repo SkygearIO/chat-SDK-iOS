@@ -1130,29 +1130,36 @@ extension SKYChatConversationViewController {
     }
 
     open override func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
-        self.loadMoreMessage()
+        if self.shouldLoadMoreMessage() {
+            self.loadMoreMessage()
+        }
     }
 
     open override func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let scrollViewHeight = scrollView.frame.size.height;
-        let scrollContentSizeHeight = scrollView.contentSize.height;
-        let scrollOffset = scrollView.contentOffset.y;
-
-        if scrollOffset < self.offsetYToLoadMore {
+        if self.shouldLoadMoreMessage() {
             self.loadMoreMessage()
         }
 
         // should automaticallyScrollsToMostRecentMessage when reach bottom
+        let scrollViewHeight = scrollView.frame.size.height;
+        let scrollContentSizeHeight = scrollView.contentSize.height;
+        let scrollOffset = scrollView.contentOffset.y;
         self.automaticallyScrollsToMostRecentMessage = scrollOffset >= scrollContentSizeHeight - scrollViewHeight
     }
 
+    func shouldLoadMoreMessage() -> Bool {
+        let scrollView = self.collectionView!
+        let scrollViewHeight = scrollView.frame.size.height;
+        let scrollContentSizeHeight = scrollView.contentSize.height;
+        let scrollOffset = scrollView.contentOffset.y;
+        return !self.isFetchingMessage && self.hasMoreMessageToFetch && scrollOffset < self.offsetYToLoadMore
+    }
+
     open func loadMoreMessage() {
-        if !self.isFetchingMessage && self.hasMoreMessageToFetch {
-            if let firstMessage = self.messageList.firstSuccessMessage() {
-                self.fetchMessages(before: firstMessage.creationDate())
-            } else {
-                self.fetchMessages(before: nil)
-            }
+        if let firstMessage = self.messageList.firstSuccessMessage() {
+            self.fetchMessages(before: firstMessage.creationDate())
+        } else {
+            self.fetchMessages(before: nil)
         }
     }
 
@@ -1629,6 +1636,11 @@ extension SKYChatConversationViewController {
                                   self.collectionView.contentSize.height - bottomOffset), 0)
                 self.collectionView.contentOffset = CGPoint(x: 0, y: offsetY)
                 self.collectionView.flashScrollIndicators()
+
+                // Trigger next time load more message if needed
+                if self.shouldLoadMoreMessage() {
+                    self.loadMoreMessage()
+                }
         })
     }
 
