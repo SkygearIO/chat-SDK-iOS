@@ -30,13 +30,13 @@ PODS:
   - SKYKit/Core (1.1.1):
     - FMDB (~> 2.6.0)
     - SocketRocket (~> 0.4)
-  - SKYKitChat (1.2.0-alpha.3):
+  - SKYKitChat (1.2.0-alpha.4):
     - Realm (~> 3.0.1)
-    - SKYKitChat/Core (= 1.2.0-alpha.3)
-  - SKYKitChat/Core (1.2.0-alpha.3):
+    - SKYKitChat/Core (= 1.2.0-alpha.4)
+  - SKYKitChat/Core (1.2.0-alpha.4):
     - Realm (~> 3.0.1)
     - SKYKit/Core (~> 1.1.1)
-  - SKYKitChat/UI (1.2.0-alpha.3):
+  - SKYKitChat/UI (1.2.0-alpha.4):
     - ALCameraViewController (~> 2.0)
     - CTAssetsPickerController (~> 3.3.1)
     - JSQSystemSoundPlayer (~> 2.0.1)
@@ -75,7 +75,7 @@ SPEC CHECKSUMS:
   Realm: 6f23fd1f178a09342eac21bfa7c2bf4312a7a180
   SKPhotoBrowser: aa02de50f56d80fac23f543e40847af6b360e4b3
   SKYKit: f929480e612606e31c8d2a57278076550d352678
-  SKYKitChat: cb60eb59ce3ee6877049a049d37838c2531c4e04
+  SKYKitChat: 268eab8c2dd070699e1e5f8442ca38aab5825568
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   Specta: 3e1bd89c3517421982dc4d1c992503e48bd5fe66
   SVProgressHUD: c404a55d78acbeb7ebb78b76d3faf986475a6994
