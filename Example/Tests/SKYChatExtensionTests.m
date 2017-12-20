@@ -249,7 +249,6 @@ SpecBegin(SKYChatExtension)
         });
 
         it(@"save message", ^{
-            __block NSInteger checkPoint = 0;
             SKYMessage *message = [SKYMessage
                 recordWithRecord:[SKYRecord recordWithRecordType:@"message" name:@"mm1"]];
             SKYConversation *conversation = [SKYConversation
@@ -263,29 +262,18 @@ SpecBegin(SKYChatExtension)
             };
 
             waitUntil(^(DoneCallback done) {
-                [chatExtension addMessage:message
-                           toConversation:conversation
-                               completion:^(SKYMessage *_Nullable message, BOOL isCached,
-                                            NSError *_Nullable error) {
-                                   expect(error).to.beNil();
-                                   expect(message.recordID.recordName).to.equal(@"mm1");
-                                   if (isCached) {
-                                       expect(message.alreadySyncToServer).to.beFalsy();
-                                       expect(message.creationDate).to.beNil();
-                                       expect(message.sendDate).toNot.beNil();
-                                       checkPoint++;
-                                   } else {
-                                       expect(message.alreadySyncToServer).to.beTruthy();
-                                       expect(message.creationDate).toNot.beNil();
-                                       expect(message.sendDate).to.beNil();
-                                       checkPoint++;
-                                   }
-
-                                   if (checkPoint == 2) {
-                                       checkRealm();
-                                       done();
-                                   }
-                               }];
+                [chatExtension
+                        addMessage:message
+                    toConversation:conversation
+                        completion:^(SKYMessage *_Nullable message, NSError *_Nullable error) {
+                            expect(error).to.beNil();
+                            expect(message.recordID.recordName).to.equal(@"mm1");
+                            expect(message.alreadySyncToServer).to.beTruthy();
+                            expect(message.creationDate).toNot.beNil();
+                            expect(message.sendDate).to.beNil();
+                            checkRealm();
+                            done();
+                        }];
             });
         });
 
@@ -426,7 +414,6 @@ describe(@"Conversation messages, with error response", ^{
     });
 
     it(@"save message", ^{
-        __block NSInteger checkPoint = 0;
         SKYMessage *message =
             [SKYMessage recordWithRecord:[SKYRecord recordWithRecordType:@"message" name:@"mm1"]];
         SKYConversation *conversation = [SKYConversation
@@ -448,25 +435,12 @@ describe(@"Conversation messages, with error response", ^{
         waitUntil(^(DoneCallback done) {
             [chatExtension addMessage:message
                        toConversation:conversation
-                           completion:^(SKYMessage *_Nullable message, BOOL isCached,
-                                        NSError *_Nullable error) {
-                               if (isCached) {
-                                   expect(message.recordID.recordName).to.equal(@"mm1");
-                                   expect(message.alreadySyncToServer).to.beFalsy();
-                                   expect(message.creationDate).to.beNil();
-                                   expect(message.sendDate).toNot.beNil();
-                                   expect(error).to.beNil();
-                                   checkPoint++;
-                               } else {
-                                   expect(message).to.beNil();
-                                   expect(error).toNot.beNil();
-                                   checkPoint++;
-                               }
+                           completion:^(SKYMessage *_Nullable message, NSError *_Nullable error) {
+                               expect(message).to.beNil();
+                               expect(error).toNot.beNil();
 
-                               if (checkPoint == 2) {
-                                   checkRealm();
-                                   done();
-                               }
+                               checkRealm();
+                               done();
                            }];
         });
     });

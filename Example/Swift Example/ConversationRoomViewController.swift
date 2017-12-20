@@ -131,12 +131,7 @@ class ConversationRoomViewController: UIViewController,
         message.body = messaegBodyTextField.text
         message.metadata = metadateDic
         message.attachment = chosenAsset
-        SKYContainer.default().chatExtension?.addMessage(message, to: conversation) { (message, isCached, error) in
-            if isCached {
-                // TODO: handle cached result
-                return
-            }
-
+        SKYContainer.default().chatExtension?.addMessage(message, to: conversation) { (message, error) in
             if let err = error {
                 let alert = UIAlertController(title: "Unable to send message", message: err.localizedDescription, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -233,12 +228,7 @@ class ConversationRoomViewController: UIViewController,
                 let newMessageBody = editMessageController.textFields?[0].text ?? ""
                 let message = self.messages[indexPath.row]
                 NSLog("New Message Body=%@", newMessageBody)
-                SKYContainer.default().chatExtension?.editMessage(message, with: newMessageBody, completion: { (result, isCached, error) in
-                    if isCached {
-                        // TODO: handle cached result
-                        return
-                    }
-
+                SKYContainer.default().chatExtension?.editMessage(message, with: newMessageBody, completion: { (result, error) in
                     if let err = error {
                         NSLog(err.localizedDescription)
                         let alert = UIAlertController(title: "Unable to edit message", message: err.localizedDescription, preferredStyle: .alert)

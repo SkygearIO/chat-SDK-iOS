@@ -1018,11 +1018,7 @@ extension SKYChatConversationViewController {
         self.skygear.chatExtension?.addMessage(
             msg,
             to: conv,
-            completion: {(result, isCached, error) in
-                if isCached {
-                    return
-                }
-
+            completion: {(result, error) in
                 guard error == nil else {
                     print("Failed to sent message: \(error!.localizedDescription)")
                     self.failedToSend(message: msg,

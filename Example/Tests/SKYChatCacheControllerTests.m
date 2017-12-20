@@ -241,8 +241,7 @@ SpecBegin(SKYChatCacheController)
 
             [cacheController
                 saveMessage:messageToSave
-                 completion:^(SKYMessage *_Nullable message, BOOL isCached,
-                              NSError *_Nullable error) {
+                 completion:^(SKYMessage *_Nullable message, NSError *_Nullable error) {
                      expect(message.recordID).to.equal(messageToSave.recordID);
                      expect(message.sendDate).to.equal(messageToSave.sendDate);
 
