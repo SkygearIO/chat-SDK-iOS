@@ -28,6 +28,14 @@ import SKPhotoBrowser
     case record
 }
 
+@objc enum ConversationViewScrollDirection: Int {
+    case none
+    case up
+    case down
+    case left
+    case right
+}
+
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
     @objc optional func messagesFetchLimitInConversationViewController(
@@ -105,7 +113,7 @@ import SKPhotoBrowser
 
     @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
                                                    didFetchedMessages messages: [SKYMessage],
-                                                   isCached isCached: Bool)
+                                                   isCached: Bool)
 
     @objc optional func conversationViewController(
         _ controller: SKYChatConversationViewController,
@@ -185,7 +193,7 @@ open class MessageList {
     }
 
     public func firstSuccessMessage() -> SKYMessage? {
-        for var messageID in self.messageIDs {
+        for messageID in self.messageIDs {
             if let id = messageID as? String {
                 let message = self.messages[id]
                 if let msg = message {
@@ -276,6 +284,28 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
             }
         }
     }
+
+    var conversationViewContentOffset: CGPoint = CGPoint.zero {
+        willSet {
+            if self.conversationViewDragging {
+                let epsilon: CGFloat = 0.01
+                let offsetDiff = CGPoint(
+                    x: newValue.x - self.conversationViewContentOffset.x,
+                    y: newValue.y - self.conversationViewContentOffset.y
+                )
+
+                if fabs(offsetDiff.x) < epsilon && fabs(offsetDiff.y) < epsilon {
+                    self.conversationViewDraggingDirection = .none
+                } else if fabs(offsetDiff.x) > fabs(offsetDiff.y) {
+                    self.conversationViewDraggingDirection = offsetDiff.x > 0 ? .right : .left
+                } else {
+                    self.conversationViewDraggingDirection = offsetDiff.y > 0 ? .up : .down
+                }
+            }
+        }
+    }
+    var conversationViewDraggingDirection: ConversationViewScrollDirection = .none
+    var conversationViewDragging: Bool = false
 
     public var conversationView: SKYChatConversationView? {
         guard let view = self.collectionView as? SKYChatConversationView else {
@@ -1144,6 +1174,16 @@ extension SKYChatConversationViewController {
     }
 
     open override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if let offset = self.conversationView?.contentOffset {
+            self.conversationViewContentOffset = offset
+            if self.conversationViewDragging &&
+                self.conversationViewDraggingDirection == .down &&
+                self.inputToolbar.contentView.textView.isFirstResponder
+            {
+                self.inputToolbar.contentView.textView.resignFirstResponder()
+            }
+        }
+
         if self.shouldLoadMoreMessage() {
             self.loadMoreMessage()
         }
@@ -1155,10 +1195,16 @@ extension SKYChatConversationViewController {
         self.automaticallyScrollsToMostRecentMessage = scrollOffset >= scrollContentSizeHeight - scrollViewHeight
     }
 
+    open override func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        self.conversationViewDragging = true
+    }
+
+    open override func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        self.conversationViewDragging = false
+    }
+
     func shouldLoadMoreMessage() -> Bool {
         let scrollView = self.collectionView!
-        let scrollViewHeight = scrollView.frame.size.height;
-        let scrollContentSizeHeight = scrollView.contentSize.height;
         let scrollOffset = scrollView.contentOffset.y;
         return !self.isFetchingMessage && self.hasMoreMessageToFetch && scrollOffset < self.offsetYToLoadMore
     }
