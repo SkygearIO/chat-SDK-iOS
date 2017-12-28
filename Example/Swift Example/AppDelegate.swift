@@ -59,12 +59,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             .update(userNameField: "name")
             .update(userAvatarField: "profile_pic")
 
-        SKYChatConversationView.appearance().avatarBackgroundColor
+        SKYChatConversationView.UICustomization().avatarBackgroundColor
             = UIColor(red: 0, green: 0.4745, blue: 0.8235, alpha: 1.0)
-        SKYChatConversationView.appearance().messageSenderTextColor = UIColor.black
-        SKYChatConversationView.appearance().avatarType = .image
-        SKYChatConversationView.appearance().avatarHidden = true
-        SKYChatConversationView.appearance().avatarHiddenForIncomingMessages = false
+        SKYChatConversationView.UICustomization().messageSenderTextColor = UIColor.black
+        SKYChatConversationView.UICustomization().avatarType = .image
+        SKYChatConversationView.UICustomization().avatarHidden = true
+        SKYChatConversationView.UICustomization().avatarHiddenForIncomingMessages = false
 
         return true
     }

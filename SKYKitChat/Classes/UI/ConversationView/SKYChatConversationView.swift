@@ -22,17 +22,33 @@
     case image
 }
 
-open class SKYChatConversationView: JSQMessagesCollectionView {
-    @objc dynamic public var avatarBackgroundColor: UIColor?
-    @objc dynamic public var avatarTextColor: UIColor?
-    @objc dynamic public var messageSenderTextColor: UIColor?
-    @objc dynamic public var avatarType: SKYChatConversationViewUserAvatarType = .initial
-    @objc dynamic public var avatarHiddenForOutgoingMessages: Bool = false
-    @objc dynamic public var avatarHiddenForIncomingMessages: Bool = false
-    @objc dynamic public var avatarHidden: Bool = false {
+public class SKYChatConversationViewCustomization {
+    static var sharedInstance: SKYChatConversationViewCustomization? = nil
+
+    public var avatarBackgroundColor: UIColor?
+    public var avatarTextColor: UIColor?
+    public var messageSenderTextColor: UIColor?
+    public var avatarType: SKYChatConversationViewUserAvatarType = .initial
+    public var avatarHiddenForOutgoingMessages: Bool = false
+    public var avatarHiddenForIncomingMessages: Bool = false
+    public var avatarHidden: Bool = false {
         didSet {
             self.avatarHiddenForIncomingMessages = self.avatarHidden
             self.avatarHiddenForOutgoingMessages = self.avatarHidden
         }
+    }
+
+    public static func `default`() -> SKYChatConversationViewCustomization {
+        if self.sharedInstance == nil {
+            self.sharedInstance = SKYChatConversationViewCustomization()
+        }
+
+        return self.sharedInstance!
+    }
+}
+
+open class SKYChatConversationView: JSQMessagesCollectionView {
+    public static func UICustomization() -> SKYChatConversationViewCustomization {
+         return SKYChatConversationViewCustomization.default()
     }
 }

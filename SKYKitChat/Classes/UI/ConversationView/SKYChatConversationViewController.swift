@@ -367,12 +367,6 @@ extension SKYChatConversationViewController {
         self.subscribeTypingIndicatorChanges()
     }
 
-    open override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
-        self.updateViewsAfterAppear()
-    }
-
     override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
@@ -568,6 +562,27 @@ extension SKYChatConversationViewController {
 
         self.setRecordButton()
         self.createActivityIndicator()
+
+        if SKYChatConversationView.UICustomization().avatarHiddenForIncomingMessages == true {
+            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize
+                = CGSize(width: 0, height: 0)
+        } else {
+            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize = CGSize(
+                width: kJSQMessagesCollectionViewAvatarSizeDefault,
+                height: kJSQMessagesCollectionViewAvatarSizeDefault
+            )
+        }
+
+        // UIAppearance got the values from proxy after it is attached to screen
+        if SKYChatConversationView.UICustomization().avatarHiddenForOutgoingMessages == true {
+            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize
+                = CGSize(width: 0, height: 0)
+        } else {
+            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize = CGSize(
+                width: kJSQMessagesCollectionViewAvatarSizeDefault,
+                height: kJSQMessagesCollectionViewAvatarSizeDefault
+            )
+        }
     }
 
     open func updateTitle() {
@@ -580,30 +595,6 @@ extension SKYChatConversationViewController {
             self.navigationItem.title = namelist
         } else {
             self.navigationItem.title = nil
-        }
-    }
-
-    open func updateViewsAfterAppear() {
-        // UIAppearance got the values from proxy after it is attached to screen
-        if self.conversationView?.avatarHiddenForIncomingMessages == true {
-            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize
-                = CGSize(width: 0, height: 0)
-        } else {
-            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize = CGSize(
-                width: kJSQMessagesCollectionViewAvatarSizeDefault,
-                height: kJSQMessagesCollectionViewAvatarSizeDefault
-            )
-        }
-
-        // UIAppearance got the values from proxy after it is attached to screen
-        if self.conversationView?.avatarHiddenForOutgoingMessages == true {
-            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize
-                = CGSize(width: 0, height: 0)
-        } else {
-            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize = CGSize(
-                width: kJSQMessagesCollectionViewAvatarSizeDefault,
-                height: kJSQMessagesCollectionViewAvatarSizeDefault
-            )
         }
     }
 
@@ -758,7 +749,7 @@ extension SKYChatConversationViewController {
         let msg = self.messageList.messageAt(indexPath.row)
         let senderName = self.getSenderName(forMessage: msg) ?? ""
         let attrStr = NSMutableAttributedString(string: senderName)
-        if let color = self.conversationView?.messageSenderTextColor {
+        if let color = SKYChatConversationView.UICustomization().messageSenderTextColor {
             attrStr.setAttributes([NSForegroundColorAttributeName: color],
                                   range: NSMakeRange(0, attrStr.length))
         }
@@ -816,7 +807,7 @@ extension SKYChatConversationViewController {
             return JSQMessagesAvatarImage.avatar(with: image)
         }
 
-        if self.conversationView?.avatarType == .image {
+        if SKYChatConversationView.UICustomization().avatarType == .image {
             // get from avatar field
             let avatarField = SKYChatUIModelCustomization.default().userAvatarField
             let senderAvatar = sender?.object(forKey: avatarField)
@@ -860,8 +851,8 @@ extension SKYChatConversationViewController {
         // fallback: generate from user name
         let senderName = self.getSenderName(forMessage: msg) ?? ""
         if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName,
-                                                 backgroundColor: self.conversationView?.avatarBackgroundColor,
-                                                 textColor: self.conversationView?.avatarTextColor),
+                                                 backgroundColor: SKYChatConversationView.UICustomization().avatarBackgroundColor,
+                                                 textColor: SKYChatConversationView.UICustomization().avatarTextColor),
             let roundedImage = UIImage.circleImage(fromImage: avatarImage)
         {
             return JSQMessagesAvatarImage.avatar(with: roundedImage)
