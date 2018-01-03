@@ -2,6 +2,8 @@ use_frameworks!
 
 source 'https://github.com/CocoaPods/Specs.git'
 
+#https://github.com/CocoaPods/CocoaPods/issues/4370#issuecomment-284075060
+install! 'cocoapods', :deterministic_uuids => false, :integrate_targets => false
 platform :ios, '8.3'
 
 target 'SKYKitChat_Example' do
