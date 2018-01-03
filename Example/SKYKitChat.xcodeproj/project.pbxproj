@@ -543,11 +543,11 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-SKYKitChat_Tests/Pods-SKYKitChat_Tests-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/FMDB-iOS8.3/FMDB.framework",
-				"${BUILT_PRODUCTS_DIR}/Realm-iOS8.3/Realm.framework",
-				"${BUILT_PRODUCTS_DIR}/SKYKit-iOS8.3/SKYKit.framework",
+				"${BUILT_PRODUCTS_DIR}/FMDB/FMDB.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/SKYKit/SKYKit.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKitChat/SKYKitChat.framework",
-				"${BUILT_PRODUCTS_DIR}/SocketRocket-iOS8.3/SocketRocket.framework",
+				"${BUILT_PRODUCTS_DIR}/SocketRocket/SocketRocket.framework",
 				"${BUILT_PRODUCTS_DIR}/Expecta/Expecta.framework",
 				"${BUILT_PRODUCTS_DIR}/OHHTTPStubs/OHHTTPStubs.framework",
 				"${BUILT_PRODUCTS_DIR}/Specta/Specta.framework",
@@ -665,11 +665,11 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Swift Example/Pods-Swift Example-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/FMDB-iOS10.1/FMDB.framework",
-				"${BUILT_PRODUCTS_DIR}/Realm-iOS10.1/Realm.framework",
-				"${BUILT_PRODUCTS_DIR}/SKYKit-iOS10.1/SKYKit.framework",
+				"${BUILT_PRODUCTS_DIR}/FMDB/FMDB.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/SKYKit/SKYKit.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKitChat.default-UI/SKYKitChat.framework",
-				"${BUILT_PRODUCTS_DIR}/SocketRocket-iOS10.1/SocketRocket.framework",
+				"${BUILT_PRODUCTS_DIR}/SocketRocket/SocketRocket.framework",
 				"${BUILT_PRODUCTS_DIR}/ALCameraViewController/ALCameraViewController.framework",
 				"${BUILT_PRODUCTS_DIR}/CTAssetsPickerController/CTAssetsPickerController.framework",
 				"${BUILT_PRODUCTS_DIR}/JSQSystemSoundPlayer/JSQSystemSoundPlayer.framework",
@@ -785,11 +785,11 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-SKYKitChat_Example/Pods-SKYKitChat_Example-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/FMDB-iOS8.3/FMDB.framework",
-				"${BUILT_PRODUCTS_DIR}/Realm-iOS8.3/Realm.framework",
-				"${BUILT_PRODUCTS_DIR}/SKYKit-iOS8.3/SKYKit.framework",
+				"${BUILT_PRODUCTS_DIR}/FMDB/FMDB.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/SKYKit/SKYKit.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKitChat/SKYKitChat.framework",
-				"${BUILT_PRODUCTS_DIR}/SocketRocket-iOS8.3/SocketRocket.framework",
+				"${BUILT_PRODUCTS_DIR}/SocketRocket/SocketRocket.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
