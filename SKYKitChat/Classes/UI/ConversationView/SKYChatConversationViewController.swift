@@ -724,6 +724,16 @@ extension SKYChatConversationViewController {
 
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
+        didTapCellAt indexPath: IndexPath!,
+        touchLocation: CGPoint
+    ) {
+        if self.inputToolbar.contentView.textView.isFirstResponder {
+            self.inputToolbar.contentView.textView.resignFirstResponder()
+        }
+    }
+
+    open override func collectionView(
+        _ collectionView: JSQMessagesCollectionView!,
         messageBubbleImageDataForItemAt indexPath: IndexPath!
     ) -> JSQMessageBubbleImageDataSource! {
         let msg = self.messageList.messageAt(indexPath.row)
