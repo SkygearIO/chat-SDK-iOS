@@ -36,7 +36,7 @@
     NSURL *url = [NSURL URLWithString:[dir stringByAppendingPathComponent:name]];
     config.fileURL = url;
 
-    self.realm = [RLMRealm realmWithConfiguration:config error:nil];
+    [self createRealmWithConfiguration:config];
 
     return self;
 }
@@ -50,9 +50,16 @@
     RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
     config.inMemoryIdentifier = name;
 
-    self.realm = [RLMRealm realmWithConfiguration:config error:nil];
+    [self createRealmWithConfiguration:config];
 
     return self;
+}
+
+- (void)createRealmWithConfiguration:(RLMRealmConfiguration *)config
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.realm = [RLMRealm realmWithConfiguration:config error:nil];
+    });
 }
 
 - (NSArray<SKYMessage *> *)getMessagesWithPredicate:(NSPredicate *)predicate
