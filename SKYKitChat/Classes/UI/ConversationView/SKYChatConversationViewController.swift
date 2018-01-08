@@ -22,6 +22,20 @@ import CTAssetsPickerController
 import AVFoundation
 import SKPhotoBrowser
 
+@objc public enum InputToolbarSendButtonState: Int {
+    case undefined
+    case send
+    case record
+}
+
+@objc enum ConversationViewScrollDirection: Int {
+    case none
+    case up
+    case down
+    case left
+    case right
+}
+
 @objc public protocol SKYChatConversationViewControllerDelegate: class {
 
     @objc optional func messagesFetchLimitInConversationViewController(
@@ -99,7 +113,7 @@ import SKPhotoBrowser
 
     @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
                                                    didFetchedMessages messages: [SKYMessage],
-                                                   isCached isCached: Bool)
+                                                   isCached: Bool)
 
     @objc optional func conversationViewController(
         _ controller: SKYChatConversationViewController,
@@ -179,7 +193,7 @@ open class MessageList {
     }
 
     public func firstSuccessMessage() -> SKYMessage? {
-        for var messageID in self.messageIDs {
+        for messageID in self.messageIDs {
             if let id = messageID as? String {
                 let message = self.messages[id]
                 if let msg = message {
@@ -241,6 +255,58 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
 
     public var cameraButton: UIButton?
 
+    public var shouldShowCameraButton: Bool {
+        return self.delegate?.cameraButtonShouldShowInConversationViewController?(self) ?? true
+    }
+
+    public var inputToolbarSendButtonState: InputToolbarSendButtonState = .undefined {
+        didSet {
+            guard self.inputToolbarSendButtonState != oldValue else {
+                return
+            }
+            switch self.inputToolbarSendButtonState {
+            case .record:
+                self.inputToolbar?.contentView?.rightBarButtonItem = self.recordButton
+                self.inputToolbar?.contentView?.rightBarButtonItem.isEnabled = true
+                self.cameraButton?.isHidden = false
+                if self.shouldShowCameraButton {
+                    self.addInputToolbarCameraButton()
+                }
+            case .send:
+                self.inputToolbar?.contentView?.rightBarButtonItem = self.sendButton
+                self.inputToolbar?.contentView?.rightBarButtonItem.isEnabled = true
+                if self.shouldShowCameraButton {
+                    self.addInputToolbarCameraButton()
+                }
+            case .undefined: do {
+                // nothing
+            }
+            }
+        }
+    }
+
+    var conversationViewContentOffset: CGPoint = CGPoint.zero {
+        willSet {
+            if self.conversationViewDragging {
+                let epsilon: CGFloat = 0.01
+                let offsetDiff = CGPoint(
+                    x: newValue.x - self.conversationViewContentOffset.x,
+                    y: newValue.y - self.conversationViewContentOffset.y
+                )
+
+                if fabs(offsetDiff.x) < epsilon && fabs(offsetDiff.y) < epsilon {
+                    self.conversationViewDraggingDirection = .none
+                } else if fabs(offsetDiff.x) > fabs(offsetDiff.y) {
+                    self.conversationViewDraggingDirection = offsetDiff.x > 0 ? .right : .left
+                } else {
+                    self.conversationViewDraggingDirection = offsetDiff.y > 0 ? .up : .down
+                }
+            }
+        }
+    }
+    var conversationViewDraggingDirection: ConversationViewScrollDirection = .none
+    var conversationViewDragging: Bool = false
+
     public var conversationView: SKYChatConversationView? {
         guard let view = self.collectionView as? SKYChatConversationView else {
             return nil
@@ -278,7 +344,6 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     var audioRecorder: AVAudioRecorder?
     var inputTextView: UITextView?
     var slideToCancelTextView: UITextView?
-    var gesture: UILongPressGestureRecognizer?
     var isRecordingCancelled: Bool = false
     var audioDict: [String: SKYChatConversationAudioItem] = [:]
     var audioTime: TimeInterval?
@@ -352,6 +417,41 @@ extension SKYChatConversationViewController {
             return
         }
 
+        if self.cameraButton == nil {
+            self.cameraButton = {
+                let image = UIImage(named: "icon-camera", in: self.bundle(), compatibleWith: nil)
+                let btn = UIButton(type: .custom)
+                btn.translatesAutoresizingMaskIntoConstraints = false
+                btn.setImage(image, for: .normal)
+                btn.addTarget(self, action: #selector(didPressCameraButton(_:)), for: .touchUpInside)
+                return btn
+            }()
+        }
+
+        if self.sendButton == nil {
+            self.sendButton = {
+                let btn = self.inputToolbar?.contentView?.rightBarButtonItem
+                btn?.addTarget(self, action: #selector(didPressSendButton), for: .touchUpInside)
+                return btn
+            }()
+        }
+
+        if self.recordButton == nil {
+            self.recordButton = {
+                let gesture = UILongPressGestureRecognizer(
+                    target: self,
+                    action: #selector(recordingButtonDidLongPressed(gesture:)))
+                gesture.minimumPressDuration = 0.01
+
+                let image = UIImage(named: "icon-mic", in: self.bundle(), compatibleWith: nil)
+                let btn = UIButton(type: .custom)
+                btn.setImage(image, for: .normal)
+                btn.tintColor = self.sendButton?.tintColor ?? self.view.tintColor
+                btn.addGestureRecognizer(gesture)
+                return btn
+            }()
+        }
+
         self.customizeViews()
 
         if self.participants.count == 0 {
@@ -405,17 +505,16 @@ extension SKYChatConversationViewController {
         return textView
     }
 
-    func createRecordButton(_ frame: CGRect) -> UIButton {
-        let recordButton = UIButton(frame: frame)
-        recordButton.setImage(UIImage(named: "icon-mic", in: self.bundle(), compatibleWith: nil), for: UIControlState.normal)
-        recordButton.tintColor = self.sendButton?.tintColor
-        return recordButton
-    }
+    func addInputToolbarCameraButton() {
+        // TODO: Find a better way to layout the input toolbar
 
-    func reLayout() {
         let contentView = self.inputToolbar?.contentView
         let rightContainerView = contentView?.rightBarButtonContainerView
         rightContainerView?.removeConstraints(rightContainerView?.constraints ?? [])
+
+        if rightContainerView?.subviews.contains(self.cameraButton!) == false {
+            rightContainerView?.addSubview(self.cameraButton!)
+        }
 
         var constraints: [NSLayoutConstraint] = []
 
@@ -500,10 +599,6 @@ extension SKYChatConversationViewController {
         NSLayoutConstraint.activate(constraints)
     }
 
-    func shouldShowCameraButton() -> Bool {
-        return
-            self.delegate?.cameraButtonShouldShowInConversationViewController?(self) ?? true
-    }
 
     func createActivityIndicator() {
         self.indicator = UIActivityIndicatorView()
@@ -537,30 +632,15 @@ extension SKYChatConversationViewController {
             self.inputToolbar?.contentView?.leftBarButtonItem = nil
         }
 
-        let shouldShowCameraButton: Bool = self.shouldShowCameraButton()
-
-        if self.sendButton == nil {
-            self.sendButton = self.inputToolbar?.contentView?.rightBarButtonItem
-            self.sendButton?.removeFromSuperview()
-        }
-
-        if self.recordButton == nil {
-            self.recordButton = self.createRecordButton(self.sendButton!.frame)
-        }
-
         self.inputTextView = self.inputToolbar?.contentView?.textView
         self.slideToCancelTextView = self.createSlideToCancelTextView(self.inputTextView!.frame)
 
-        if shouldShowCameraButton {
-            let cameraButton = UIButton(type: .custom)
-            cameraButton.translatesAutoresizingMaskIntoConstraints = false
-            cameraButton.setImage(UIImage(named: "icon-camera", in: self.bundle(), compatibleWith: nil), for: .normal)
-            cameraButton.addTarget(self, action: #selector(didPressCameraButton(_:)), for: .touchUpInside)
-            self.inputToolbar?.contentView?.rightBarButtonContainerView.addSubview(cameraButton)
-            self.cameraButton = cameraButton
+        if self.inputToolbar.contentView.textView.text.count > 0 {
+            self.inputToolbarSendButtonState = .send
+        } else {
+            self.inputToolbarSendButtonState = .record
         }
 
-        self.setRecordButton()
         self.createActivityIndicator()
 
         if SKYChatConversationView.UICustomization().avatarHiddenForIncomingMessages == true {
@@ -606,11 +686,7 @@ extension SKYChatConversationViewController {
     open override func collectionView(_ collectionView: JSQMessagesCollectionView!,
                                       messageDataForItemAt indexPath: IndexPath!) -> JSQMessageData! {
         let msg = self.messageList.messageAt(indexPath.row)
-
-        var msgSenderName: String = ""
-        if let sender = self.getSenderName(forMessage: msg) as? String {
-            msgSenderName = sender
-        }
+        let msgSenderName = self.getSenderName(forMessage: msg) ?? ""
 
         let isOutgoingMessage = msg.creatorUserRecordID() == self.senderId
         let mediaData = self.messageMediaDataFactory.mediaData(with: msg,
@@ -644,6 +720,16 @@ extension SKYChatConversationViewController {
         }
 
         return jsqMessage
+    }
+
+    open override func collectionView(
+        _ collectionView: JSQMessagesCollectionView!,
+        didTapCellAt indexPath: IndexPath!,
+        touchLocation: CGPoint
+    ) {
+        if self.inputToolbar.contentView.textView.isFirstResponder {
+            self.inputToolbar.contentView.textView.resignFirstResponder()
+        }
     }
 
     open override func collectionView(
@@ -885,32 +971,7 @@ extension SKYChatConversationViewController {
         self.showTypingIndicator = false
     }
     
-    open func setRecordButton() {
-        self.inputToolbar?.contentView?.rightBarButtonItem = self.recordButton
-        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchUpInside)
-        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self, action: nil, for: UIControlEvents.touchDown)
-        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self.inputToolbar, action: nil, for: UIControlEvents.touchUpInside)
-        self.inputToolbar?.contentView?.rightBarButtonItem.isEnabled = true
-        self.cameraButton?.isHidden = false
-        self.gesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressAction(gesture:)))
-        self.gesture?.minimumPressDuration = 0.01
-        self.inputToolbar?.contentView?.rightBarButtonItem.addGestureRecognizer(self.gesture!)
-        if self.shouldShowCameraButton() {
-            self.reLayout()
-        }
-    }
-    
-    open func setSendButton() {
-        self.inputToolbar?.contentView?.rightBarButtonItem.removeGestureRecognizer(self.gesture!)
-        self.inputToolbar?.contentView?.rightBarButtonItem = self.sendButton
-        self.inputToolbar?.contentView?.rightBarButtonItem.removeTarget(self.inputToolbar, action: nil, for: UIControlEvents.touchUpInside)
-        self.inputToolbar?.contentView?.rightBarButtonItem.addTarget(self, action: #selector(didPressSendButton), for: UIControlEvents.touchUpInside)
-        if self.shouldShowCameraButton() {
-            self.reLayout()
-        }
-    }
-    
-    func longPressAction(gesture: UILongPressGestureRecognizer) {
+    func recordingButtonDidLongPressed(gesture: UILongPressGestureRecognizer) {
         if gesture.state == .began {
             self.didStartRecord(button: self.recordButton!)
         }
@@ -987,7 +1048,7 @@ extension SKYChatConversationViewController {
         self.messageList.append([msg])
         self.collectionView?.reloadData()
 
-        self.setRecordButton()
+        self.inputToolbarSendButtonState = .record
 
         DispatchQueue.main.async {
             self.scrollToBottom(animated: true)
@@ -1074,10 +1135,10 @@ extension SKYChatConversationViewController {
 extension SKYChatConversationViewController {
     open override func textViewDidChange(_ textView: UITextView) {
         super.textViewDidChange(textView)
-        if textView.text.characters.count > 0 {
-            self.setSendButton()
+        if textView.text.count > 0 {
+            self.inputToolbarSendButtonState = .send
         } else {
-            self.setRecordButton()
+            self.inputToolbarSendButtonState = .record
         }
         self.skygear.chatExtension?.sendTypingIndicator(.begin, in: self.conversation!)
     }
@@ -1123,6 +1184,16 @@ extension SKYChatConversationViewController {
     }
 
     open override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if let offset = self.conversationView?.contentOffset {
+            self.conversationViewContentOffset = offset
+            if self.conversationViewDragging &&
+                self.conversationViewDraggingDirection == .down &&
+                self.inputToolbar.contentView.textView.isFirstResponder
+            {
+                self.inputToolbar.contentView.textView.resignFirstResponder()
+            }
+        }
+
         if self.shouldLoadMoreMessage() {
             self.loadMoreMessage()
         }
@@ -1134,10 +1205,16 @@ extension SKYChatConversationViewController {
         self.automaticallyScrollsToMostRecentMessage = scrollOffset >= scrollContentSizeHeight - scrollViewHeight
     }
 
+    open override func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        self.conversationViewDragging = true
+    }
+
+    open override func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        self.conversationViewDragging = false
+    }
+
     func shouldLoadMoreMessage() -> Bool {
         let scrollView = self.collectionView!
-        let scrollViewHeight = scrollView.frame.size.height;
-        let scrollContentSizeHeight = scrollView.contentSize.height;
         let scrollOffset = scrollView.contentOffset.y;
         return !self.isFetchingMessage && self.hasMoreMessageToFetch && scrollOffset < self.offsetYToLoadMore
     }
@@ -1315,7 +1392,7 @@ extension SKYChatConversationViewController {
 
         if !flag || self.isRecordingCancelled {
             print("Voice Recording: Cancelled")
-            self.setRecordButton()
+            self.inputToolbarSendButtonState = .record
             return
         }
 
@@ -1352,7 +1429,7 @@ extension SKYChatConversationViewController {
         let recordingSession = AVAudioSession.sharedInstance()
         if recordingSession.recordPermission() == .granted {
             print("Voice Recording: Stop recording \(cancelled ? "(cancelled)" : "")")
-            self.setRecordButton()
+            self.inputToolbarSendButtonState = .record
             self.isRecordingCancelled = cancelled
             self.slideToCancelTextView?.removeFromSuperview()
             self.inputTextView?.isHidden = false
