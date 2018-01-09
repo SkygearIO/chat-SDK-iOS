@@ -18,6 +18,7 @@
 //
 
 #import "SKYMessageCacheObject.h"
+#import "SKYMessage.h"
 
 @implementation SKYMessageCacheObject
 

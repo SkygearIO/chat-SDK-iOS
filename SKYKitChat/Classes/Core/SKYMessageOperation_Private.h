@@ -1,5 +1,5 @@
 //
-//  SKYKitChat.h
+//  SKYMessageOperation_Private.h
 //  SKYKitChat
 //
 //  Copyright 2016 Oursky Ltd.
@@ -17,14 +17,15 @@
 //  limitations under the License.
 //
 
-#import "SKYChatExtension.h"
-#import "SKYChatReceipt.h"
-#import "SKYChatRecord.h"
-#import "SKYChatRecordChange.h"
-#import "SKYChatTypingIndicator.h"
-#import "SKYContainer+Chat.h"
-#import "SKYConversation.h"
-#import "SKYKitChat.h"
-#import "SKYMessage.h"
 #import "SKYMessageOperation.h"
-#import "SKYUserChannel.h"
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface SKYMessageOperation ()
+
+@property (readwrite, nonatomic) SKYMessageOperationStatus status;
+@property (readwrite, copy, nonatomic, nullable) NSError *error;
+
+@end
+
+NS_ASSUME_NONNULL_END
