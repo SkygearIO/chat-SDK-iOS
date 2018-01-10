@@ -41,9 +41,6 @@ typedef NS_ENUM(NSInteger, SKYMessageConversationStatus) {
 @property (assign, nonatomic, readonly) bool deleted;
 @property (strong, nonatomic, nullable) NSDate *sendDate;
 
-@property (assign, nonatomic) bool syncingToServer;
-@property (assign, nonatomic) bool alreadySyncToServer;
-@property (assign, nonatomic) bool fail;
 @property (assign, nonatomic, readonly) SKYMessageConversationStatus conversationStatus;
 
 + (instancetype _Nullable)message;

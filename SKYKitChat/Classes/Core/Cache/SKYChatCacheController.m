@@ -61,7 +61,6 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
         [NSPredicate predicateWithFormat:@"conversationID LIKE %@", conversationId],
         [NSPredicate predicateWithFormat:@"deleted == FALSE"],
         [NSCompoundPredicate orPredicateWithSubpredicates:@[
-            [NSPredicate predicateWithFormat:@"alreadySyncToServer != FALSE AND fail != TRUE"],
             [NSPredicate predicateWithFormat:@"sendDate == nil"],
         ]],
     ]];

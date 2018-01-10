@@ -269,7 +269,6 @@ SpecBegin(SKYChatExtension)
                         completion:^(SKYMessage *_Nullable message, NSError *_Nullable error) {
                             expect(error).to.beNil();
                             expect(message.recordID.recordName).to.equal(@"mm1");
-                            expect(message.alreadySyncToServer).to.beTruthy();
                             expect(message.creationDate).toNot.beNil();
                             expect(message.sendDate).to.beNil();
                             checkRealm();
@@ -422,8 +421,6 @@ describe(@"Conversation messages, with error response", ^{
 
         waitUntil(^(DoneCallback done) {
             RLMRealm *realm = cacheController.store.realm;
-            expect(saved.alreadySyncToServer).to.beFalsy();
-            expect(saved.fail).to.beTruthy();
 
             [chatExtension addMessage:message
                        toConversation:conversation

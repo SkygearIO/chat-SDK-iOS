@@ -295,8 +295,6 @@ SpecBegin(SKYChatCacheController)
 
             SKYMessage *newMessage = [[results objectAtIndex:0] messageRecord];
             expect(newMessage.body).to.equal(messageToSave.body);
-            expect(newMessage.alreadySyncToServer).to.equal(YES);
-            expect(newMessage.fail).to.equal(NO);
         });
 
         it(@"delete message, update the cache", ^{

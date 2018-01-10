@@ -309,8 +309,6 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
 
                      SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
-                     msg.alreadySyncToServer = true;
-                     msg.fail = false;
                      if (msg && msg.deleted) {
                          [deletedReturnArray addObject:msg];
                      } else if (msg && !msg.deleted) {
@@ -572,8 +570,6 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                 SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
 
                 SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
-                msg.alreadySyncToServer = true;
-                msg.fail = false;
                 if (msg) {
                     [returnArray addObject:msg];
                 }
