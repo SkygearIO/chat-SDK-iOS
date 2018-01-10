@@ -41,15 +41,9 @@
 
 - (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion;
 
-- (void)didSaveMessage:(SKYMessage *)message error:(NSError *)error;
-
 - (void)didDeleteMessage:(SKYMessage *)message;
 
 - (void)handleRecordChange:(SKYChatRecordChange *)recordChange;
-
-- (void)fetchUnsentMessagesWithConversationID:(NSString *)conversationId
-                                   completion:(void (^_Nullable)(NSArray<SKYMessage *> *_Nonnull))
-                                                  completion;
 
 NS_ASSUME_NONNULL_BEGIN
 

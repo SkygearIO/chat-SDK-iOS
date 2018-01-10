@@ -25,6 +25,7 @@
 
 #import "SKYConversation.h"
 #import "SKYMessageCacheObject.h"
+#import "SKYMessageOperationCacheObject.h"
 
 SpecBegin(SKYChatExtension)
 
@@ -419,29 +420,34 @@ describe(@"Conversation messages, with error response", ^{
         SKYConversation *conversation = [SKYConversation
             recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
 
-        void (^checkRealm)() = ^{
+        waitUntil(^(DoneCallback done) {
             RLMRealm *realm = cacheController.store.realm;
-            RLMResults<SKYMessageCacheObject *> *results =
-                [SKYMessageCacheObject allObjectsInRealm:realm];
-            expect(results.count).to.equal(11);
-
-            SKYMessageCacheObject *saved =
-                [SKYMessageCacheObject objectInRealm:realm forPrimaryKey:@"mm1"];
             expect(saved.alreadySyncToServer).to.beFalsy();
             expect(saved.fail).to.beTruthy();
-            expect(saved.sendDate).toNot.beNil();
-        };
 
-        waitUntil(^(DoneCallback done) {
             [chatExtension addMessage:message
                        toConversation:conversation
                            completion:^(SKYMessage *_Nullable message, NSError *_Nullable error) {
                                expect(message).to.beNil();
                                expect(error).toNot.beNil();
 
-                               checkRealm();
+                               RLMResults<SKYMessageOperationCacheObject *> *results =
+                                   [SKYMessageOperationCacheObject allObjectsInRealm:realm];
+                               expect(results.count).to.equal(1);
+                               SKYMessageOperation *operation = results[0].messageOperation;
+                               expect(operation.status).to.equal(SKYMessageOperationStatusFailed);
+                               expect(operation.error).toNot.beNil();
                                done();
                            }];
+
+            RLMResults<SKYMessageOperationCacheObject *> *results =
+                [SKYMessageOperationCacheObject allObjectsInRealm:realm];
+            expect(results.count).to.equal(1);
+            expect(results[0].conversationID).to.equal(@"c0");
+            SKYMessageOperation *operation = results[0].messageOperation;
+            expect(operation.message.recordID).to.equal(message.recordID);
+            expect(operation.status).to.equal(SKYMessageOperationStatusPending);
+            expect(operation.type).to.equal(SKYMessageOperationTypeAdd);
         });
     });
 
@@ -452,23 +458,32 @@ describe(@"Conversation messages, with error response", ^{
             recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
 
         waitUntil(^(DoneCallback done) {
-            [chatExtension deleteMessage:message
-                          inConversation:conversation
-                              completion:^(SKYConversation *_Nullable conversation,
-                                           NSError *_Nullable error) {
-                                  expect(error).toNot.beNil();
+            RLMRealm *realm = cacheController.store.realm;
 
-                                  RLMRealm *realm = cacheController.store.realm;
-                                  RLMResults<SKYMessageCacheObject *> *results =
-                                      [SKYMessageCacheObject allObjectsInRealm:realm];
-                                  expect(results.count).to.equal(10);
+            [chatExtension
+                 deleteMessage:message
+                inConversation:conversation
+                    completion:^(SKYConversation *_Nullable conversation,
+                                 NSError *_Nullable error) {
+                        expect(error).toNot.beNil();
 
-                                  results =
-                                      [SKYMessageCacheObject objectsInRealm:realm
-                                                                      where:@"deleted == %@", @YES];
-                                  expect(results.count).to.equal(0);
-                                  done();
-                              }];
+                        RLMResults<SKYMessageOperationCacheObject *> *results =
+                            [SKYMessageOperationCacheObject allObjectsInRealm:realm];
+                        expect(results.count).to.equal(1);
+                        SKYMessageOperation *operation = results[0].messageOperation;
+                        expect(operation.status).to.equal(SKYMessageOperationStatusFailed);
+                        expect(operation.error).toNot.beNil();
+                        done();
+                    }];
+
+            RLMResults<SKYMessageOperationCacheObject *> *results =
+                [SKYMessageOperationCacheObject allObjectsInRealm:realm];
+            expect(results.count).to.equal(1);
+            expect(results[0].conversationID).to.equal(@"c0");
+            SKYMessageOperation *operation = results[0].messageOperation;
+            expect(operation.message.recordID).to.equal(message.recordID);
+            expect(operation.status).to.equal(SKYMessageOperationStatusPending);
+            expect(operation.type).to.equal(SKYMessageOperationTypeDelete);
         });
     });
 });

@@ -274,33 +274,6 @@ SpecBegin(SKYChatCacheController)
                                                      [baseDate dateByAddingTimeInterval:i * 2000]);
                                          }
                                      }];
-
-            [cacheController
-                fetchUnsentMessagesWithConversationID:@"c0"
-                                           completion:^(NSArray<SKYMessage *> *_Nonnull messages) {
-                                               expect(messages.count).to.equal(1);
-                                               expect(messages[0].recordID.recordName)
-                                                   .to.equal(messageToSave.recordID.recordName);
-                                               expect(messages[0].sendDate)
-                                                   .to.equal(messageToSave.sendDate);
-                                           }];
-
-            [cacheController didSaveMessage:messageToSave error:nil];
-
-            [cacheController
-                fetchMessagesWithConversationID:@"c0"
-                                          limit:1
-                                     beforeTime:nil
-                                          order:nil
-                                     completion:^(NSArray<SKYMessage *> *messageList, BOOL isCached,
-                                                  NSError *error) {
-                                         SKYMessage *latestMessage = messageList.firstObject;
-                                         expect(latestMessage.recordID)
-                                             .to.equal(messageToSave.recordID);
-                                         expect(latestMessage.sendDate)
-                                             .to.equal(messageToSave.sendDate);
-                                         expect(latestMessage.alreadySyncToServer).to.beTruthy();
-                                     }];
         });
 
         it(@"didSave message, update the cache", ^{
@@ -313,7 +286,7 @@ SpecBegin(SKYChatCacheController)
             messageToSave.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:50000];
             messageToSave.body = @"new message";
 
-            [cacheController didSaveMessage:messageToSave error:nil];
+            [cacheController saveMessage:messageToSave completion:nil];
 
             RLMRealm *realm = cacheController.store.realm;
             RLMResults<SKYMessageCacheObject *> *results =

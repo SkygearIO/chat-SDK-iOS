@@ -368,20 +368,6 @@ typedef void (^SKYChatFetchMessageOperationsListCompletion)(
     /* clang-format off */ NS_SWIFT_NAME(addMessage(_:to:completion:)); /* clang-format on */
 
 /**
- Fetch unsent messages in a conversation.
-
- There are two types of unsent messages. First is pending messages that are added but no server
- response yet. Second is messages that are failed saved to server.
-
- @param conversationId ID of the conversation
- @param completion completion block
- */
-- (void)fetchUnsentMessagesWithConversationID:(NSString *_Nonnull)conversationId
-                                   completion:(void (^_Nullable)(NSArray<SKYMessage *> *_Nonnull))
-                                                  completion
-    /* clang-format off */ NS_SWIFT_NAME(fetchUnsentMessages(conversationID:completion:)); /* clang-format on */
-
-/**
  Fetch messages in a conversation.
 
  @param conversation conversation object

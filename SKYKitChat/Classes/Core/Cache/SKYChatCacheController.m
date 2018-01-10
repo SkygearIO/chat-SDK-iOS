@@ -120,22 +120,6 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     }
 }
 
-- (void)didSaveMessage:(SKYMessage *)message error:(NSError *)error
-{
-    if (error) {
-        // invalidate unsaved message
-        message.alreadySyncToServer = false;
-        message.fail = true;
-        [self.store setMessages:@[ message ]];
-        return;
-    }
-
-    message.alreadySyncToServer = true;
-    message.fail = false;
-
-    [self.store setMessages:@[ message ]];
-}
-
 - (void)didDeleteMessage:(SKYMessage *)message
 {
     // soft delete
@@ -155,34 +139,14 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 {
     switch (event) {
         case SKYChatRecordChangeEventCreate:
-            [self didSaveMessage:message error:nil];
-            break;
         case SKYChatRecordChangeEventUpdate:
-            [self didSaveMessage:message error:nil];
+            [self saveMessage:message completion:nil];
             break;
         case SKYChatRecordChangeEventDelete:
             [self didDeleteMessage:message];
             break;
         default:
             break;
-    }
-}
-
-- (void)fetchUnsentMessagesWithConversationID:(NSString *)conversationId
-                                   completion:(void (^_Nullable)(NSArray<SKYMessage *> *_Nonnull))
-                                                  completion
-{
-    NSMutableArray *predicates = [NSMutableArray arrayWithArray:@[
-        [NSPredicate predicateWithFormat:@"conversationID LIKE %@", conversationId],
-        [NSPredicate predicateWithFormat:@"sendDate != nil"],
-        [NSPredicate predicateWithFormat:@"alreadySyncToServer == FALSE OR fail == TRUE"],
-    ]];
-    NSPredicate *predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
-
-    if (completion) {
-        NSArray<SKYMessage *> *messages =
-            [self.store getMessagesWithPredicate:predicate limit:-1 order:@"creationDate"];
-        completion(messages);
     }
 }
 
