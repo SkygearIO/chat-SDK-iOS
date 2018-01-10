@@ -20,6 +20,7 @@
 #import "SKYChatCacheRealmStore.h"
 
 #import "SKYMessageCacheObject.h"
+#import "SKYMessageOperationCacheObject.h"
 
 @implementation SKYChatCacheRealmStore
 
@@ -116,6 +117,67 @@
         SKYMessageCacheObject *cacheObject =
             [SKYMessageCacheObject objectInRealm:self.realm
                                    forPrimaryKey:message.recordID.recordName];
+
+        if (cacheObject) {
+            [self.realm deleteObject:cacheObject];
+        }
+    }
+
+    [self.realm commitWriteTransaction];
+}
+
+#pragma mark - Message Operations
+
+- (NSArray<SKYMessageOperation *> *)getMessageOperationsWithPredicate:(NSPredicate *)predicate
+                                                                limit:(NSInteger)limit
+                                                                order:(NSString *)order
+{
+    RLMResults<SKYMessageOperationCacheObject *> *results =
+        [[SKYMessageOperationCacheObject objectsInRealm:self.realm withPredicate:predicate]
+            sortedResultsUsingKeyPath:order
+                            ascending:NO];
+    NSMutableArray<SKYMessageOperation *> *operations =
+        [NSMutableArray arrayWithCapacity:results.count];
+
+    NSUInteger resultCount = results.count;
+
+    for (NSInteger i = 0; (limit == -1 || i < limit) && i < resultCount; i++) {
+        SKYMessageOperationCacheObject *cacheObject = results[i];
+        SKYMessageOperation *operation = [cacheObject messageOperation];
+        [operations addObject:operation];
+    }
+
+    return [operations copy];
+}
+
+- (SKYMessageOperation *)getMessageOperationWithID:(NSString *)operationID
+{
+    SKYMessageOperationCacheObject *cacheObject =
+        [SKYMessageOperationCacheObject objectInRealm:self.realm forPrimaryKey:operationID];
+    return [cacheObject messageOperation];
+}
+
+- (void)setMessageOperations:(NSArray<SKYMessageOperation *> *)messageOperations
+{
+    [self.realm beginWriteTransaction];
+
+    for (SKYMessageOperation *operation in messageOperations) {
+        SKYMessageOperationCacheObject *cacheObject =
+            [SKYMessageOperationCacheObject cacheObjectFromMessageOperation:operation];
+        [self.realm addOrUpdateObject:cacheObject];
+    }
+
+    [self.realm commitWriteTransaction];
+}
+
+- (void)deleteMessageOperations:(NSArray<SKYMessageOperation *> *)messageOperations
+{
+    [self.realm beginWriteTransaction];
+
+    for (SKYMessageOperation *operation in messageOperations) {
+        SKYMessageOperationCacheObject *cacheObject =
+            [SKYMessageOperationCacheObject objectInRealm:self.realm
+                                            forPrimaryKey:operation.operationID];
 
         if (cacheObject) {
             [self.realm deleteObject:cacheObject];

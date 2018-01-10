@@ -21,6 +21,7 @@
 
 #import "SKYChatExtension.h"
 #import "SKYMessage.h"
+#import "SKYMessageOperation.h"
 
 @interface SKYChatCacheController : NSObject
 
@@ -49,5 +50,24 @@
 - (void)fetchUnsentMessagesWithConversationID:(NSString *)conversationId
                                    completion:(void (^_Nullable)(NSArray<SKYMessage *> *_Nonnull))
                                                   completion;
+
+NS_ASSUME_NONNULL_BEGIN
+
+- (void)fetchMessageOperationsWithConversationID:(NSString *)conversationId
+                                   operationType:(SKYMessageOperationType)type
+                                      completion:
+                                          (SKYChatFetchMessageOperationsListCompletion)completion;
+
+- (SKYMessageOperation *)didStartMessage:(SKYMessage *)message
+                          conversationID:(NSString *)conversationID
+                           operationType:(SKYMessageOperationType)operationType;
+
+- (void)didCompleteMessageOperation:(SKYMessageOperation *)messageOperation;
+
+- (void)didFailMessageOperation:(SKYMessageOperation *)messageOperation error:(NSError *)error;
+
+- (void)didCancelMessageOperation:(SKYMessageOperation *)messageOperation;
+
+NS_ASSUME_NONNULL_END
 
 @end

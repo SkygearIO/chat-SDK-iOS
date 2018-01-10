@@ -57,7 +57,7 @@ extern NSString *_Nonnull const SKYChatTypingIndicatorUserInfoKey;
  */
 extern NSString *_Nonnull const SKYChatRecordChangeUserInfoKey;
 
-@class SKYConversation, SKYMessage, SKYUserChannel;
+@class SKYConversation, SKYMessage, SKYUserChannel, SKYMessageOperation;
 
 /**
  SKYChatExtension is a simple object that expose easy to use helper methods to develop a chat
@@ -82,6 +82,8 @@ typedef void (^SKYChatFetchConversationListCompletion)(
     NSArray<SKYConversation *> *_Nullable conversationList, NSError *_Nullable error);
 typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nullable messageList,
                                                    BOOL isCached, NSError *_Nullable error);
+typedef void (^SKYChatFetchMessageOperationsListCompletion)(
+    NSArray<SKYMessageOperation *> *_Nullable messageOperationList);
 /**
  Gets or sets whether messages fetched from server are automatically marked as delivered.
 

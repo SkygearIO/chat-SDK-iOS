@@ -20,7 +20,8 @@
 #import "SKYChatCacheController.h"
 #import "SKYChatCacheController+Private.h"
 
-#import "SKYMessageCacheObject.h"
+#import "SKYMessageOperationCacheObject.h"
+#import "SKYMessageOperation_Private.h"
 
 static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 
@@ -183,6 +184,58 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
             [self.store getMessagesWithPredicate:predicate limit:-1 order:@"creationDate"];
         completion(messages);
     }
+}
+
+#pragma mark - Message Operations
+
+- (void)fetchMessageOperationsWithConversationID:(NSString *)conversationId
+                                   operationType:(SKYMessageOperationType)type
+                                      completion:
+                                          (SKYChatFetchMessageOperationsListCompletion)completion
+{
+    NSString *operationTypeKey =
+        [SKYMessageOperationCacheObject messageOperationTypeKeyWithType:type];
+    NSMutableArray *predicates = [NSMutableArray arrayWithArray:@[
+        [NSPredicate predicateWithFormat:@"conversationID == %@", conversationId],
+        [NSPredicate predicateWithFormat:@"type == %@", operationTypeKey],
+    ]];
+    NSPredicate *predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+
+    if (completion) {
+        NSArray<SKYMessageOperation *> *operations =
+            [self.store getMessageOperationsWithPredicate:predicate limit:-1 order:@"sendDate"];
+        completion(operations);
+    }
+}
+
+- (SKYMessageOperation *)didStartMessage:(SKYMessage *)message
+                          conversationID:(NSString *)conversationID
+                           operationType:(SKYMessageOperationType)operationType
+{
+    SKYMessageOperation *operation = [[SKYMessageOperation alloc] initWithMessage:message
+                                                                   conversationID:conversationID
+                                                                             type:operationType];
+    [self.store setMessageOperations:@[ operation ]];
+    return operation;
+}
+
+- (void)didCompleteMessageOperation:(SKYMessageOperation *)messageOperation
+{
+    // Completed message operation is removed from cache store.
+    messageOperation.status = SKYMessageOperationStatusSuccess;
+    [self.store deleteMessageOperations:@[ messageOperation ]];
+}
+
+- (void)didFailMessageOperation:(SKYMessageOperation *)messageOperation error:(NSError *)error
+{
+    messageOperation.status = SKYMessageOperationStatusFailed;
+    messageOperation.error = [error copy];
+    [self.store setMessageOperations:@[ messageOperation ]];
+}
+
+- (void)didCancelMessageOperation:(SKYMessageOperation *)messageOperation
+{
+    [self.store deleteMessageOperations:@[ messageOperation ]];
 }
 
 @end
