@@ -37,7 +37,7 @@ NSString *const SKYMessageDeletedKey = @"deleted";
 
 + (instancetype)message
 {
-    return [[self alloc] initWithRecordType:@"message"];
+    return [[self alloc] init];
 }
 
 - (id)init
