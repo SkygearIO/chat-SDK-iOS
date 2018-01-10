@@ -130,8 +130,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     adminIDs = [[NSSet setWithArray:adminIDs] allObjects];
 
     NSDictionary<NSString *, id> *options =
-        [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithBool:distinctByParticipants]
-                                           forKey:@"distinctByParticipants"];
+        @{ @"distinctByParticipants" : @(distinctByParticipants),
+           @"adminIDs" : adminIDs };
 
     if (!metadata) {
         metadata = (NSDictionary *)[NSNull null];
