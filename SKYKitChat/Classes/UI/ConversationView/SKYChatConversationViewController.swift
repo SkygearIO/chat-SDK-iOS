@@ -755,21 +755,14 @@ extension SKYChatConversationViewController {
             return nil
         }
 
+        let textCustomization = SKYChatConversationView.UICustomization().textCustomization
         if msg.fail {
-            return NSAttributedString(string: NSLocalizedString("Failed", comment: ""),
+            return NSAttributedString(string: textCustomization.messageSentFailed,
                                       attributes: [NSForegroundColorAttributeName: UIColor.red])
         }
 
-        switch msg.conversationStatus {
-        case .allRead:
-            return NSAttributedString(string: NSLocalizedString("All read", comment: ""))
-        case .someRead:
-            return NSAttributedString(string: NSLocalizedString("Some read", comment: ""))
-        case .delivered:
-            return NSAttributedString(string: NSLocalizedString("Delivered", comment: ""))
-        case .delivering:
-            return NSAttributedString(string: NSLocalizedString("Delivering", comment: ""))
-        }
+        return NSAttributedString(
+            string: textCustomization.getMessageStatus(msg.conversationStatus))
     }
 
     open override func collectionView(
