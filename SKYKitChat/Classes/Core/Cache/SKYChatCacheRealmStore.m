@@ -57,9 +57,15 @@
 
 - (void)createRealmWithConfiguration:(RLMRealmConfiguration *)config
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    void (^initializeRealm)() = ^() {
         self.realm = [RLMRealm realmWithConfiguration:config error:nil];
-    });
+    };
+
+    if ([NSThread isMainThread]) {
+        initializeRealm();
+    } else {
+        dispatch_async(dispatch_get_main_queue(), initializeRealm);
+    }
 }
 
 - (NSArray<SKYMessage *> *)getMessagesWithPredicate:(NSPredicate *)predicate
