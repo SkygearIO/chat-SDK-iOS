@@ -666,16 +666,19 @@ extension SKYChatConversationViewController {
     }
 
     open func updateTitle() {
-        if let title = self.conversation?.title {
-            self.navigationItem.title = title
-        } else if let namelist
-            = self.conversation?.nameList(fromParticipants: self.participants.map { $0.value },
-                                          currentUserID: self.senderId) {
-
-            self.navigationItem.title = namelist
-        } else {
-            self.navigationItem.title = nil
+        var title: String? = nil
+        switch SKYChatConversationView.UICustomization().titleDisplayType {
+        case .`default`:
+            if let convTitle = self.conversation?.title {
+                title = convTitle
+            }
+        case .otherParticipants:
+            let participants = self.participants.map { $0.value }
+            title = self.conversation?.nameList(fromParticipants: participants,
+                                                ignoringUserIDs: [self.senderId])
         }
+
+        self.navigationItem.title = title
     }
 
     open override func collectionView(_ collectionView: UICollectionView,
