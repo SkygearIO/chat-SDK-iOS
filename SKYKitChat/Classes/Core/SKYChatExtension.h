@@ -22,6 +22,7 @@
 #import "SKYChatReceipt.h"
 #import "SKYChatRecordChange.h"
 #import "SKYChatTypingIndicator.h"
+#import "SKYMessageOperation.h"
 
 /**
  When obtaining a dictionary containing unread count information, use this
@@ -84,6 +85,13 @@ typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nulla
                                                    BOOL isCached, NSError *_Nullable error);
 typedef void (^SKYChatFetchMessageOperationsListCompletion)(
     NSArray<SKYMessageOperation *> *_Nullable messageOperationList);
+NS_ASSUME_NONNULL_BEGIN
+typedef void (^SKYMessageOperationCompletion)(SKYMessageOperation *messageOperation,
+                                              SKYMessage *_Nullable message,
+                                              NSError *_Nullable error);
+typedef void (^SKYMessageOperationListCompletion)(
+    NSArray<SKYMessageOperation *> *messageOperations);
+NS_ASSUME_NONNULL_END
 /**
  Gets or sets whether messages fetched from server are automatically marked as delivered.
 
@@ -725,4 +733,55 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
  @param NSNotification observer
  */
 - (void)unsubscribeToTypingIndicatorWithObserver:(id _Nonnull)observer;
+
+///-----------------------------------------
+/// @name Managing Failed Message Operations
+///-----------------------------------------
+
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ Fetches outstanding message operations.
+
+ This method fetches outstanding message operations that is cached locally. Messages operations that
+ are pending or failed will be returned by this method. The application can display these
+ outstanding messages to the user and decide how to handle these outstanding operations.
+
+ @param conversationID The conversation ID of the message in a failed operation
+ @param operationType The type of the message operation
+ @param completion block to be called with an array of failed message operations
+ */
+- (void)fetchOutstandingMessageOperationsWithConverstionID:(NSString *)conversationID
+                                             operationType:(SKYMessageOperationType)operationType
+                                                completion:
+                                                    (SKYMessageOperationListCompletion)completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchOutstandingMessageOperations(conversationID:operationType:completion:)); /* clang-format on */
+
+/**
+ Retry a failed message operation.
+
+ This method is called by the application when it decides to retry the message operation. The
+ operation will be removed and a new operation will be created. The message will be saved, edited,
+ or deleted according to the message operation type.
+
+ @param operation the message operation to retry
+ @param completion block to be called when the message operation completes
+ */
+- (void)retryMessageOperation:(SKYMessageOperation *)operation
+                   completion:(SKYMessageOperationCompletion)completion
+    /* clang-format off */ NS_SWIFT_NAME(retry(messageOperation:completion:)); /* clang-format on */
+
+/**
+ Cancel a failed message operation.
+
+ This method is called by the application when it decides the message operation will not be carried
+ out. The operation will be removed and no further actions will be performed.
+
+ @param operation the message operation to retry
+ */
+- (void)cancelMessageOperation:(SKYMessageOperation *)operation
+    /* clang-format off */ NS_SWIFT_NAME(cancel(messageOperation:)); /* clang-format on */
+
+NS_ASSUME_NONNULL_END
+
 @end

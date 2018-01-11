@@ -818,6 +818,73 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
              }];
 }
 
+#pragma mark - Message Operations
+
+- (void)fetchOutstandingMessageOperationsWithConverstionID:(NSString *)conversationId
+                                             operationType:(SKYMessageOperationType)operationType
+                                                completion:
+                                                    (SKYMessageOperationListCompletion)completion
+{
+    [self.cacheController
+        fetchMessageOperationsWithConversationID:conversationId
+                                   operationType:operationType
+                                      completion:^(
+                                          NSArray<SKYMessageOperation *> *messageOperationList) {
+                                          if (completion) {
+                                              completion(messageOperationList);
+                                          }
+                                      }];
+}
+
+- (void)retryMessageOperation:(SKYMessageOperation *)operation
+                   completion:(SKYMessageOperationCompletion)completion
+{
+    if (operation.status == SKYMessageOperationStatusPending) {
+        NSLog(@"Message operation %@ is still pending. Pending operations cannot be retried.");
+        return;
+    }
+
+    [self.cacheController didCancelMessageOperation:operation];
+
+    switch (operation.type) {
+        case SKYMessageOperationTypeAdd:
+        case SKYMessageOperationTypeEdit: {
+            [self saveMessage:operation.message
+                forNewMessage:(operation.type == SKYMessageOperationTypeAdd)
+                   completion:^(SKYMessage *message, NSError *error) {
+                       if (completion) {
+                           completion(operation, message, error);
+                       }
+                   }];
+            break;
+        }
+        case SKYMessageOperationTypeDelete: {
+            [self deleteMessage:operation.message
+                 inConversation:[SKYConversation
+                                    recordWithRecord:[SKYRecord
+                                                         recordWithRecordType:@"conversation"
+                                                                         name:operation
+                                                                                  .conversationID]]
+                     completion:^(SKYConversation *conversation, NSError *error) {
+                         if (completion) {
+                             completion(operation, nil, error);
+                         }
+                     }];
+            break;
+        }
+    }
+}
+
+- (void)cancelMessageOperation:(SKYMessageOperation *)operation
+{
+    if (operation.status == SKYMessageOperationStatusPending) {
+        NSLog(@"Message operation %@ is still pending. Pending operations cannot be cancelled.");
+        return;
+    }
+
+    [self.cacheController didCancelMessageOperation:operation];
+}
+
 #pragma mark - Subscriptions
 
 - (void)fetchOrCreateUserChannelWithCompletion:(SKYChatChannelCompletion)completion
