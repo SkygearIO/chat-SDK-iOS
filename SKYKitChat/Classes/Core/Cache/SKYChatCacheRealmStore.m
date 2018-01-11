@@ -187,4 +187,18 @@
     [self.realm commitWriteTransaction];
 }
 
+- (void)markMessagesAsFailedWithError:(NSError *)error predicate:(NSPredicate *)predicate;
+{
+    [self.realm beginWriteTransaction];
+
+    RLMResults<SKYMessageCacheObject *> *results =
+        [SKYMessageOperationCacheObject objectsInRealm:self.realm withPredicate:predicate];
+    [results setValuesForKeysWithDictionary:@{
+        @"status" : @"failed",
+        @"errorData" : [NSKeyedArchiver archivedDataWithRootObject:error],
+    }];
+
+    [self.realm commitWriteTransaction];
+}
+
 @end

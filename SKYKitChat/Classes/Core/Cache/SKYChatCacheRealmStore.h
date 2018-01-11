@@ -50,4 +50,6 @@
 
 - (void)deleteMessageOperations:(NSArray<SKYMessageOperation *> *)messageOperations;
 
+- (void)markMessagesAsFailedWithError:(NSError *)error predicate:(NSPredicate *)predicate;
+
 @end

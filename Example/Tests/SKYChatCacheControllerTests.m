@@ -443,6 +443,26 @@ describe(@"Cache Controller handle message operations", ^{
         }];
     });
 
+    it(@"mark pending messages as failed", ^{
+        RLMRealm *realm = cacheController.store.realm;
+
+        SKYMessage *message = [SKYMessage message];
+
+        SKYMessageOperation *operation =
+            [cacheController didStartMessage:message
+                              conversationID:@"c0"
+                               operationType:SKYMessageOperationTypeAdd];
+        expect(operation.status).to.equal(SKYMessageOperationStatusPending);
+
+        [cacheController markMessagesAsFailed];
+
+        SKYMessageOperationCacheObject *cacheObject =
+            [SKYMessageOperationCacheObject objectInRealm:realm
+                                            forPrimaryKey:operation.operationID];
+        SKYMessageOperation *operationInStore = [cacheObject messageOperation];
+        expect(operationInStore.status).to.equal(SKYMessageOperationStatusFailed);
+    });
+
     it(@"start message will create a pending message operation in store", ^{
         RLMRealm *realm = cacheController.store.realm;
 

@@ -35,6 +35,7 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
         SKYChatCacheRealmStore *store =
             [[SKYChatCacheRealmStore alloc] initWithName:SKYChatCacheStoreName];
         controller = [[SKYChatCacheController alloc] initWithStore:store];
+        [controller markMessagesAsFailed];
     });
 
     return controller;
@@ -199,6 +200,12 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 - (void)didCancelMessageOperation:(SKYMessageOperation *)messageOperation
 {
     [self.store deleteMessageOperations:@[ messageOperation ]];
+}
+
+- (void)markMessagesAsFailed
+{
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"status == %@", @"pending"];
+    [self.store markMessagesAsFailedWithError:nil predicate:predicate];
 }
 
 @end
