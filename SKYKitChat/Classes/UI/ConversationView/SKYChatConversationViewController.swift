@@ -83,6 +83,9 @@ import SKPhotoBrowser
         withAuthor author: SKYRecord?,
         atIndexPath indexPath: IndexPath) -> UIImage?
 
+    @objc optional func typingIndicatorShouldShowInConversationViewController(
+        _ controller: SKYChatConversationViewController) -> Bool
+
     /**
      * Hooks on send message flow
      */
@@ -259,6 +262,14 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
         return self.delegate?.cameraButtonShouldShowInConversationViewController?(self) ?? true
     }
 
+    public var shouldShowTypingIndicator: Bool {
+        if let shouldShow = self.delegate?.typingIndicatorShouldShowInConversationViewController?(self) {
+            return shouldShow
+        }
+
+        return SKYChatConversationView.UICustomization().typingIndicatorShouldShow
+    }
+
     public var inputToolbarSendButtonState: InputToolbarSendButtonState = .undefined {
         didSet {
             guard self.inputToolbarSendButtonState != oldValue else {
@@ -284,6 +295,8 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
             }
         }
     }
+
+
 
     var conversationViewContentOffset: CGPoint = CGPoint.zero {
         willSet {
@@ -952,6 +965,11 @@ extension SKYChatConversationViewController {
     open func displayTypingIndicator() {
         guard self.showTypingIndicator == false else {
             // no need to update
+            return
+        }
+
+        guard self.shouldShowTypingIndicator else {
+            self.showTypingIndicator = false
             return
         }
 

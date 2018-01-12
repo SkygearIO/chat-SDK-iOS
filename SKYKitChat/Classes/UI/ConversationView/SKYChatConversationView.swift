@@ -31,11 +31,37 @@ public class SKYChatConversationViewCustomization {
     public var avatarType: SKYChatConversationViewUserAvatarType = .initial
     public var avatarHiddenForOutgoingMessages: Bool = false
     public var avatarHiddenForIncomingMessages: Bool = false
-    public var avatarHidden: Bool = false {
-        didSet {
-            self.avatarHiddenForIncomingMessages = self.avatarHidden
-            self.avatarHiddenForOutgoingMessages = self.avatarHidden
+    public var avatarHidden: Bool? {
+        get {
+            if self.avatarHiddenForIncomingMessages == self.avatarHiddenForOutgoingMessages {
+                return self.avatarHiddenForOutgoingMessages
+            }
+
+            return nil
         }
+        set {
+            if let hidden = newValue {
+                self.avatarHiddenForIncomingMessages = hidden
+                self.avatarHiddenForOutgoingMessages = hidden
+            }
+        }
+    }
+
+    public lazy var textCustomization: SKYChatConversationViewTextCustomization
+        = SKYChatConversationViewTextCustomization()
+
+    public var messageDateFormatter: DateFormatter
+
+    public var typingIndicatorShouldShow: Bool = true
+
+    init() {
+        self.messageDateFormatter = {
+            let df = DateFormatter()
+            df.dateStyle = .medium
+            df.timeStyle = .short
+            df.doesRelativeDateFormatting = true
+            return df
+        }()
     }
 
     public static func `default`() -> SKYChatConversationViewCustomization {
