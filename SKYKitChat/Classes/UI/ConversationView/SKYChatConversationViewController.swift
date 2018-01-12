@@ -69,6 +69,9 @@ import SKPhotoBrowser
     @objc optional func cameraButtonShouldShowInConversationViewController(
         _ controller: SKYChatConversationViewController) -> Bool
 
+    @objc optional func voiceMessageButtonShouldShowInConversationViewController(
+        _ controller: SKYChatConversationViewController) -> Bool
+
     @objc optional func conversationViewController(
         _ controller: SKYChatConversationViewController,
         alertControllerForAccessoryButton button: UIButton) -> UIAlertController
@@ -261,8 +264,28 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
 
     public var cameraButton: UIButton?
 
+    public var shouldShowAccessoryButton: Bool {
+        return self.delegate?.accessoryButtonShouldShowInConversationViewController?(self) ?? true
+    }
+
     public var shouldShowCameraButton: Bool {
-        return self.delegate?.cameraButtonShouldShowInConversationViewController?(self) ?? true
+        if let shouldShow =
+            self.delegate?.cameraButtonShouldShowInConversationViewController?(self)
+        {
+            return shouldShow
+        }
+
+        return SKYChatConversationView.UICustomization().cameraButtonShouldShow
+    }
+
+    public var shouldShowVoiceMessageButton: Bool {
+        if let shouldShow =
+            self.delegate?.voiceMessageButtonShouldShowInConversationViewController?(self)
+        {
+            return shouldShow
+        }
+
+        return SKYChatConversationView.UICustomization().voiceMessageButtonShouldShow
     }
 
     public var shouldShowTypingIndicator: Bool {
@@ -310,8 +333,6 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
             }
         }
     }
-
-
 
     var conversationViewContentOffset: CGPoint = CGPoint.zero {
         willSet {
@@ -644,6 +665,11 @@ extension SKYChatConversationViewController {
     open func customizeViews() {
         self.updateTitle()
 
+        let sendButton = self.inputToolbar?.contentView?.rightBarButtonItem
+        sendButton?.setTitle(
+            SKYChatConversationView.UICustomization().textCustomization.sendButton,
+            for: .normal)
+
         if let color = self.delegate?.incomingMessageColorForConversationViewController?(self) {
             self.incomingMessageBubbleColor = color
         }
@@ -652,10 +678,7 @@ extension SKYChatConversationViewController {
             self.outgoingMessageBubbleColor = color
         }
 
-        let shouldShowAccessoryButton: Bool =
-            self.delegate?.accessoryButtonShouldShowInConversationViewController?(self) ?? true
-
-        if !shouldShowAccessoryButton {
+        if !self.shouldShowAccessoryButton {
             self.inputToolbar?.contentView?.leftBarButtonItem?.removeFromSuperview()
             self.inputToolbar?.contentView?.leftBarButtonItem = nil
         }
@@ -663,10 +686,12 @@ extension SKYChatConversationViewController {
         self.inputTextView = self.inputToolbar?.contentView?.textView
         self.slideToCancelTextView = self.createSlideToCancelTextView(self.inputTextView!.frame)
 
-        if self.inputToolbar.contentView.textView.text.count > 0 {
-            self.inputToolbarSendButtonState = .send
-        } else {
+        if self.shouldShowVoiceMessageButton &&
+            self.inputToolbar.contentView.textView.text.count == 0
+        {
             self.inputToolbarSendButtonState = .record
+        } else {
+            self.inputToolbarSendButtonState = .send
         }
 
         self.createActivityIndicator()
@@ -1086,7 +1111,9 @@ extension SKYChatConversationViewController {
         self.messageList.append([msg])
         self.collectionView?.reloadData()
 
-        self.inputToolbarSendButtonState = .record
+        if self.shouldShowVoiceMessageButton {
+            self.inputToolbarSendButtonState = .record
+        }
 
         DispatchQueue.main.async {
             self.scrollToBottom(animated: true)
@@ -1173,11 +1200,13 @@ extension SKYChatConversationViewController {
 extension SKYChatConversationViewController {
     open override func textViewDidChange(_ textView: UITextView) {
         super.textViewDidChange(textView)
-        if textView.text.count > 0 {
-            self.inputToolbarSendButtonState = .send
-        } else {
+
+        if self.shouldShowVoiceMessageButton && textView.text.count == 0 {
             self.inputToolbarSendButtonState = .record
+        } else {
+            self.inputToolbarSendButtonState = .send
         }
+
         self.skygear.chatExtension?.sendTypingIndicator(.begin, in: self.conversation!)
     }
 
@@ -1430,7 +1459,9 @@ extension SKYChatConversationViewController {
 
         if !flag || self.isRecordingCancelled {
             print("Voice Recording: Cancelled")
-            self.inputToolbarSendButtonState = .record
+            if self.shouldShowVoiceMessageButton {
+                self.inputToolbarSendButtonState = .record
+            }
             return
         }
 

@@ -52,6 +52,8 @@ public class SKYChatConversationViewCustomization {
 
     public var messageDateFormatter: DateFormatter
 
+    public var cameraButtonShouldShow: Bool = true
+    public var voiceMessageButtonShouldShow: Bool = true
     public var typingIndicatorShouldShow: Bool = true
     public var messageStatusShouldShow: Bool = true
 
