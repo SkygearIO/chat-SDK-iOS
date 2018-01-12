@@ -60,6 +60,18 @@ public class SKYChatConversationViewCustomization {
     public lazy var textCustomization: SKYChatConversationViewTextCustomization
         = SKYChatConversationViewTextCustomization()
 
+    public var messageDateFormatter: DateFormatter
+
+    init() {
+        self.messageDateFormatter = {
+            let df = DateFormatter()
+            df.dateStyle = .medium
+            df.timeStyle = .short
+            df.doesRelativeDateFormatting = true
+            return df
+        }()
+    }
+
     public static func `default`() -> SKYChatConversationViewCustomization {
         if self.sharedInstance == nil {
             self.sharedInstance = SKYChatConversationViewCustomization()

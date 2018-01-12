@@ -66,6 +66,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         SKYChatConversationView.UICustomization().avatarHidden = true
         SKYChatConversationView.UICustomization().avatarHiddenForIncomingMessages = false
 
+        SKYChatConversationView.UICustomization().messageDateFormatter.dateStyle = .long
+
         return true
     }
 

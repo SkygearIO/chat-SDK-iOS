@@ -776,22 +776,18 @@ extension SKYChatConversationViewController {
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
         attributedTextForCellTopLabelAt indexPath: IndexPath!
-        ) -> NSAttributedString! {
+    ) -> NSAttributedString! {
+
         if let ds = self.delegate?.conversationViewController?(self, dateStringAt: indexPath) {
             return ds
         }
 
         let msg = self.messageList.messageAt(indexPath.row)
-        let date = msg.creationDate()
+        let msgDate = msg.creationDate()
+        let dateString =
+            SKYChatConversationView.UICustomization().messageDateFormatter.string(from: msgDate)
         
-        let dateFormatter: DateFormatter
-        dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .short
-        dateFormatter.doesRelativeDateFormatting = true
-        let dateString = dateFormatter.string(from: date)
-        
-        return NSAttributedString(string: "\(dateString)")
+        return NSAttributedString(string: dateString)
     }
     
     open override func collectionView(
