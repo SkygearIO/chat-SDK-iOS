@@ -616,6 +616,18 @@ extension SKYChatConversationViewController {
     open func customizeViews() {
         self.updateTitle()
 
+        let sendButton: UIButton? = {
+            if self.inputToolbar?.sendButtonOnRight == false {
+                return self.inputToolbar?.contentView?.leftBarButtonItem
+            }
+
+            return self.inputToolbar?.contentView?.rightBarButtonItem
+        }()
+
+        sendButton?.setTitle(
+            SKYChatConversationView.UICustomization().textCustomization.sendButton,
+            for: .normal)
+
         if let color = self.delegate?.incomingMessageColorForConversationViewController?(self) {
             self.incomingMessageBubbleColor = color
         }

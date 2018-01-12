@@ -24,6 +24,8 @@
 
 public class SKYChatConversationViewTextCustomization {
 
+    public var sendButton = NSLocalizedString("Send", comment: "")
+
     public var messageSentFailed = NSLocalizedString("Failed", comment: "")
 
     public var messageStatusAllRead = NSLocalizedString("All read", comment: "")
