@@ -53,6 +53,7 @@ public class SKYChatConversationViewCustomization {
     public var messageDateFormatter: DateFormatter
 
     public var typingIndicatorShouldShow: Bool = true
+    public var messageStatusShouldShow: Bool = true
 
     init() {
         self.messageDateFormatter = {

@@ -86,6 +86,9 @@ import SKPhotoBrowser
     @objc optional func typingIndicatorShouldShowInConversationViewController(
         _ controller: SKYChatConversationViewController) -> Bool
 
+    @objc optional func messageStatusShouldShowInConversationViewController(
+        _ controller: SKYChatConversationViewController) -> Bool
+
     /**
      * Hooks on send message flow
      */
@@ -263,11 +266,23 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     }
 
     public var shouldShowTypingIndicator: Bool {
-        if let shouldShow = self.delegate?.typingIndicatorShouldShowInConversationViewController?(self) {
+        if let shouldShow =
+            self.delegate?.typingIndicatorShouldShowInConversationViewController?(self)
+        {
             return shouldShow
         }
 
         return SKYChatConversationView.UICustomization().typingIndicatorShouldShow
+    }
+
+    public var shouldShowMessageStatus: Bool {
+        if let shouldShow =
+            self.delegate?.messageStatusShouldShowInConversationViewController?(self)
+        {
+            return shouldShow
+        }
+
+        return SKYChatConversationView.UICustomization().messageStatusShouldShow
     }
 
     public var inputToolbarSendButtonState: InputToolbarSendButtonState = .undefined {
@@ -761,7 +776,12 @@ extension SKYChatConversationViewController {
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
         attributedTextForCellBottomLabelAt indexPath: IndexPath!
-    ) -> NSAttributedString! {
+    ) -> NSAttributedString? {
+
+        guard self.shouldShowMessageStatus else {
+            return nil
+        }
+
         let msg = self.messageList.messageAt(indexPath.row)
 
         if msg.creatorUserRecordID() != self.senderId {
