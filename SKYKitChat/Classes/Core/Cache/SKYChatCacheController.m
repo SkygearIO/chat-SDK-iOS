@@ -124,14 +124,10 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     [self.store setMessages:deletedMessages];
 }
 
-- (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
+- (void)didSaveMessage:(SKYMessage *)message
 {
     // cache unsaved message
     [self.store setMessages:@[ message ]];
-
-    if (completion) {
-        completion(message, nil);
-    }
 }
 
 - (void)didDeleteMessage:(SKYMessage *)message
@@ -154,7 +150,7 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     switch (event) {
         case SKYChatRecordChangeEventCreate:
         case SKYChatRecordChangeEventUpdate:
-            [self saveMessage:message completion:nil];
+            [self didSaveMessage:message];
             break;
         case SKYChatRecordChangeEventDelete:
             [self didDeleteMessage:message];

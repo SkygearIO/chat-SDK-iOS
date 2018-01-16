@@ -240,25 +240,20 @@ SpecBegin(SKYChatCacheController)
             messageToSave.body = @"new message";
             messageToSave.sendDate = [baseDate dateByAddingTimeInterval:50000];
 
-            [cacheController
-                saveMessage:messageToSave
-                 completion:^(SKYMessage *_Nullable message, NSError *_Nullable error) {
-                     expect(message.recordID).to.equal(messageToSave.recordID);
-                     expect(message.sendDate).to.equal(messageToSave.sendDate);
+            [cacheController didSaveMessage:messageToSave];
+            expect(message.recordID).to.equal(messageToSave.recordID);
+            expect(message.sendDate).to.equal(messageToSave.sendDate);
 
-                     RLMRealm *realm = cacheController.store.realm;
-                     RLMResults<SKYMessageCacheObject *> *results =
-                         [SKYMessageCacheObject objectsInRealm:realm
-                                                         where:@"recordID == %@", @"mm1"];
-                     expect(results.count).to.equal(1);
-                     expect(results[0].recordID).to.equal(messageToSave.recordID.recordName);
-                     expect(results[0].sendDate).to.equal(messageToSave.sendDate);
+            RLMRealm *realm = cacheController.store.realm;
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"mm1"];
+            expect(results.count).to.equal(1);
+            expect(results[0].recordID).to.equal(messageToSave.recordID.recordName);
+            expect(results[0].sendDate).to.equal(messageToSave.sendDate);
 
-                     results = [SKYMessageCacheObject allObjectsInRealm:realm];
-                     expect(results.count).to.equal(11);
-                 }];
+            results = [SKYMessageCacheObject allObjectsInRealm:realm];
+            expect(results.count).to.equal(11);
 
-            // assume that the save message to cache operation is sync
             [cacheController
                 fetchMessagesWithConversationID:@"c0"
                                           limit:100
@@ -286,7 +281,7 @@ SpecBegin(SKYChatCacheController)
             messageToSave.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:50000];
             messageToSave.body = @"new message";
 
-            [cacheController saveMessage:messageToSave completion:nil];
+            [cacheController didSaveMessage:messageToSave];
 
             RLMRealm *realm = cacheController.store.realm;
             RLMResults<SKYMessageCacheObject *> *results =

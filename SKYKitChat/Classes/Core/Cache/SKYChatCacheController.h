@@ -39,7 +39,7 @@
 - (void)didFetchMessages:(NSArray<SKYMessage *> *)messages
          deletedMessages:(NSArray<SKYMessage *> *)deletedMessages;
 
-- (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion;
+- (void)didSaveMessage:(SKYMessage *)message;
 
 - (void)didDeleteMessage:(SKYMessage *)message;
 

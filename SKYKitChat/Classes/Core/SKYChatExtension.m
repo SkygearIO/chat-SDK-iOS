@@ -459,7 +459,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                       [self.cacheController didFailMessageOperation:operation error:error];
                   } else {
                       msg = [[SKYMessage alloc] initWithRecordData:record];
-                      [self.cacheController saveMessage:msg completion:nil];
+                      [self.cacheController didSaveMessage:msg];
                       [self.cacheController didCompleteMessageOperation:operation];
                   }
 
