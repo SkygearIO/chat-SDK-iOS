@@ -187,7 +187,7 @@
     [self.realm commitWriteTransaction];
 }
 
-- (void)markMessagesAsFailedWithError:(NSError *)error predicate:(NSPredicate *)predicate;
+- (void)failMessageOperationsWithPredicate:(NSPredicate *)predicate error:(NSError *)error
 {
     [self.realm beginWriteTransaction];
 

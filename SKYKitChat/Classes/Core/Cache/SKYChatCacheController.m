@@ -35,7 +35,11 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
         SKYChatCacheRealmStore *store =
             [[SKYChatCacheRealmStore alloc] initWithName:SKYChatCacheStoreName];
         controller = [[SKYChatCacheController alloc] initWithStore:store];
-        [controller markMessagesAsFailed];
+
+        // It is assumed that when the default cache controller is created,
+        // the app is launched and we make use of this opportunity to clean
+        // up the cache.
+        [controller cleanUpOnLaunch];
     });
 
     return controller;
@@ -50,6 +54,16 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     self.store = store;
 
     return self;
+}
+
+- (void)cleanUpOnLaunch
+{
+    // Mark pending message operations as failed.
+    //
+    // Message operations that is pending will not progress to failed/success
+    // state because the app is just launched. Therefore we need to move them
+    // to failed state so that the in the clean up.
+    [self markPendingMessageOperationsAsFailed];
 }
 
 - (void)fetchMessagesWithConversationID:(NSString *)conversationId
@@ -202,10 +216,10 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     [self.store deleteMessageOperations:@[ messageOperation ]];
 }
 
-- (void)markMessagesAsFailed
+- (void)markPendingMessageOperationsAsFailed
 {
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"status == %@", @"pending"];
-    [self.store markMessagesAsFailedWithError:nil predicate:predicate];
+    [self.store failMessageOperationsWithPredicate:predicate error:nil];
 }
 
 @end
