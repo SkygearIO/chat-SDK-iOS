@@ -42,10 +42,10 @@ This is the client library for the Skygear Chat extension.
     sp.dependency 'SKYKitChat/Core'
     sp.dependency 'SKYKit/Core',               '~> 1.3.1'
     sp.dependency 'SVProgressHUD',             '~> 2.1.0'
-    sp.dependency 'ALCameraViewController',    '~> 2.0'
+    sp.dependency 'ALCameraViewController',    '~> 3.0'
     sp.dependency 'LruCache',                  '~> 0.1'
     sp.dependency 'CTAssetsPickerController',  '~> 3.3.1'
-    sp.dependency 'SKPhotoBrowser',            '~> 4.1.1'
+    sp.dependency 'SKPhotoBrowser',            '~> 5.0'
     sp.dependency 'JSQSystemSoundPlayer',      '~> 2.0.1'
   end
 
