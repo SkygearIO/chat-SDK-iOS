@@ -22,6 +22,7 @@
 #import "SKYChatRecordChange_Private.h"
 
 #import "SKYMessageCacheObject.h"
+#import "SKYMessageOperationCacheObject.h"
 
 SpecBegin(SKYChatCacheController)
 
@@ -239,25 +240,20 @@ SpecBegin(SKYChatCacheController)
             messageToSave.body = @"new message";
             messageToSave.sendDate = [baseDate dateByAddingTimeInterval:50000];
 
-            [cacheController
-                saveMessage:messageToSave
-                 completion:^(SKYMessage *_Nullable message, NSError *_Nullable error) {
-                     expect(message.recordID).to.equal(messageToSave.recordID);
-                     expect(message.sendDate).to.equal(messageToSave.sendDate);
+            [cacheController didSaveMessage:messageToSave];
+            expect(message.recordID).to.equal(messageToSave.recordID);
+            expect(message.sendDate).to.equal(messageToSave.sendDate);
 
-                     RLMRealm *realm = cacheController.store.realm;
-                     RLMResults<SKYMessageCacheObject *> *results =
-                         [SKYMessageCacheObject objectsInRealm:realm
-                                                         where:@"recordID == %@", @"mm1"];
-                     expect(results.count).to.equal(1);
-                     expect(results[0].recordID).to.equal(messageToSave.recordID.recordName);
-                     expect(results[0].sendDate).to.equal(messageToSave.sendDate);
+            RLMRealm *realm = cacheController.store.realm;
+            RLMResults<SKYMessageCacheObject *> *results =
+                [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"mm1"];
+            expect(results.count).to.equal(1);
+            expect(results[0].recordID).to.equal(messageToSave.recordID.recordName);
+            expect(results[0].sendDate).to.equal(messageToSave.sendDate);
 
-                     results = [SKYMessageCacheObject allObjectsInRealm:realm];
-                     expect(results.count).to.equal(11);
-                 }];
+            results = [SKYMessageCacheObject allObjectsInRealm:realm];
+            expect(results.count).to.equal(11);
 
-            // assume that the save message to cache operation is sync
             [cacheController
                 fetchMessagesWithConversationID:@"c0"
                                           limit:100
@@ -273,33 +269,6 @@ SpecBegin(SKYChatCacheController)
                                                      [baseDate dateByAddingTimeInterval:i * 2000]);
                                          }
                                      }];
-
-            [cacheController
-                fetchUnsentMessagesWithConversationID:@"c0"
-                                           completion:^(NSArray<SKYMessage *> *_Nonnull messages) {
-                                               expect(messages.count).to.equal(1);
-                                               expect(messages[0].recordID.recordName)
-                                                   .to.equal(messageToSave.recordID.recordName);
-                                               expect(messages[0].sendDate)
-                                                   .to.equal(messageToSave.sendDate);
-                                           }];
-
-            [cacheController didSaveMessage:messageToSave error:nil];
-
-            [cacheController
-                fetchMessagesWithConversationID:@"c0"
-                                          limit:1
-                                     beforeTime:nil
-                                          order:nil
-                                     completion:^(NSArray<SKYMessage *> *messageList, BOOL isCached,
-                                                  NSError *error) {
-                                         SKYMessage *latestMessage = messageList.firstObject;
-                                         expect(latestMessage.recordID)
-                                             .to.equal(messageToSave.recordID);
-                                         expect(latestMessage.sendDate)
-                                             .to.equal(messageToSave.sendDate);
-                                         expect(latestMessage.alreadySyncToServer).to.beTruthy();
-                                     }];
         });
 
         it(@"didSave message, update the cache", ^{
@@ -312,7 +281,7 @@ SpecBegin(SKYChatCacheController)
             messageToSave.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:50000];
             messageToSave.body = @"new message";
 
-            [cacheController didSaveMessage:messageToSave error:nil];
+            [cacheController didSaveMessage:messageToSave];
 
             RLMRealm *realm = cacheController.store.realm;
             RLMResults<SKYMessageCacheObject *> *results =
@@ -321,8 +290,6 @@ SpecBegin(SKYChatCacheController)
 
             SKYMessage *newMessage = [[results objectAtIndex:0] messageRecord];
             expect(newMessage.body).to.equal(messageToSave.body);
-            expect(newMessage.alreadySyncToServer).to.equal(YES);
-            expect(newMessage.fail).to.equal(NO);
         });
 
         it(@"delete message, update the cache", ^{
@@ -451,6 +418,213 @@ describe(@"Cache Controller handle change event", ^{
             [SKYMessageCacheObject allObjectsInRealm:realm];
         expect(results.count).to.equal(1);
         expect(results[0].deleted).to.beTruthy();
+    });
+});
+
+describe(@"Cache Controller handle message operations", ^{
+    __block SKYChatCacheController *cacheController = nil;
+    __block NSDate *baseDate = nil;
+
+    beforeEach(^{
+        cacheController = [[SKYChatCacheController alloc]
+            initWithStore:[[SKYChatCacheRealmStore alloc] initInMemoryWithName:@"ChatTest"]];
+        baseDate = [NSDate dateWithTimeIntervalSince1970:0];
+    });
+
+    afterEach(^{
+        RLMRealm *realm = cacheController.store.realm;
+        [realm transactionWithBlock:^{
+            [realm deleteAllObjects];
+        }];
+    });
+
+    it(@"mark pending messages as failed", ^{
+        RLMRealm *realm = cacheController.store.realm;
+
+        SKYMessage *message = [SKYMessage message];
+
+        SKYMessageOperation *operation =
+            [cacheController didStartMessage:message
+                              conversationID:@"c0"
+                               operationType:SKYMessageOperationTypeAdd];
+        expect(operation.status).to.equal(SKYMessageOperationStatusPending);
+
+        [cacheController markMessagesAsFailed];
+
+        SKYMessageOperationCacheObject *cacheObject =
+            [SKYMessageOperationCacheObject objectInRealm:realm
+                                            forPrimaryKey:operation.operationID];
+        SKYMessageOperation *operationInStore = [cacheObject messageOperation];
+        expect(operationInStore.status).to.equal(SKYMessageOperationStatusFailed);
+    });
+
+    it(@"start message will create a pending message operation in store", ^{
+        RLMRealm *realm = cacheController.store.realm;
+
+        SKYMessage *message = [SKYMessage message];
+
+        SKYMessageOperation *operation =
+            [cacheController didStartMessage:message
+                              conversationID:@"c0"
+                               operationType:SKYMessageOperationTypeAdd];
+        expect(operation.status).to.equal(SKYMessageOperationStatusPending);
+
+        SKYMessageOperationCacheObject *cacheObject =
+            [SKYMessageOperationCacheObject objectInRealm:realm
+                                            forPrimaryKey:operation.operationID];
+        SKYMessageOperation *operationInStore = [cacheObject messageOperation];
+        expect(operationInStore.status).to.equal(SKYMessageOperationStatusPending);
+        expect(operationInStore.type).to.equal(SKYMessageOperationTypeAdd);
+        expect(operationInStore.message.recordID).to.equal(message.recordID);
+    });
+
+    it(@"start message will with different operation type", ^{
+        RLMRealm *realm = cacheController.store.realm;
+
+        SKYMessage *message = [SKYMessage message];
+
+        SKYMessageOperation *operation =
+            [cacheController didStartMessage:message
+                              conversationID:@"c0"
+                               operationType:SKYMessageOperationTypeEdit];
+
+        SKYMessageOperationCacheObject *cacheObject =
+            [SKYMessageOperationCacheObject objectInRealm:realm
+                                            forPrimaryKey:operation.operationID];
+        SKYMessageOperation *operationInStore = [cacheObject messageOperation];
+        expect(operationInStore.type).to.equal(SKYMessageOperationTypeEdit);
+    });
+
+    it(@"mark message operation as completed", ^{
+        RLMRealm *realm = cacheController.store.realm;
+
+        SKYMessageOperation *operation =
+            [cacheController didStartMessage:[SKYMessage message]
+                              conversationID:@"c0"
+                               operationType:SKYMessageOperationTypeAdd];
+
+        [cacheController didCompleteMessageOperation:operation];
+        expect(operation.status).to.equal(SKYMessageOperationStatusSuccess);
+
+        SKYMessageOperationCacheObject *cacheObject =
+            [SKYMessageOperationCacheObject objectInRealm:realm
+                                            forPrimaryKey:operation.operationID];
+        expect(cacheObject).to.beNil();
+    });
+
+    it(@"mark message operation as cancelled", ^{
+        RLMRealm *realm = cacheController.store.realm;
+
+        SKYMessageOperation *operation =
+            [cacheController didStartMessage:[SKYMessage message]
+                              conversationID:@"c0"
+                               operationType:SKYMessageOperationTypeAdd];
+
+        [cacheController didCancelMessageOperation:operation];
+
+        SKYMessageOperationCacheObject *cacheObject =
+            [SKYMessageOperationCacheObject objectInRealm:realm
+                                            forPrimaryKey:operation.operationID];
+        expect(cacheObject).to.beNil();
+    });
+
+    it(@"mark message operation as failed", ^{
+        RLMRealm *realm = cacheController.store.realm;
+
+        SKYMessageOperation *operation =
+            [cacheController didStartMessage:[SKYMessage message]
+                              conversationID:@"c0"
+                               operationType:SKYMessageOperationTypeAdd];
+
+        NSError *error = [NSError errorWithDomain:NSGenericException code:10000 userInfo:nil];
+        [cacheController didFailMessageOperation:operation error:error];
+        expect(operation.status).to.equal(SKYMessageOperationStatusFailed);
+
+        SKYMessageOperationCacheObject *cacheObject =
+            [SKYMessageOperationCacheObject objectInRealm:realm
+                                            forPrimaryKey:operation.operationID];
+        SKYMessageOperation *operationInStore = [cacheObject messageOperation];
+        expect(operationInStore.status).to.equal(SKYMessageOperationStatusFailed);
+        expect(operationInStore.error).to.equal(error);
+    });
+
+    it(@"fetch messages by type", ^{
+        SKYRecordID *conversationID1 = [SKYRecordID recordIDWithRecordType:@"conversation"];
+        SKYRecordID *conversationID2 = [SKYRecordID recordIDWithRecordType:@"conversation"];
+
+        SKYMessage *message1 = [SKYMessage message];
+        message1.conversationRef = [SKYReference referenceWithRecordID:conversationID1];
+        SKYMessage *message2 = [SKYMessage message];
+        message2.conversationRef = [SKYReference referenceWithRecordID:conversationID1];
+        SKYMessage *message3 = [SKYMessage message];
+        message3.conversationRef = [SKYReference referenceWithRecordID:conversationID2];
+        SKYMessage *message4 = [SKYMessage message];
+        message4.conversationRef = [SKYReference referenceWithRecordID:conversationID2];
+
+        SKYMessageOperation *operation1 =
+            [cacheController didStartMessage:message1
+                              conversationID:message1.conversationRef.recordID.recordName
+                               operationType:SKYMessageOperationTypeAdd];
+        SKYMessageOperation *operation2 =
+            [cacheController didStartMessage:message2
+                              conversationID:message2.conversationRef.recordID.recordName
+                               operationType:SKYMessageOperationTypeEdit];
+        SKYMessageOperation *operation3 =
+            [cacheController didStartMessage:message3
+                              conversationID:message3.conversationRef.recordID.recordName
+                               operationType:SKYMessageOperationTypeDelete];
+        SKYMessageOperation *operation4 =
+            [cacheController didStartMessage:message4
+                              conversationID:message4.conversationRef.recordID.recordName
+                               operationType:SKYMessageOperationTypeDelete];
+
+        [cacheController
+            fetchMessageOperationsWithConversationID:conversationID1.recordName
+                                       operationType:SKYMessageOperationTypeAdd
+                                          completion:^(NSArray<SKYMessageOperation *>
+                                                           *_Nullable messageOperationList) {
+                                              expect(messageOperationList).to.haveLength(1);
+                                              expect(messageOperationList[0].operationID)
+                                                  .to.equal(operation1.operationID);
+                                              expect(messageOperationList[0].message.recordID)
+                                                  .to.equal(message1.recordID);
+                                          }];
+        [cacheController
+            fetchMessageOperationsWithConversationID:conversationID2.recordName
+                                       operationType:SKYMessageOperationTypeAdd
+                                          completion:^(NSArray<SKYMessageOperation *>
+                                                           *_Nullable messageOperationList) {
+                                              expect(messageOperationList).to.haveLength(0);
+                                          }];
+        [cacheController
+            fetchMessageOperationsWithConversationID:conversationID1.recordName
+                                       operationType:SKYMessageOperationTypeEdit
+                                          completion:^(NSArray<SKYMessageOperation *>
+                                                           *_Nullable messageOperationList) {
+                                              expect(messageOperationList).to.haveLength(1);
+                                              expect(messageOperationList[0].operationID)
+                                                  .to.equal(operation2.operationID);
+                                              expect(messageOperationList[0].message.recordID)
+                                                  .to.equal(message2.recordID);
+                                          }];
+        [cacheController
+            fetchMessageOperationsWithConversationID:conversationID2.recordName
+                                       operationType:SKYMessageOperationTypeDelete
+                                          completion:^(NSArray<SKYMessageOperation *>
+                                                           *_Nullable messageOperationList) {
+                                              expect(messageOperationList).to.haveLength(2);
+
+                                              // fetchMessageOperationsWithConversationID:operationType:completion:
+                                              // returns operation in descending order of sendDate.
+                                              expect(messageOperationList[0].operationID)
+                                                  .to.equal(operation4.operationID);
+                                              expect(messageOperationList[0].message.recordID)
+                                                  .to.equal(message4.recordID);
+                                              expect(messageOperationList[1].operationID)
+                                                  .to.equal(operation3.operationID);
+                                              expect(messageOperationList[1].message.recordID)
+                                                  .to.equal(message3.recordID);
+                                          }];
     });
 });
 

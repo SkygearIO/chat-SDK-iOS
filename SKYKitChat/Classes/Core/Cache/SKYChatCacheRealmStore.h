@@ -20,6 +20,7 @@
 #import <Realm/Realm.h>
 
 #import "SKYMessage.h"
+#import "SKYMessageOperation.h"
 
 @interface SKYChatCacheRealmStore : NSObject
 
@@ -38,5 +39,17 @@
 - (void)setMessages:(NSArray<SKYMessage *> *)messages;
 
 - (void)deleteMessages:(NSArray<SKYMessage *> *)messages;
+
+- (NSArray<SKYMessageOperation *> *)getMessageOperationsWithPredicate:(NSPredicate *)predicate
+                                                                limit:(NSInteger)limit
+                                                                order:(NSString *)order;
+
+- (SKYMessageOperation *)getMessageOperationWithID:(NSString *)operationID;
+
+- (void)setMessageOperations:(NSArray<SKYMessageOperation *> *)messageOperations;
+
+- (void)deleteMessageOperations:(NSArray<SKYMessageOperation *> *)messageOperations;
+
+- (void)failMessageOperationsWithPredicate:(NSPredicate *)predicate error:(NSError *)error;
 
 @end

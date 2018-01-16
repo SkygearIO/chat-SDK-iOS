@@ -309,8 +309,6 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
 
                      SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
-                     msg.alreadySyncToServer = true;
-                     msg.fail = false;
                      if (msg && msg.deleted) {
                          [deletedReturnArray addObject:msg];
                      } else if (msg && !msg.deleted) {
@@ -442,23 +440,27 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     [self addMessage:message toConversation:conversation completion:completion];
 }
 
-- (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
+- (void)saveMessage:(SKYMessage *)message
+      forNewMessage:(BOOL)isNewMessage
+         completion:(SKYChatMessageCompletion)completion
 {
-    [self.cacheController saveMessage:message completion:nil];
+    SKYMessageOperationType operationType =
+        isNewMessage ? SKYMessageOperationTypeAdd : SKYMessageOperationTypeEdit;
+    SKYMessageOperation *operation =
+        [self.cacheController didStartMessage:message
+                               conversationID:message.conversationRef.recordID.recordName
+                                operationType:operationType];
 
     SKYDatabase *database = self.container.publicCloudDatabase;
     [database saveRecord:message.record
               completion:^(SKYRecord *record, NSError *error) {
                   SKYMessage *msg = nil;
                   if (error) {
-                      message.alreadySyncToServer = false;
-                      message.fail = true;
-                      [self.cacheController didSaveMessage:message error:error];
+                      [self.cacheController didFailMessageOperation:operation error:error];
                   } else {
                       msg = [[SKYMessage alloc] initWithRecordData:record];
-                      msg.alreadySyncToServer = true;
-                      msg.fail = false;
-                      [self.cacheController didSaveMessage:msg error:error];
+                      [self.cacheController didSaveMessage:msg];
+                      [self.cacheController didCompleteMessageOperation:operation];
                   }
 
                   if (completion) {
@@ -474,30 +476,24 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
     message.conversationRef = [SKYReference referenceWithRecord:conversation.record];
     message.sendDate = [NSDate date];
     if (!message.attachment || !message.attachment.url.isFileURL) {
-        [self saveMessage:message completion:completion];
+        [self saveMessage:message forNewMessage:YES completion:completion];
         return;
     }
 
-    [self.container.publicCloudDatabase uploadAsset:message.attachment
-                                  completionHandler:^(SKYAsset *uploadedAsset, NSError *error) {
-                                      if (error) {
-                                          NSLog(@"error uploading asset: %@", error);
+    [self.container.publicCloudDatabase
+              uploadAsset:message.attachment
+        completionHandler:^(SKYAsset *uploadedAsset, NSError *error) {
+            if (error) {
+                NSLog(@"error uploading asset: %@", error);
 
-                                          // NOTE(cheungpat): No idea why we should save message
-                                          // when upload asset has failed, but this is the existing
-                                          // behavior.
-                                      } else {
-                                          message.attachment = uploadedAsset;
-                                      }
-                                      [self saveMessage:message completion:completion];
-                                  }];
-}
-
-- (void)fetchUnsentMessagesWithConversationID:(NSString *)conversationId
-                                   completion:(void (^)(NSArray<SKYMessage *> *_Nonnull))completion
-{
-    [self.cacheController fetchUnsentMessagesWithConversationID:conversationId
-                                                     completion:completion];
+                // NOTE(cheungpat): No idea why we should save message
+                // when upload asset has failed, but this is the existing
+                // behavior.
+            } else {
+                message.attachment = uploadedAsset;
+            }
+            [self saveMessage:message forNewMessage:YES completion:completion];
+        }];
 }
 
 - (void)fetchMessagesWithConversation:(SKYConversation *)conversation
@@ -574,8 +570,6 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                 SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
 
                 SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
-                msg.alreadySyncToServer = true;
-                msg.fail = false;
                 if (msg) {
                     [returnArray addObject:msg];
                 }
@@ -690,7 +684,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
     NSLog(@"Edit a message, message ID %@", message.recordID.recordName);
     message.body = body;
-    [self saveMessage:message completion:completion];
+    [self saveMessage:message forNewMessage:NO completion:completion];
 }
 
 #pragma mark Message Deletion
@@ -699,11 +693,16 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
        inConversation:(SKYConversation *_Nonnull)conversation
            completion:(SKYChatConversationCompletion _Nullable)completion
 {
+    SKYMessageOperation *operation =
+        [self.cacheController didStartMessage:message
+                               conversationID:conversation.recordName
+                                operationType:SKYMessageOperationTypeDelete];
     NSLog(@"Delete a message, messageID %@", message.recordID.recordName);
     [self.container callLambda:@"chat:delete_message"
                      arguments:@[ message.recordID.recordName ]
              completionHandler:^(NSDictionary *response, NSError *error) {
                  if (error) {
+                     [self.cacheController didFailMessageOperation:operation error:error];
                      if (completion) {
                          completion(nil, error);
                      }
@@ -716,6 +715,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                  SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
 
                  [self.cacheController didDeleteMessage:msg];
+                 [self.cacheController didCompleteMessageOperation:operation];
 
                  if (completion) {
                      completion(conversation, nil);
@@ -816,6 +816,73 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      completion(error);
                  }
              }];
+}
+
+#pragma mark - Message Operations
+
+- (void)fetchOutstandingMessageOperationsWithConverstionID:(NSString *)conversationId
+                                             operationType:(SKYMessageOperationType)operationType
+                                                completion:
+                                                    (SKYMessageOperationListCompletion)completion
+{
+    [self.cacheController
+        fetchMessageOperationsWithConversationID:conversationId
+                                   operationType:operationType
+                                      completion:^(
+                                          NSArray<SKYMessageOperation *> *messageOperationList) {
+                                          if (completion) {
+                                              completion(messageOperationList);
+                                          }
+                                      }];
+}
+
+- (void)retryMessageOperation:(SKYMessageOperation *)operation
+                   completion:(SKYMessageOperationCompletion)completion
+{
+    if (operation.status == SKYMessageOperationStatusPending) {
+        NSLog(@"Message operation %@ is still pending. Pending operations cannot be retried.");
+        return;
+    }
+
+    [self.cacheController didCancelMessageOperation:operation];
+
+    switch (operation.type) {
+        case SKYMessageOperationTypeAdd:
+        case SKYMessageOperationTypeEdit: {
+            [self saveMessage:operation.message
+                forNewMessage:(operation.type == SKYMessageOperationTypeAdd)
+                   completion:^(SKYMessage *message, NSError *error) {
+                       if (completion) {
+                           completion(operation, message, error);
+                       }
+                   }];
+            break;
+        }
+        case SKYMessageOperationTypeDelete: {
+            [self deleteMessage:operation.message
+                 inConversation:[SKYConversation
+                                    recordWithRecord:[SKYRecord
+                                                         recordWithRecordType:@"conversation"
+                                                                         name:operation
+                                                                                  .conversationID]]
+                     completion:^(SKYConversation *conversation, NSError *error) {
+                         if (completion) {
+                             completion(operation, nil, error);
+                         }
+                     }];
+            break;
+        }
+    }
+}
+
+- (void)cancelMessageOperation:(SKYMessageOperation *)operation
+{
+    if (operation.status == SKYMessageOperationStatusPending) {
+        NSLog(@"Message operation %@ is still pending. Pending operations cannot be cancelled.");
+        return;
+    }
+
+    [self.cacheController didCancelMessageOperation:operation];
 }
 
 #pragma mark - Subscriptions

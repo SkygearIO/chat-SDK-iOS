@@ -31,9 +31,6 @@
 
 @property bool deleted;
 
-@property bool alreadySyncToServer;
-@property bool fail;
-
 @property NSData *recordData;
 
 @end

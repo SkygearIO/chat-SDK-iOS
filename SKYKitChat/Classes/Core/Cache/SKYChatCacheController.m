@@ -20,7 +20,8 @@
 #import "SKYChatCacheController.h"
 #import "SKYChatCacheController+Private.h"
 
-#import "SKYMessageCacheObject.h"
+#import "SKYMessageOperationCacheObject.h"
+#import "SKYMessageOperation_Private.h"
 
 static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 
@@ -34,6 +35,11 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
         SKYChatCacheRealmStore *store =
             [[SKYChatCacheRealmStore alloc] initWithName:SKYChatCacheStoreName];
         controller = [[SKYChatCacheController alloc] initWithStore:store];
+
+        // It is assumed that when the default cache controller is created,
+        // the app is launched and we make use of this opportunity to clean
+        // up the cache.
+        [controller cleanUpOnLaunch];
     });
 
     return controller;
@@ -50,6 +56,16 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     return self;
 }
 
+- (void)cleanUpOnLaunch
+{
+    // Mark pending message operations as failed.
+    //
+    // Message operations that is pending will not progress to failed/success
+    // state because the app is just launched. Therefore we need to move them
+    // to failed state so that the in the clean up.
+    [self markPendingMessageOperationsAsFailed];
+}
+
 - (void)fetchMessagesWithConversationID:(NSString *)conversationId
                                   limit:(NSInteger)limit
                              beforeTime:(NSDate *)beforeTime
@@ -60,7 +76,6 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
         [NSPredicate predicateWithFormat:@"conversationID LIKE %@", conversationId],
         [NSPredicate predicateWithFormat:@"deleted == FALSE"],
         [NSCompoundPredicate orPredicateWithSubpredicates:@[
-            [NSPredicate predicateWithFormat:@"alreadySyncToServer != FALSE AND fail != TRUE"],
             [NSPredicate predicateWithFormat:@"sendDate == nil"],
         ]],
     ]];
@@ -109,29 +124,9 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     [self.store setMessages:deletedMessages];
 }
 
-- (void)saveMessage:(SKYMessage *)message completion:(SKYChatMessageCompletion)completion
+- (void)didSaveMessage:(SKYMessage *)message
 {
     // cache unsaved message
-    [self.store setMessages:@[ message ]];
-
-    if (completion) {
-        completion(message, nil);
-    }
-}
-
-- (void)didSaveMessage:(SKYMessage *)message error:(NSError *)error
-{
-    if (error) {
-        // invalidate unsaved message
-        message.alreadySyncToServer = false;
-        message.fail = true;
-        [self.store setMessages:@[ message ]];
-        return;
-    }
-
-    message.alreadySyncToServer = true;
-    message.fail = false;
-
     [self.store setMessages:@[ message ]];
 }
 
@@ -154,10 +149,8 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 {
     switch (event) {
         case SKYChatRecordChangeEventCreate:
-            [self didSaveMessage:message error:nil];
-            break;
         case SKYChatRecordChangeEventUpdate:
-            [self didSaveMessage:message error:nil];
+            [self didSaveMessage:message];
             break;
         case SKYChatRecordChangeEventDelete:
             [self didDeleteMessage:message];
@@ -167,22 +160,62 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     }
 }
 
-- (void)fetchUnsentMessagesWithConversationID:(NSString *)conversationId
-                                   completion:(void (^_Nullable)(NSArray<SKYMessage *> *_Nonnull))
-                                                  completion
+#pragma mark - Message Operations
+
+- (void)fetchMessageOperationsWithConversationID:(NSString *)conversationId
+                                   operationType:(SKYMessageOperationType)type
+                                      completion:
+                                          (SKYChatFetchMessageOperationsListCompletion)completion
 {
+    NSString *operationTypeKey =
+        [SKYMessageOperationCacheObject messageOperationTypeKeyWithType:type];
     NSMutableArray *predicates = [NSMutableArray arrayWithArray:@[
-        [NSPredicate predicateWithFormat:@"conversationID LIKE %@", conversationId],
-        [NSPredicate predicateWithFormat:@"sendDate != nil"],
-        [NSPredicate predicateWithFormat:@"alreadySyncToServer == FALSE OR fail == TRUE"],
+        [NSPredicate predicateWithFormat:@"conversationID == %@", conversationId],
+        [NSPredicate predicateWithFormat:@"type == %@", operationTypeKey],
     ]];
     NSPredicate *predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
 
     if (completion) {
-        NSArray<SKYMessage *> *messages =
-            [self.store getMessagesWithPredicate:predicate limit:-1 order:@"creationDate"];
-        completion(messages);
+        NSArray<SKYMessageOperation *> *operations =
+            [self.store getMessageOperationsWithPredicate:predicate limit:-1 order:@"sendDate"];
+        completion(operations);
     }
+}
+
+- (SKYMessageOperation *)didStartMessage:(SKYMessage *)message
+                          conversationID:(NSString *)conversationID
+                           operationType:(SKYMessageOperationType)operationType
+{
+    SKYMessageOperation *operation = [[SKYMessageOperation alloc] initWithMessage:message
+                                                                   conversationID:conversationID
+                                                                             type:operationType];
+    [self.store setMessageOperations:@[ operation ]];
+    return operation;
+}
+
+- (void)didCompleteMessageOperation:(SKYMessageOperation *)messageOperation
+{
+    // Completed message operation is removed from cache store.
+    messageOperation.status = SKYMessageOperationStatusSuccess;
+    [self.store deleteMessageOperations:@[ messageOperation ]];
+}
+
+- (void)didFailMessageOperation:(SKYMessageOperation *)messageOperation error:(NSError *)error
+{
+    messageOperation.status = SKYMessageOperationStatusFailed;
+    messageOperation.error = [error copy];
+    [self.store setMessageOperations:@[ messageOperation ]];
+}
+
+- (void)didCancelMessageOperation:(SKYMessageOperation *)messageOperation
+{
+    [self.store deleteMessageOperations:@[ messageOperation ]];
+}
+
+- (void)markPendingMessageOperationsAsFailed
+{
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"status == %@", @"pending"];
+    [self.store failMessageOperationsWithPredicate:predicate error:nil];
 }
 
 @end

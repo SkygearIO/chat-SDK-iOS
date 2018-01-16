@@ -18,6 +18,7 @@
 //
 
 #import "SKYMessageCacheObject.h"
+#import "SKYMessage.h"
 
 @implementation SKYMessageCacheObject
 
@@ -34,8 +35,6 @@
 {
     SKYRecord *record = [NSKeyedUnarchiver unarchiveObjectWithData:self.recordData];
     SKYMessage *message = [SKYMessage recordWithRecord:record];
-    message.alreadySyncToServer = self.alreadySyncToServer;
-    message.fail = self.fail;
     message.sendDate = self.sendDate;
     return message;
 }
@@ -60,8 +59,6 @@
 
     cacheObject.editionDate = [message.record objectForKey:@"edited_at"];
     cacheObject.deleted = message.deleted;
-    cacheObject.alreadySyncToServer = message.alreadySyncToServer;
-    cacheObject.fail = message.fail;
     cacheObject.sendDate = message.sendDate;
     cacheObject.recordData = [NSKeyedArchiver archivedDataWithRootObject:message.record];
 

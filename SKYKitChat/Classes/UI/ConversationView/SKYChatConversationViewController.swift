@@ -201,13 +201,12 @@ open class MessageList {
         fatalError("messageIDs contains non String object")
     }
 
-    public func firstSuccessMessage() -> SKYMessage? {
+    public func first(where predicate: (_ message: SKYMessage) throws -> Bool) rethrows -> SKYMessage? {
         for messageID in self.messageIDs {
             if let id = messageID as? String {
-                let message = self.messages[id]
-                if let msg = message {
-                    if !msg.fail {
-                        return msg
+                if let message = self.messages[id] {
+                    if try predicate(message) {
+                        return message
                     }
                 }
             }
@@ -233,6 +232,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     public var conversation: SKYConversation?
     public var participants: [String: SKYRecord] = [:]
     public var messageList: MessageList = MessageList()
+    public var messageOperationByIDs: [String: SKYMessageOperation] = [:]
     public var typingIndicatorShowDuration: TimeInterval = TimeInterval(5)
     public var offsetYToLoadMore: CGFloat = CGFloat(400)
     fileprivate var hasMoreMessageToFetch: Bool = false
@@ -836,7 +836,7 @@ extension SKYChatConversationViewController {
         }
 
         let textCustomization = SKYChatConversationView.UICustomization().textCustomization
-        if msg.fail {
+        if self.failedMessageOperation(message: msg) != nil {
             return NSAttributedString(string: textCustomization.messageSentFailed,
                                       attributes: [NSForegroundColorAttributeName: UIColor.red])
         }
@@ -1298,7 +1298,7 @@ extension SKYChatConversationViewController {
     }
 
     open func loadMoreMessage() {
-        if let firstMessage = self.messageList.firstSuccessMessage() {
+        if let firstMessage = self.firstSuccessMessage() {
             self.fetchMessages(before: firstMessage.creationDate())
         } else {
             self.fetchMessages(before: nil)
@@ -1307,7 +1307,7 @@ extension SKYChatConversationViewController {
 
     open override func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
         let message = self.messageList.messageAt(indexPath.row)
-        if !message.fail {
+        if self.failedMessageOperation(message: message) == nil {
             return super.collectionView(collectionView, canPerformAction: action, forItemAt: indexPath, withSender: sender)
         }
 
@@ -1332,13 +1332,24 @@ extension SKYChatConversationViewController {
     @objc func resendFailedMessage(_ message: SKYMessage) {
         self.messageList.remove([message])
         self.beforeSending(message: message)
-        self.send(message: message)
         self.collectionView.reloadData()
+        
+        if let operation = self.failedMessageOperation(message: message) {
+            self.removeMessageOperation(message: message)
+            self.skygear.chatExtension?.retry(messageOperation: operation, completion: { (messageOperation, message, error) in
+                
+            })
+        }
     }
 
     @objc func deleteFailedMessage(_ message: SKYMessage) {
         self.messageList.remove([message])
         self.collectionView.reloadData()
+        
+        if let operation = self.failedMessageOperation(message: message) {
+            self.removeMessageOperation(message: message)
+            self.skygear.chatExtension?.cancel(messageOperation: operation)
+        }
     }
 }
 
@@ -1684,14 +1695,52 @@ extension SKYChatConversationViewController {
 
             }, perRecordErrorHandler: nil)
     }
-
+    
+    func appendFailedMessageOperation(operation: SKYMessageOperation) {
+        let message = operation.message
+        let messageID = message.recordID().recordName
+        guard !self.messageList.contains(messageID) else {
+            return
+        }
+        
+        guard self.messageOperationByIDs[messageID] == nil else {
+            return
+        }
+        
+        self.messageList.append([message])
+        self.messageOperationByIDs[messageID] = operation
+    }
+    
+    func failedMessageOperation(message: SKYMessage) -> SKYMessageOperation? {
+        return self.messageOperationByIDs[message.recordID().recordName]
+    }
+    
+    func removeMessageOperation(message: SKYMessage) {
+        self.messageOperationByIDs.removeValue(forKey: message.recordID().recordName)
+    }
+    
+    func firstSuccessMessage() -> SKYMessage? {
+        return self.messageList.first { (message) -> Bool in
+            return self.messageOperationByIDs[message.recordID().recordName] == nil
+        }
+    }
+    
     open func fetchUnsentMessages() {
         let chatExt = self.skygear.chatExtension
-        chatExt?.fetchUnsentMessages(conversationID: self.conversation!.recordID().recordName,
-                                     completion: { (unsentMessages) in
-                                        self.delegate?.conversationViewController?(self, didFetchedMessages: unsentMessages, isCached: true)
-                                        self.messageList.merge(unsentMessages)
-                                        self.finishReceivingMessage()
+        chatExt?.fetchOutstandingMessageOperations(conversationID: self.conversation!.recordID().recordName,
+                                                   operationType: SKYMessageOperationType.add,
+                                                   completion: { (operations) in
+                                                    var unsentMessages = [SKYMessage]()
+                                                    for operation in operations {
+                                                        guard operation.status == SKYMessageOperationStatus.failed else {
+                                                            continue
+                                                        }
+                                                        
+                                                        self.appendFailedMessageOperation(operation: operation)
+                                                        unsentMessages.append(operation.message);
+                                                    }
+                                                    self.delegate?.conversationViewController?(self, didFetchedMessages: unsentMessages, isCached: true)
+                                                    self.finishReceivingMessage()
         })
     }
 
@@ -1753,6 +1802,15 @@ extension SKYChatConversationViewController {
                     }
                 }
                 self.messageList.merge(msgs)
+                // NOTE(cheungpat): Since we are fetching messages from
+                // the servers, these messages are assumed to be successful.
+                // Removing the failed operations because existence of
+                // a message operation is considered to be the message being
+                // failing.
+                for msg in msgs {
+                    self.removeMessageOperation(message: msg)
+                }
+
 
                 if !isCached {
                     if msgs.count > 0, let first = msgs.first {
