@@ -94,8 +94,8 @@ public extension UIImage {
 
         let aString = NSMutableAttributedString(string: joinedInitials)
         aString.setAttributes([
-            NSForegroundColorAttributeName: textColor,
-            NSFontAttributeName: UIFont.boldSystemFont(ofSize: 34)
+            NSAttributedStringKey.foregroundColor: textColor,
+            NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: 34)
             ], range: fullRange)
         return UIImage.avatarImage(forAttributedString: aString, gradientColors: colors, size: size)
     }

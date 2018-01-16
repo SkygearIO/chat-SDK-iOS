@@ -119,7 +119,7 @@ extension SKYChatConversationImageItem {
         }
     }
     
-    func imageDidTap() {
+    @objc func imageDidTap() {
         if let delegate = self.delegate {
             delegate.imageDidTap(self.assetUrl)
         }
