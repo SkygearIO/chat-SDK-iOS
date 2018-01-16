@@ -1802,6 +1802,11 @@ extension SKYChatConversationViewController {
                     }
                 }
                 self.messageList.merge(msgs)
+                // NOTE(cheungpat): Since we are fetching messages from
+                // the servers, these messages are assumed to be successful.
+                // Removing the failed operations because existence of
+                // a message operation is considered to be the message being
+                // failing.
                 for msg in msgs {
                     self.removeMessageOperation(message: msg)
                 }
