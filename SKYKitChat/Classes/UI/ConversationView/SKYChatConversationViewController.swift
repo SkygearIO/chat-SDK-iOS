@@ -676,9 +676,11 @@ extension SKYChatConversationViewController {
         self.updateTitle()
 
         let sendButton: UIButton? = {
+            /* NOTE(cheungpat): Putting send button on the left is not supported.
             if self.inputToolbar?.sendButtonOnRight == false {
                 return self.inputToolbar?.contentView?.leftBarButtonItem
             }
+            */
 
             return self.inputToolbar?.contentView?.rightBarButtonItem
         }()
