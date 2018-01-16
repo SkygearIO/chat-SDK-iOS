@@ -65,10 +65,19 @@ public class SKYChatConversationViewCustomization {
     public var avatarType: SKYChatConversationViewUserAvatarType = .initial
     public var avatarHiddenForOutgoingMessages: Bool = false
     public var avatarHiddenForIncomingMessages: Bool = false
-    public var avatarHidden: Bool = false {
-        didSet {
-            self.avatarHiddenForIncomingMessages = self.avatarHidden
-            self.avatarHiddenForOutgoingMessages = self.avatarHidden
+    public var avatarHidden: Bool? {
+        get {
+            if self.avatarHiddenForIncomingMessages == self.avatarHiddenForOutgoingMessages {
+                return self.avatarHiddenForOutgoingMessages
+            }
+
+            return nil
+        }
+        set {
+            if let hidden = newValue {
+                self.avatarHiddenForIncomingMessages = hidden
+                self.avatarHiddenForOutgoingMessages = hidden
+            }
         }
     }
 
@@ -76,6 +85,11 @@ public class SKYChatConversationViewCustomization {
         = SKYChatConversationViewTextCustomization()
 
     public var messageDateFormatter: DateFormatter
+
+    public var cameraButtonShouldShow: Bool = true
+    public var voiceMessageButtonShouldShow: Bool = true
+    public var typingIndicatorShouldShow: Bool = true
+    public var messageStatusShouldShow: Bool = true
 
     init() {
         self.messageDateFormatter = {
