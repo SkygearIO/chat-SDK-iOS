@@ -25,15 +25,26 @@ public extension SKYConversation {
      participant names.
      */
     public func nameList(fromParticipants participants: [SKYRecord]) -> String? {
+        let userNameField = SKYChatUIModelCustomization.default().userNameField
         let participantNames = participants.flatMap { (eachParticipant) -> String? in
-            return eachParticipant.object(forKey: "username") as? String
+            return eachParticipant.object(forKey: userNameField) as? String
         }
 
         guard participantNames.count > 0 else {
             return nil
         }
 
-        return participantNames.joined(separator: ", ")
+        return participantNames.sorted().joined(separator: ", ")
+    }
+
+    /**
+     Generate a name list from a list of participant. The title will be concatenating all
+     participant names and ignoring some of the users.
+     */
+    public func nameList(fromParticipants participants: [SKYRecord],
+                         ignoringUserIDs: [String]) -> String? {
+        let filtered = participants.filter { !ignoringUserIDs.contains($0.recordID.recordName) }
+        return self.nameList(fromParticipants: filtered)
     }
 
     /**
@@ -47,11 +58,12 @@ public extension SKYConversation {
             return self.nameList(fromParticipants: participants)
         }
 
-        let filtered = participants.filter { $0.recordID.recordName != currentUserID }
-        guard let namelist = self.nameList(fromParticipants: filtered) else {
+        if let nameList = self.nameList(fromParticipants: participants,
+                                        ignoringUserIDs: [currentUserID])
+        {
+            return String.localizedStringWithFormat("%@ and You", nameList)
+        } else {
             return nil
         }
-
-        return String.localizedStringWithFormat("%@ and You", namelist)
     }
 }

@@ -22,9 +22,22 @@
     case image
 }
 
+@objc public enum SKYChatConversationViewTitleOptions: Int {
+    /**
+     Showing the title of the conversation for conversation view
+     */
+    case `default`
+
+    /**
+     Showing the list of other participants name
+     */
+    case otherParticipants
+}
+
 public class SKYChatConversationViewCustomization {
     static var sharedInstance: SKYChatConversationViewCustomization? = nil
 
+    public var titleDisplayType: SKYChatConversationViewTitleOptions = .`default`
     public var avatarBackgroundColor: UIColor?
     public var avatarTextColor: UIColor?
     public var messageSenderTextColor: UIColor?
