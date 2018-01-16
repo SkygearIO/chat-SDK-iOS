@@ -616,6 +616,18 @@ extension SKYChatConversationViewController {
     open func customizeViews() {
         self.updateTitle()
 
+        let sendButton: UIButton? = {
+            if self.inputToolbar?.sendButtonOnRight == false {
+                return self.inputToolbar?.contentView?.leftBarButtonItem
+            }
+
+            return self.inputToolbar?.contentView?.rightBarButtonItem
+        }()
+
+        sendButton?.setTitle(
+            SKYChatConversationView.UICustomization().textCustomization.sendButton,
+            for: .normal)
+
         if let color = self.delegate?.incomingMessageColorForConversationViewController?(self) {
             self.incomingMessageBubbleColor = color
         }
@@ -758,21 +770,14 @@ extension SKYChatConversationViewController {
             return nil
         }
 
+        let textCustomization = SKYChatConversationView.UICustomization().textCustomization
         if msg.fail {
-            return NSAttributedString(string: NSLocalizedString("Failed", comment: ""),
+            return NSAttributedString(string: textCustomization.messageSentFailed,
                                       attributes: [NSForegroundColorAttributeName: UIColor.red])
         }
 
-        switch msg.conversationStatus {
-        case .allRead:
-            return NSAttributedString(string: NSLocalizedString("All read", comment: ""))
-        case .someRead:
-            return NSAttributedString(string: NSLocalizedString("Some read", comment: ""))
-        case .delivered:
-            return NSAttributedString(string: NSLocalizedString("Delivered", comment: ""))
-        case .delivering:
-            return NSAttributedString(string: NSLocalizedString("Delivering", comment: ""))
-        }
+        return NSAttributedString(
+            string: textCustomization.getMessageStatus(msg.conversationStatus))
     }
 
     open override func collectionView(
@@ -786,22 +791,18 @@ extension SKYChatConversationViewController {
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
         attributedTextForCellTopLabelAt indexPath: IndexPath!
-        ) -> NSAttributedString! {
+    ) -> NSAttributedString! {
+
         if let ds = self.delegate?.conversationViewController?(self, dateStringAt: indexPath) {
             return ds
         }
 
         let msg = self.messageList.messageAt(indexPath.row)
-        let date = msg.creationDate()
+        let msgDate = msg.creationDate()
+        let dateString =
+            SKYChatConversationView.UICustomization().messageDateFormatter.string(from: msgDate)
         
-        let dateFormatter: DateFormatter
-        dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .short
-        dateFormatter.doesRelativeDateFormatting = true
-        let dateString = dateFormatter.string(from: date)
-        
-        return NSAttributedString(string: "\(dateString)")
+        return NSAttributedString(string: dateString)
     }
     
     open override func collectionView(

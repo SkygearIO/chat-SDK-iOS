@@ -34,6 +34,27 @@
     case otherParticipants
 }
 
+public class SKYChatConversationViewTextCustomization {
+
+    public var sendButton = NSLocalizedString("Send", comment: "")
+
+    public var messageSentFailed = NSLocalizedString("Failed", comment: "")
+
+    public var messageStatusAllRead = NSLocalizedString("All read", comment: "")
+    public var messageStatusSomeRead = NSLocalizedString("Some read", comment: "")
+    public var messageStatusDelivered = NSLocalizedString("Delivered", comment: "")
+    public var messageStatusDelivering = NSLocalizedString("Delivering", comment: "")
+
+    public func getMessageStatus(_ status: SKYMessageConversationStatus) -> String {
+        switch status {
+        case .allRead: return messageStatusAllRead
+        case .someRead: return messageStatusSomeRead
+        case .delivered: return messageStatusDelivered
+        case .delivering: return messageStatusDelivering
+        }
+    }
+}
+
 public class SKYChatConversationViewCustomization {
     static var sharedInstance: SKYChatConversationViewCustomization? = nil
 
@@ -49,6 +70,21 @@ public class SKYChatConversationViewCustomization {
             self.avatarHiddenForIncomingMessages = self.avatarHidden
             self.avatarHiddenForOutgoingMessages = self.avatarHidden
         }
+    }
+
+    public lazy var textCustomization: SKYChatConversationViewTextCustomization
+        = SKYChatConversationViewTextCustomization()
+
+    public var messageDateFormatter: DateFormatter
+
+    init() {
+        self.messageDateFormatter = {
+            let df = DateFormatter()
+            df.dateStyle = .medium
+            df.timeStyle = .short
+            df.doesRelativeDateFormatting = true
+            return df
+        }()
     }
 
     public static func `default`() -> SKYChatConversationViewCustomization {
