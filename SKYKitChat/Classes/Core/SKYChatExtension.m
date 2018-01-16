@@ -532,16 +532,16 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                              completion:(SKYChatFetchMessagesListCompletion)completion
 {
 
-    NSMutableArray *arguments = [NSMutableArray arrayWithObjects:conversationId, @(limit), nil];
+    NSMutableDictionary *arguments = [NSMutableDictionary dictionaryWithObjectsAndKeys:conversationId, @"conversation_id", @(limit), @"limit", nil];
     if (beforeTime) {
         NSString *dateString = [SKYDataSerialization stringFromDate:beforeTime];
         NSLog(@"dateString :%@", dateString);
 
-        [arguments addObject:dateString];
+        [arguments setObject:dateString forKey:@"before_time"];
     }
 
     if (order) {
-        [arguments addObject:order];
+        [arguments setObject:order forKey:@"order"];
     }
 
     if (completion) {
@@ -558,7 +558,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
     [self.container
                callLambda:@"chat:get_messages"
-                arguments:arguments
+      dictionaryArguments:arguments
         completionHandler:^(NSDictionary *response, NSError *error) {
             if (error) {
                 NSLog(@"error calling chat:get_messages: %@", error);
