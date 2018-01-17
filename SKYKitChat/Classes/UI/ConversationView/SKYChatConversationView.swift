@@ -91,6 +91,13 @@ public class SKYChatConversationViewCustomization {
     public var typingIndicatorShouldShow: Bool = true
     public var messageStatusShouldShow: Bool = true
 
+    public var incomingMessageBubbleColor: UIColor = UIColor.lightGray
+    public var outgoingMessageBubbleColor: UIColor = UIColor.jsq_messageBubbleBlue()
+    public var incomingMessageTextColor: UIColor = UIColor.white
+    public var outgoingMessageTextColor: UIColor = UIColor.white
+    public var incomingAudioMessageButtonColor: UIColor = UIColor.white
+    public var outgoingAudioMessageButtonColor: UIColor = UIColor.jsq_messageBubbleBlue()
+
     init() {
         self.messageDateFormatter = {
             let df = DateFormatter()

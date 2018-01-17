@@ -69,6 +69,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         SKYChatConversationView.UICustomization().messageDateFormatter.dateStyle = .long
 
+        SKYChatConversationView.UICustomization().outgoingMessageTextColor = UIColor.yellow
+        SKYChatConversationView.UICustomization().outgoingAudioMessageButtonColor = UIColor.yellow
+
         return true
     }
 

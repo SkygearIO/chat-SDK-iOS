@@ -63,6 +63,18 @@ import SKPhotoBrowser
     @objc optional func outgoingMessageColorForConversationViewController(
         _ controller: SKYChatConversationViewController) -> UIColor
 
+    @objc optional func incomingMessageTextColorForConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UIColor
+
+    @objc optional func outgoingMessageTextColorForConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UIColor
+
+    @objc optional func incomingAudioMessageButtonColorForConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UIColor
+
+    @objc optional func outgoingAudioMessageButtonColorForConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UIColor
+
     @objc optional func accessoryButtonShouldShowInConversationViewController(
         _ controller: SKYChatConversationViewController) -> Bool
 
@@ -257,6 +269,12 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     public var incomingMessageBubble: JSQMessagesBubbleImage?
     public var outgoingMessageBubble: JSQMessagesBubbleImage?
 
+    public var incomingMessageTextColor: UIColor?
+    public var outgoingMessageTextColor: UIColor?
+
+    public var incomingAudioMessageButtonColor: UIColor?
+    public var outgoingAudioMessageButtonColor: UIColor?
+
     let downloadDispatcher = SimpleDownloadDispatcher.default()
     public var dataCache: DataCache = MemoryDataCache.shared()
     public var assetCache: SKYAssetCache = SKYAssetMemoryCache.shared()
@@ -310,9 +328,6 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
 
     public var inputToolbarSendButtonState: InputToolbarSendButtonState = .undefined {
         didSet {
-            guard self.inputToolbarSendButtonState != oldValue else {
-                return
-            }
             switch self.inputToolbarSendButtonState {
             case .record:
                 self.inputToolbar?.contentView?.rightBarButtonItem = self.recordButton
@@ -463,8 +478,7 @@ extension SKYChatConversationViewController {
         JSQMessagesCollectionViewCell.registerMenuAction(#selector(SKYChatConversationViewController.resendFailedMessage(_:)))
         JSQMessagesCollectionViewCell.registerMenuAction(#selector(SKYChatConversationViewController.deleteFailedMessage(_:)))
 
-        self.incomingMessageBubbleColor = UIColor.lightGray
-        self.outgoingMessageBubbleColor = UIColor.jsq_messageBubbleBlue()
+        self.configureViews()
     }
 
     override open func viewWillAppear(_ animated: Bool) {
@@ -671,16 +685,91 @@ extension SKYChatConversationViewController {
             NSLayoutConstraint(item: self.indicator!, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1, constant: 0)
             ])
     }
-    
+
+    open func configureViews() {
+        self.incomingMessageBubbleColor = {
+            if let color = self.delegate?.incomingMessageColorForConversationViewController?(self) {
+                return color
+            }
+
+            return SKYChatConversationView.UICustomization().incomingMessageBubbleColor
+        }()
+        self.outgoingMessageBubbleColor = {
+            if let color = self.delegate?.outgoingMessageColorForConversationViewController?(self) {
+                return color
+            }
+
+            return SKYChatConversationView.UICustomization().outgoingMessageBubbleColor
+        }()
+        self.incomingMessageTextColor = {
+            if let color =
+                self.delegate?.incomingMessageTextColorForConversationViewController?(self)
+            {
+                return color
+            }
+
+            return SKYChatConversationView.UICustomization().incomingMessageTextColor
+        }()
+        self.outgoingMessageTextColor = {
+            if let color =
+                self.delegate?.outgoingMessageTextColorForConversationViewController?(self)
+            {
+                return color
+            }
+
+            return SKYChatConversationView.UICustomization().outgoingMessageTextColor
+        }()
+        self.incomingAudioMessageButtonColor = {
+            if let color =
+                self.delegate?.incomingAudioMessageButtonColorForConversationViewController?(self)
+            {
+                return color
+            }
+
+            return SKYChatConversationView.UICustomization().incomingAudioMessageButtonColor
+        }()
+        self.outgoingAudioMessageButtonColor = {
+            if let color =
+                self.delegate?.incomingAudioMessageButtonColorForConversationViewController?(self)
+            {
+                return color
+            }
+
+            return SKYChatConversationView.UICustomization().outgoingAudioMessageButtonColor
+        }()
+
+        if SKYChatConversationView.UICustomization().avatarHiddenForIncomingMessages == true {
+            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize
+                = CGSize(width: 0, height: 0)
+        } else {
+            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize = CGSize(
+                width: kJSQMessagesCollectionViewAvatarSizeDefault,
+                height: kJSQMessagesCollectionViewAvatarSizeDefault
+            )
+        }
+
+        if SKYChatConversationView.UICustomization().avatarHiddenForOutgoingMessages == true {
+            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize
+                = CGSize(width: 0, height: 0)
+        } else {
+            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize = CGSize(
+                width: kJSQMessagesCollectionViewAvatarSizeDefault,
+                height: kJSQMessagesCollectionViewAvatarSizeDefault
+            )
+        }
+
+        self.createActivityIndicator()
+    }
+
     open func customizeViews() {
         self.updateTitle()
 
         let sendButton: UIButton? = {
             /* NOTE(cheungpat): Putting send button on the left is not supported.
-            if self.inputToolbar?.sendButtonOnRight == false {
-                return self.inputToolbar?.contentView?.leftBarButtonItem
-            }
-            */
+             if self.inputToolbar?.sendButtonOnRight == false {
+             return self.inputToolbar?.contentView?.leftBarButtonItem
+             }
+             */
 
             return self.inputToolbar?.contentView?.rightBarButtonItem
         }()
@@ -688,14 +777,6 @@ extension SKYChatConversationViewController {
         sendButton?.setTitle(
             SKYChatConversationView.UICustomization().textCustomization.sendButton,
             for: .normal)
-
-        if let color = self.delegate?.incomingMessageColorForConversationViewController?(self) {
-            self.incomingMessageBubbleColor = color
-        }
-
-        if let color = self.delegate?.outgoingMessageColorForConversationViewController?(self) {
-            self.outgoingMessageBubbleColor = color
-        }
 
         if !self.shouldShowAccessoryButton {
             self.inputToolbar?.contentView?.leftBarButtonItem?.removeFromSuperview()
@@ -711,29 +792,6 @@ extension SKYChatConversationViewController {
             self.inputToolbarSendButtonState = .record
         } else {
             self.inputToolbarSendButtonState = .send
-        }
-
-        self.createActivityIndicator()
-
-        if SKYChatConversationView.UICustomization().avatarHiddenForIncomingMessages == true {
-            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize
-                = CGSize(width: 0, height: 0)
-        } else {
-            self.conversationView?.collectionViewLayout?.incomingAvatarViewSize = CGSize(
-                width: kJSQMessagesCollectionViewAvatarSizeDefault,
-                height: kJSQMessagesCollectionViewAvatarSizeDefault
-            )
-        }
-
-        // UIAppearance got the values from proxy after it is attached to screen
-        if SKYChatConversationView.UICustomization().avatarHiddenForOutgoingMessages == true {
-            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize
-                = CGSize(width: 0, height: 0)
-        } else {
-            self.conversationView?.collectionViewLayout?.outgoingAvatarViewSize = CGSize(
-                width: kJSQMessagesCollectionViewAvatarSizeDefault,
-                height: kJSQMessagesCollectionViewAvatarSizeDefault
-            )
         }
     }
 
@@ -782,6 +840,33 @@ extension SKYChatConversationViewController {
                https://github.com/jessesquires/JSQMessagesViewController/issues/1705
             */
             if let audioItem = mediaData as? SKYChatConversationAudioItem {
+                audioItem.audioViewAttributes.backgroundColor = {
+                    if isOutgoingMessage {
+                        return self.outgoingMessageBubbleColor!
+                    }
+                    return self.incomingMessageBubbleColor!
+                }()
+                audioItem.audioViewAttributes.tintColor = {
+                    if isOutgoingMessage {
+                        return self.outgoingMessageTextColor!
+                    }
+
+                    return self.incomingMessageTextColor!
+                }()
+                audioItem.audioViewAttributes.playButtonImage = UIImage.jsq_defaultPlay().jsq_imageMasked(with: {
+                    if isOutgoingMessage {
+                        return self.outgoingAudioMessageButtonColor
+                    }
+                    return self.incomingAudioMessageButtonColor
+                }())
+                audioItem.audioViewAttributes.pauseButtonImage =
+                    UIImage.jsq_defaultPause().jsq_imageMasked(with: {
+                    if isOutgoingMessage {
+                        return self.outgoingAudioMessageButtonColor
+                    }
+                    return self.incomingAudioMessageButtonColor
+                }())
+
                 let key = msg.recordID().canonicalString
                 if let origAudioItem = self.audioDict[key] {
                     origAudioItem.stop()
@@ -805,6 +890,19 @@ extension SKYChatConversationViewController {
         if self.inputToolbar.contentView.textView.isFirstResponder {
             self.inputToolbar.contentView.textView.resignFirstResponder()
         }
+    }
+
+    open override func collectionView(
+        _ collectionView: JSQMessagesCollectionView!,
+        textColorForMessageAt indexPath: IndexPath!
+    ) -> UIColor! {
+        let msg = self.messageList.messageAt(indexPath.row)
+
+        if msg.creatorUserRecordID() == self.senderId {
+            return self.outgoingMessageTextColor
+        }
+
+        return self.incomingMessageTextColor
     }
 
     open override func collectionView(
