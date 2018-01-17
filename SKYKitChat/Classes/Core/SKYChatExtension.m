@@ -528,7 +528,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                              completion:(SKYChatFetchMessagesListCompletion)completion
 {
 
-    NSMutableDictionary *arguments = [NSMutableDictionary dictionaryWithObjectsAndKeys:conversationId, @"conversation_id", @(limit), @"limit", nil];
+    NSMutableDictionary *arguments = [NSMutableDictionary
+        dictionaryWithObjectsAndKeys:conversationId, @"conversation_id", @(limit), @"limit", nil];
     if (beforeTime) {
         NSString *dateString = [SKYDataSerialization stringFromDate:beforeTime];
         NSLog(@"dateString :%@", dateString);
@@ -552,54 +553,54 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                  }];
     }
 
-    [self.container
-               callLambda:@"chat:get_messages"
-      dictionaryArguments:arguments
-        completionHandler:^(NSDictionary *response, NSError *error) {
-            if (error) {
-                NSLog(@"error calling chat:get_messages: %@", error);
-                if (completion) {
-                    completion(nil, NO, error);
-                }
-                return;
-            }
-            NSArray *resultArray = [response objectForKey:@"results"];
-            NSMutableArray *returnArray = [[NSMutableArray alloc] init];
-            for (NSDictionary *obj in resultArray) {
-                SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
-                SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
+    [self.container callLambda:@"chat:get_messages"
+           dictionaryArguments:arguments
+             completionHandler:^(NSDictionary *response, NSError *error) {
+                 if (error) {
+                     NSLog(@"error calling chat:get_messages: %@", error);
+                     if (completion) {
+                         completion(nil, NO, error);
+                     }
+                     return;
+                 }
+                 NSArray *resultArray = [response objectForKey:@"results"];
+                 NSMutableArray *returnArray = [[NSMutableArray alloc] init];
+                 for (NSDictionary *obj in resultArray) {
+                     SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
+                     SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
 
-                SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
-                if (msg) {
-                    [returnArray addObject:msg];
-                }
-            }
+                     SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
+                     if (msg) {
+                         [returnArray addObject:msg];
+                     }
+                 }
 
-            NSArray *deletedArray = [response objectForKey:@"deleted"];
-            NSMutableArray *returnDeletedArray =
-                [NSMutableArray arrayWithCapacity:deletedArray.count];
-            for (NSDictionary *obj in deletedArray) {
-                SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
-                SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
-                SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
-                if (msg) {
-                    [returnDeletedArray addObject:msg];
-                }
-            }
+                 NSArray *deletedArray = [response objectForKey:@"deleted"];
+                 NSMutableArray *returnDeletedArray =
+                     [NSMutableArray arrayWithCapacity:deletedArray.count];
+                 for (NSDictionary *obj in deletedArray) {
+                     SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
+                     SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
+                     SKYMessage *msg = [[SKYMessage alloc] initWithRecordData:record];
+                     if (msg) {
+                         [returnDeletedArray addObject:msg];
+                     }
+                 }
 
-            [self.cacheController didFetchMessages:returnArray deletedMessages:returnDeletedArray];
+                 [self.cacheController didFetchMessages:returnArray
+                                        deletedMessages:returnDeletedArray];
 
-            if (completion) {
-                completion(returnArray, NO, error);
-            }
+                 if (completion) {
+                     completion(returnArray, NO, error);
+                 }
 
-            // The SDK notifies the server that these messages are received
-            // from the client side. The app developer is not required
-            // to call this method.
-            if (returnArray.count && self.automaticallyMarkMessagesAsDelivered) {
-                [self markDeliveredMessages:returnArray completion:nil];
-            }
-        }];
+                 // The SDK notifies the server that these messages are received
+                 // from the client side. The app developer is not required
+                 // to call this method.
+                 if (returnArray.count && self.automaticallyMarkMessagesAsDelivered) {
+                     [self markDeliveredMessages:returnArray completion:nil];
+                 }
+             }];
 }
 
 #pragma mark Delivery and Read Status
