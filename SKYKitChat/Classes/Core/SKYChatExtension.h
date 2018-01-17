@@ -741,7 +741,7 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- Fetches outstanding message operations.
+ Fetches outstanding message operations of a conversation.
 
  This method fetches outstanding message operations that is cached locally. Messages operations that
  are pending or failed will be returned by this method. The application can display these
@@ -754,8 +754,26 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)fetchOutstandingMessageOperationsWithConverstionID:(NSString *)conversationID
                                              operationType:(SKYMessageOperationType)operationType
                                                 completion:
-                                                    (SKYMessageOperationListCompletion)completion
+                                                    (SKYMessageOperationListCompletion _Nullable)
+                                                        completion
     /* clang-format off */ NS_SWIFT_NAME(fetchOutstandingMessageOperations(conversationID:operationType:completion:)); /* clang-format on */
+
+/**
+ Fetches outstanding message operations of a message.
+
+ This method fetches outstanding message operations that is cached locally. Messages operations that
+ are pending or failed will be returned by this method. The application can display these
+ outstanding messages to the user and decide how to handle these outstanding operations.
+
+ @param messageID The conversation ID of the message in a failed operation
+ @param operationType The type of the message operation
+ @param completion block to be called with an array of failed message operations
+ */
+- (void)fetchOutstandingMessageOperationsWithMessageID:(NSString *)messageID
+                                         operationType:(SKYMessageOperationType)operationType
+                                            completion:(SKYMessageOperationListCompletion _Nullable)
+                                                           completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchOutstandingMessageOperations(messageID:operationType:completion:)); /* clang-format on */
 
 /**
  Retry a failed message operation.
@@ -768,7 +786,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param completion block to be called when the message operation completes
  */
 - (void)retryMessageOperation:(SKYMessageOperation *)operation
-                   completion:(SKYMessageOperationCompletion)completion
+                   completion:(SKYMessageOperationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(retry(messageOperation:completion:)); /* clang-format on */
 
 /**

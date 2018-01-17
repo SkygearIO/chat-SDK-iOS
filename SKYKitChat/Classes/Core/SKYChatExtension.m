@@ -836,6 +836,21 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                       }];
 }
 
+- (void)fetchOutstandingMessageOperationsWithMessageID:(NSString *)messageId
+                                         operationType:(SKYMessageOperationType)operationType
+                                            completion:(SKYMessageOperationListCompletion)completion
+{
+    [self.cacheController
+        fetchMessageOperationsWithMessageID:messageId
+                              operationType:operationType
+                                 completion:^(
+                                     NSArray<SKYMessageOperation *> *messageOperationList) {
+                                     if (completion) {
+                                         completion(messageOperationList);
+                                     }
+                                 }];
+}
+
 - (void)retryMessageOperation:(SKYMessageOperation *)operation
                    completion:(SKYMessageOperationCompletion)completion
 {

@@ -52,6 +52,10 @@ NS_ASSUME_NONNULL_BEGIN
                                       completion:
                                           (SKYChatFetchMessageOperationsListCompletion)completion;
 
+- (void)fetchMessageOperationsWithMessageID:(NSString *)messageId
+                              operationType:(SKYMessageOperationType)type
+                                 completion:(SKYChatFetchMessageOperationsListCompletion)completion;
+
 - (SKYMessageOperation *)didStartMessage:(SKYMessage *)message
                           conversationID:(NSString *)conversationID
                            operationType:(SKYMessageOperationType)operationType;
