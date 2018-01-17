@@ -1186,12 +1186,13 @@ extension SKYChatConversationViewController {
                       errorCode: SKYErrorCode,
                       errorMessage: String)
     {
+        let err = self.errorCreator.error(with: errorCode, message: errorMessage)
         if let msg = message {
             self.messageList.update([msg])
+            self.messageErrorByIDs[msg.recordID().recordName] = err
             self.collectionView?.reloadData()
         }
 
-        let err = self.errorCreator.error(with: errorCode, message: errorMessage)
         self.delegate?.conversationViewController?(
             self,
             failedToSendMessageText: message?.body ?? "",
