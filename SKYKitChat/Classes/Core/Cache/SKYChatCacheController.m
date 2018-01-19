@@ -182,6 +182,25 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     }
 }
 
+- (void)fetchMessageOperationsWithMessageID:(NSString *)messageId
+                              operationType:(SKYMessageOperationType)type
+                                 completion:(SKYChatFetchMessageOperationsListCompletion)completion
+{
+    NSString *operationTypeKey =
+        [SKYMessageOperationCacheObject messageOperationTypeKeyWithType:type];
+    NSMutableArray *predicates = [NSMutableArray arrayWithArray:@[
+        [NSPredicate predicateWithFormat:@"recordID == %@", messageId],
+        [NSPredicate predicateWithFormat:@"type == %@", operationTypeKey],
+    ]];
+    NSPredicate *predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+
+    if (completion) {
+        NSArray<SKYMessageOperation *> *operations =
+            [self.store getMessageOperationsWithPredicate:predicate limit:-1 order:@"sendDate"];
+        completion(operations);
+    }
+}
+
 - (SKYMessageOperation *)didStartMessage:(SKYMessage *)message
                           conversationID:(NSString *)conversationID
                            operationType:(SKYMessageOperationType)operationType
