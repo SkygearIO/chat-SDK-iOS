@@ -407,6 +407,70 @@ NS_ASSUME_NONNULL_END
                              completion:(SKYChatFetchMessagesListCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(fetchMessages(conversationID:limit:beforeTime:order:completion:)); /* clang-format on */
 
+/**
+ Fetch messages in a conversation.
+
+ @param conversation conversation object
+ @param limit the number of messages to fetch
+ @param beforeMessage only messages before this message is fetched
+ @param order order of the messages, either 'edited_at' or '_created_at'
+ @param completion completion block
+ */
+- (void)fetchMessagesWithConversation:(SKYConversation *_Nonnull)conversation
+                                limit:(NSInteger)limit
+                        beforeMessage:(SKYMessage *_Nullable)beforeMessage
+                                order:(NSString *_Nullable)order
+                           completion:(SKYChatFetchMessagesListCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchMessages(conversation:limit:beforeMessage:order:completion:)); /* clang-format on */
+
+/**
+ Fetch messages in a conversation.
+
+ @param conversation conversation object
+ @param limit the number of messages to fetch
+ @param beforeMessageId only messages before this message ID is fetched
+ @param order order of the messages, either 'edited_at' or '_created_at'
+ @param completion completion block
+ */
+- (void)fetchMessagesWithConversation:(SKYConversation *_Nonnull)conversation
+                                limit:(NSInteger)limit
+                      beforeMessageId:(NSString *_Nullable)beforeMessageId
+                                order:(NSString *_Nullable)order
+                           completion:(SKYChatFetchMessagesListCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchMessages(conversation:limit:beforeMessageId:order:completion:)); /* clang-format on */
+
+/**
+ Fetch messages in a conversation by ID.
+
+ @param conversationId ID of the conversation
+ @param limit the number of messages to fetch
+ @param beforeMessage only messages before this message is fetched
+ @param order order of the messages, either 'edited_at' or '_created_at'
+ @param completion completion block
+ */
+- (void)fetchMessagesWithConversationID:(NSString *_Nonnull)conversationId
+                                  limit:(NSInteger)limit
+                          beforeMessage:(SKYMessage *_Nullable)beforeMessage
+                                  order:(NSString *_Nullable)order
+                             completion:(SKYChatFetchMessagesListCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchMessages(conversationID:limit:beforeMessage:order:completion:)); /* clang-format on */
+
+/**
+ Fetch messages in a conversation by ID.
+
+ @param conversationId ID of the conversation
+ @param limit the number of messages to fetch
+ @param beforeMessageId only messages before this message ID is fetched
+ @param order order of the messages, either 'edited_at' or '_created_at'
+ @param completion completion block
+ */
+- (void)fetchMessagesWithConversationID:(NSString *_Nonnull)conversationId
+                                  limit:(NSInteger)limit
+                        beforeMessageId:(NSString *_Nullable)beforeMessageId
+                                  order:(NSString *_Nullable)order
+                             completion:(SKYChatFetchMessagesListCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchMessages(conversationID:limit:beforeMessageId:order:completion:)); /* clang-format on */
+
 ///----------------------------------------------
 /// @name Send message delivery and read receipts
 ///----------------------------------------------

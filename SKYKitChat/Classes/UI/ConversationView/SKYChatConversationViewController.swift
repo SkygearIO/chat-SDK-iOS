@@ -1302,11 +1302,7 @@ extension SKYChatConversationViewController {
     }
 
     open func loadMoreMessage() {
-        if let firstMessage = self.firstSuccessMessage() {
-            self.fetchMessages(before: firstMessage.creationDate())
-        } else {
-            self.fetchMessages(before: nil)
-        }
+        self.fetchMessages(before: self.firstSuccessMessage())
     }
 
     open override func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
@@ -1769,7 +1765,7 @@ extension SKYChatConversationViewController {
         })
     }
 
-    open func fetchMessages(before: Date?) {
+    open func fetchMessages(before: SKYMessage?) {
         guard self.conversation != nil else {
             print("Cannot fetch messages with nil conversation")
             return
@@ -1788,8 +1784,8 @@ extension SKYChatConversationViewController {
         chatExt?.fetchMessages(
             conversation: self.conversation!,
             limit: Int(self.messagesFetchLimit),
-            beforeTime: before,
-                 order: nil,
+            beforeMessage: before,
+            order: nil,
             completion: { (result, isCached, error) in
                 if isCached {
                     if (result?.count ?? 0) > 0 {

@@ -66,36 +66,89 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     [self markPendingMessageOperationsAsFailed];
 }
 
-- (void)fetchMessagesWithConversationID:(NSString *)conversationId
-                                  limit:(NSInteger)limit
-                             beforeTime:(NSDate *)beforeTime
-                                  order:(NSString *)order
-                             completion:(SKYChatFetchMessagesListCompletion)completion
+- (void)fetchMessagesWithPredicate:(NSPredicate *)predicate
+                             limit:(NSInteger)limit
+                             order:(NSString *)order
+                        completion:(SKYChatFetchMessagesListCompletion)completion
 {
-    NSMutableArray *predicates = [NSMutableArray arrayWithArray:@[
+    if (completion && predicate) {
+        NSString *resolvedOrder = order;
+
+        if ([resolvedOrder isEqualToString:@"edited_at"]) {
+            resolvedOrder = @"editionDate";
+        } else {
+            resolvedOrder = @"creationDate";
+        }
+
+        NSArray<SKYMessage *> *messages =
+            [self.store getMessagesWithPredicate:predicate limit:limit order:resolvedOrder];
+        completion(messages, YES, nil);
+    }
+}
+
+- (NSMutableArray *)messagesPredicateWithConversationID:(NSString *)conversationId
+                                                  limit:(NSInteger)limit
+{
+    return [NSMutableArray arrayWithArray:@[
         [NSPredicate predicateWithFormat:@"conversationID LIKE %@", conversationId],
         [NSPredicate predicateWithFormat:@"deleted == FALSE"],
         [NSCompoundPredicate orPredicateWithSubpredicates:@[
             [NSPredicate predicateWithFormat:@"sendDate == nil"],
         ]],
     ]];
+}
+
+- (NSPredicate *)messagesPredicateWithConversationID:(NSString *)conversationId
+                                               limit:(NSInteger)limit
+                                          beforeTime:(NSDate *)beforeTime
+{
+    NSMutableArray *predicates =
+        [self messagesPredicateWithConversationID:conversationId limit:limit];
     if (beforeTime) {
         [predicates addObject:[NSPredicate predicateWithFormat:@"creationDate < %@", beforeTime]];
     }
-    NSPredicate *predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
 
-    NSString *resolvedOrder = order;
-    if ([resolvedOrder isEqualToString:@"edited_at"]) {
-        resolvedOrder = @"editionDate";
-    } else {
-        resolvedOrder = @"creationDate";
-    }
+    return [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+}
 
-    if (completion) {
-        NSArray<SKYMessage *> *messages =
-            [self.store getMessagesWithPredicate:predicate limit:limit order:resolvedOrder];
-        completion(messages, YES, nil);
+- (NSPredicate *)messagesPredicateWithConversationID:(NSString *)conversationId
+                                               limit:(NSInteger)limit
+                                     beforeMessageId:(NSString *)beforeMessageId
+{
+    NSMutableArray *predicates =
+        [self messagesPredicateWithConversationID:conversationId limit:limit];
+    if (beforeMessageId) {
+        SKYMessage *message = [self.store getMessageWithID:beforeMessageId];
+        if (message) {
+            [predicates addObject:[NSPredicate predicateWithFormat:@"seq < %d", message.seq]];
+        } else {
+            return nil;
+        }
     }
+    return [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+}
+
+- (void)fetchMessagesWithConversationID:(NSString *)conversationId
+                                  limit:(NSInteger)limit
+                             beforeTime:(NSDate *)beforeTime
+                                  order:(NSString *)order
+                             completion:(SKYChatFetchMessagesListCompletion)completion
+{
+    NSPredicate *predicate =
+        [self messagesPredicateWithConversationID:conversationId limit:limit beforeTime:beforeTime];
+    [self fetchMessagesWithPredicate:predicate limit:limit order:order completion:completion];
+}
+
+- (void)fetchMessagesWithConversationID:(NSString *)conversationId
+                                  limit:(NSInteger)limit
+                        beforeMessageId:(NSString *)beforeMessageId
+                                  order:(NSString *)order
+                             completion:(SKYChatFetchMessagesListCompletion)completion
+{
+    NSPredicate *predicate = [self messagesPredicateWithConversationID:conversationId
+                                                                 limit:limit
+                                                       beforeMessageId:beforeMessageId];
+    [self fetchMessagesWithPredicate:predicate limit:limit order:order completion:completion];
 }
 
 - (void)fetchMessagesWithIDs:(NSArray<NSString *> *)messageIDs

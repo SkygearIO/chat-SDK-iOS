@@ -39,6 +39,7 @@ typedef NS_ENUM(NSInteger, SKYMessageConversationStatus) {
 @property (copy, nonatomic, nullable) NSDictionary<NSString *, id> *metadata;
 @property (strong, nonatomic, readwrite, nullable) SKYAsset *attachment;
 @property (assign, nonatomic, readonly) bool deleted;
+@property (assign, nonatomic, readonly) int seq;
 @property (strong, nonatomic, nullable) NSDate *sendDate;
 
 @property (assign, nonatomic, readonly) SKYMessageConversationStatus conversationStatus;

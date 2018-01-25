@@ -26,6 +26,7 @@ NSString *const SKYMessageMetadataKey = @"metadata";
 NSString *const SKYMessageAttachmentKey = @"attachment";
 NSString *const SKYMessageStatusKey = @"message_status";
 NSString *const SKYMessageDeletedKey = @"deleted";
+NSString *const SKYMessageSeqKey = @"seq";
 
 @implementation SKYMessage
 
@@ -90,6 +91,11 @@ NSString *const SKYMessageDeletedKey = @"deleted";
 - (bool)deleted
 {
     return [self.record[SKYMessageDeletedKey] boolValue];
+}
+
+- (int)seq
+{
+    return [self.record[SKYMessageSeqKey] intValue];
 }
 
 - (SKYMessageConversationStatus)conversationStatus
