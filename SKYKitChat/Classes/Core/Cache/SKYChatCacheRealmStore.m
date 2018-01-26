@@ -22,6 +22,13 @@
 #import "SKYMessageCacheObject.h"
 #import "SKYMessageOperationCacheObject.h"
 
+@interface SKYChatCacheRealmStore()
+
+@property (strong, nonatomic) RLMRealmConfiguration *realmConfig;
+@property (strong, nonatomic, readonly) RLMRealm *realmInstance;
+
+@end
+
 @implementation SKYChatCacheRealmStore
 
 - (instancetype)initWithName:(NSString *)name
@@ -30,14 +37,12 @@
     if (!self)
         return nil;
 
-    RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
-
     NSString *dir =
         NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
     NSURL *url = [NSURL URLWithString:[dir stringByAppendingPathComponent:name]];
-    config.fileURL = url;
 
-    [self createRealmWithConfiguration:config];
+    self.realmConfig = [RLMRealmConfiguration defaultConfiguration];
+    self.realmConfig.fileURL = url;
 
     return self;
 }
@@ -48,34 +53,27 @@
     if (!self)
         return nil;
 
-    RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
-    config.inMemoryIdentifier = name;
-
-    [self createRealmWithConfiguration:config];
+    self.realmConfig = [RLMRealmConfiguration defaultConfiguration];
+    self.realmConfig.inMemoryIdentifier = name;
 
     return self;
 }
 
-- (void)createRealmWithConfiguration:(RLMRealmConfiguration *)config
+- (RLMRealm *)realmInstance
 {
-    void (^initializeRealm)() = ^() {
-        self.realm = [RLMRealm realmWithConfiguration:config error:nil];
-    };
-
-    if ([NSThread isMainThread]) {
-        initializeRealm();
-    } else {
-        dispatch_async(dispatch_get_main_queue(), initializeRealm);
-    }
+    // create realm instance for each access, prevent cross thread access
+    return [RLMRealm realmWithConfiguration:self.realmConfig error:nil];
 }
 
 - (NSArray<SKYMessage *> *)getMessagesWithPredicate:(NSPredicate *)predicate
                                               limit:(NSInteger)limit
                                               order:(NSString *)order
 {
+    RLMRealm *realmInstance = self.realmInstance;
     RLMResults<SKYMessageCacheObject *> *results =
-        [[SKYMessageCacheObject objectsInRealm:self.realm withPredicate:predicate]
-            sortedResultsUsingKeyPath:order
+        [[SKYMessageCacheObject objectsInRealm:realmInstance
+                                 withPredicate:predicate]
+                sortedResultsUsingKeyPath:order
                             ascending:NO];
     NSMutableArray<SKYMessage *> *messages = [NSMutableArray arrayWithCapacity:results.count];
 
@@ -92,38 +90,41 @@
 
 - (SKYMessage *)getMessageWithID:(NSString *)messageID
 {
+    RLMRealm *realmInstance = self.realmInstance;
     SKYMessageCacheObject *cacheObject =
-        [SKYMessageCacheObject objectInRealm:self.realm forPrimaryKey:messageID];
+        [SKYMessageCacheObject objectInRealm:realmInstance forPrimaryKey:messageID];
     return [cacheObject messageRecord];
 }
 
 - (void)setMessages:(NSArray<SKYMessage *> *)messages
 {
-    [self.realm beginWriteTransaction];
+    RLMRealm *realmInstance = self.realmInstance;
+    [realmInstance beginWriteTransaction];
 
     for (SKYMessage *message in messages) {
         SKYMessageCacheObject *cacheObject = [SKYMessageCacheObject cacheObjectFromMessage:message];
-        [self.realm addOrUpdateObject:cacheObject];
+        [realmInstance addOrUpdateObject:cacheObject];
     }
 
-    [self.realm commitWriteTransaction];
+    [realmInstance commitWriteTransaction];
 }
 
 - (void)deleteMessages:(NSArray<SKYMessage *> *)messages
 {
-    [self.realm beginWriteTransaction];
+    RLMRealm *realmInstance = self.realmInstance;
+    [realmInstance beginWriteTransaction];
 
     for (SKYMessage *message in messages) {
         SKYMessageCacheObject *cacheObject =
-            [SKYMessageCacheObject objectInRealm:self.realm
+            [SKYMessageCacheObject objectInRealm:realmInstance
                                    forPrimaryKey:message.recordID.recordName];
 
         if (cacheObject) {
-            [self.realm deleteObject:cacheObject];
+            [realmInstance deleteObject:cacheObject];
         }
     }
 
-    [self.realm commitWriteTransaction];
+    [realmInstance commitWriteTransaction];
 }
 
 #pragma mark - Message Operations
@@ -132,8 +133,9 @@
                                                                 limit:(NSInteger)limit
                                                                 order:(NSString *)order
 {
+    RLMRealm *realmInstance = self.realmInstance;
     RLMResults<SKYMessageOperationCacheObject *> *results =
-        [[SKYMessageOperationCacheObject objectsInRealm:self.realm withPredicate:predicate]
+        [[SKYMessageOperationCacheObject objectsInRealm:realmInstance withPredicate:predicate]
             sortedResultsUsingKeyPath:order
                             ascending:NO];
     NSMutableArray<SKYMessageOperation *> *operations =
@@ -152,53 +154,57 @@
 
 - (SKYMessageOperation *)getMessageOperationWithID:(NSString *)operationID
 {
+    RLMRealm *realmInstance = self.realmInstance;
     SKYMessageOperationCacheObject *cacheObject =
-        [SKYMessageOperationCacheObject objectInRealm:self.realm forPrimaryKey:operationID];
+        [SKYMessageOperationCacheObject objectInRealm:realmInstance forPrimaryKey:operationID];
     return [cacheObject messageOperation];
 }
 
 - (void)setMessageOperations:(NSArray<SKYMessageOperation *> *)messageOperations
 {
-    [self.realm beginWriteTransaction];
+    RLMRealm *realmInstance = self.realmInstance;
+    [realmInstance beginWriteTransaction];
 
     for (SKYMessageOperation *operation in messageOperations) {
         SKYMessageOperationCacheObject *cacheObject =
             [SKYMessageOperationCacheObject cacheObjectFromMessageOperation:operation];
-        [self.realm addOrUpdateObject:cacheObject];
+        [realmInstance addOrUpdateObject:cacheObject];
     }
 
-    [self.realm commitWriteTransaction];
+    [realmInstance commitWriteTransaction];
 }
 
 - (void)deleteMessageOperations:(NSArray<SKYMessageOperation *> *)messageOperations
 {
-    [self.realm beginWriteTransaction];
+    RLMRealm *realmInstance = self.realmInstance;
+    [realmInstance beginWriteTransaction];
 
     for (SKYMessageOperation *operation in messageOperations) {
         SKYMessageOperationCacheObject *cacheObject =
-            [SKYMessageOperationCacheObject objectInRealm:self.realm
+            [SKYMessageOperationCacheObject objectInRealm:realmInstance
                                             forPrimaryKey:operation.operationID];
 
         if (cacheObject) {
-            [self.realm deleteObject:cacheObject];
+            [realmInstance deleteObject:cacheObject];
         }
     }
 
-    [self.realm commitWriteTransaction];
+    [realmInstance commitWriteTransaction];
 }
 
 - (void)failMessageOperationsWithPredicate:(NSPredicate *)predicate error:(NSError *)error
 {
-    [self.realm beginWriteTransaction];
+    RLMRealm *realmInstance = self.realmInstance;
+    [realmInstance beginWriteTransaction];
 
     RLMResults<SKYMessageCacheObject *> *results =
-        [SKYMessageOperationCacheObject objectsInRealm:self.realm withPredicate:predicate];
+        [SKYMessageOperationCacheObject objectsInRealm:realmInstance withPredicate:predicate];
     [results setValuesForKeysWithDictionary:@{
         @"status" : @"failed",
         @"errorData" : [NSKeyedArchiver archivedDataWithRootObject:error],
     }];
 
-    [self.realm commitWriteTransaction];
+    [realmInstance commitWriteTransaction];
 }
 
 @end

@@ -25,9 +25,8 @@
 
 @interface SKYChatCacheController ()
 
-@property SKYChatCacheRealmStore *store;
+@property (strong, nonatomic) SKYChatCacheRealmStore *store;
 
-- (id)initWithStore:(SKYChatCacheRealmStore *)store;
 - (void)markMessagesAsFailed;
 
 @end
