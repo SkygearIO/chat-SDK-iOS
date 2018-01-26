@@ -19,6 +19,7 @@
 
 #import "SKYChatCacheController+Private.h"
 #import "SKYChatCacheController.h"
+#import "SKYChatCacheRealmStore+Private.h"
 #import "SKYChatExtension.h"
 #import "SKYChatExtension_Private.h"
 #import <OHHTTPStubs/OHHTTPStubs.h>
@@ -68,7 +69,7 @@ SpecBegin(SKYChatExtension)
                 [messages addObject:messageCacheObject];
             }
 
-            RLMRealm *realm = cacheController.store.realm;
+            RLMRealm *realm = cacheController.store.realmInstance;
             [realm transactionWithBlock:^{
                 [realm addObjects:messages];
             }];
@@ -188,7 +189,7 @@ SpecBegin(SKYChatExtension)
         });
 
         afterEach(^{
-            RLMRealm *realm = cacheController.store.realm;
+            RLMRealm *realm = cacheController.store.realmInstance;
             [realm transactionWithBlock:^{
                 [realm deleteAllObjects];
             }];
@@ -202,7 +203,7 @@ SpecBegin(SKYChatExtension)
                 recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
 
             void (^checkRealm)() = ^{
-                RLMRealm *realm = cacheController.store.realm;
+                RLMRealm *realm = cacheController.store.realmInstance;
                 RLMResults<SKYMessageCacheObject *> *results =
                     [SKYMessageCacheObject allObjectsInRealm:realm];
                 expect(results.count).to.equal(20);
@@ -259,7 +260,7 @@ SpecBegin(SKYChatExtension)
                 recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
 
             void (^checkRealm)() = ^{
-                RLMRealm *realm = cacheController.store.realm;
+                RLMRealm *realm = cacheController.store.realmInstance;
                 RLMResults<SKYMessageCacheObject *> *results =
                     [SKYMessageCacheObject allObjectsInRealm:realm];
                 expect(results.count).to.equal(11);
@@ -293,7 +294,7 @@ SpecBegin(SKYChatExtension)
                                                NSError *_Nullable error) {
                                       expect(error).to.beNil();
 
-                                      RLMRealm *realm = cacheController.store.realm;
+                                      RLMRealm *realm = cacheController.store.realmInstance;
                                       RLMResults<SKYMessageCacheObject *> *results =
                                           [SKYMessageCacheObject allObjectsInRealm:realm];
                                       expect(results.count).to.equal(10);
@@ -345,7 +346,7 @@ describe(@"Conversation messages, with error response", ^{
             [messages addObject:messageCacheObject];
         }
 
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
         [realm transactionWithBlock:^{
             [realm addObjects:messages];
         }];
@@ -363,7 +364,7 @@ describe(@"Conversation messages, with error response", ^{
     });
 
     afterEach(^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
         [realm transactionWithBlock:^{
             [realm deleteAllObjects];
         }];
@@ -375,7 +376,7 @@ describe(@"Conversation messages, with error response", ^{
             recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
 
         void (^checkRealm)() = ^{
-            RLMRealm *realm = cacheController.store.realm;
+            RLMRealm *realm = cacheController.store.realmInstance;
             RLMResults<SKYMessageCacheObject *> *results =
                 [SKYMessageCacheObject allObjectsInRealm:realm];
             expect(results.count).to.equal(10);
@@ -423,7 +424,7 @@ describe(@"Conversation messages, with error response", ^{
             recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
 
         waitUntil(^(DoneCallback done) {
-            RLMRealm *realm = cacheController.store.realm;
+            RLMRealm *realm = cacheController.store.realmInstance;
 
             [chatExtension addMessage:message
                        toConversation:conversation
@@ -458,7 +459,7 @@ describe(@"Conversation messages, with error response", ^{
             recordWithRecord:[SKYRecord recordWithRecordType:@"conversation" name:@"c0"]];
 
         waitUntil(^(DoneCallback done) {
-            RLMRealm *realm = cacheController.store.realm;
+            RLMRealm *realm = cacheController.store.realmInstance;
 
             [chatExtension
                  deleteMessage:message
@@ -525,7 +526,7 @@ describe(@"Message Operations", ^{
             [messages addObject:messageCacheObject];
         }
 
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
         [realm transactionWithBlock:^{
             [realm addObjects:messages];
         }];
@@ -543,7 +544,7 @@ describe(@"Message Operations", ^{
     });
 
     afterEach(^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
         [realm transactionWithBlock:^{
             [realm deleteAllObjects];
         }];
@@ -583,7 +584,7 @@ describe(@"Message Operations", ^{
         [cacheController.store setMessageOperations:@[ operation ]];
 
         [chatExtension cancelMessageOperation:operation];
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
         expect([SKYMessageOperationCacheObject allObjectsInRealm:realm]).to.haveCount(0);
     });
 
@@ -633,7 +634,7 @@ describe(@"Message Operations", ^{
                 retryMessageOperation:operation
                            completion:^(SKYMessageOperation *messageOperation, SKYMessage *message,
                                         NSError *error) {
-                               RLMRealm *realm = cacheController.store.realm;
+                               RLMRealm *realm = cacheController.store.realmInstance;
                                expect([SKYMessageOperationCacheObject allObjectsInRealm:realm])
                                    .to.haveCount(0);
                                done();
@@ -683,7 +684,7 @@ describe(@"Message Operations", ^{
                 retryMessageOperation:operation
                            completion:^(SKYMessageOperation *messageOperation, SKYMessage *message,
                                         NSError *error) {
-                               RLMRealm *realm = cacheController.store.realm;
+                               RLMRealm *realm = cacheController.store.realmInstance;
                                expect([SKYMessageOperationCacheObject allObjectsInRealm:realm])
                                    .to.haveCount(0);
                                done();
