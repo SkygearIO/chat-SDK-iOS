@@ -179,7 +179,7 @@ SpecBegin(SKYChatExtension)
                         @"seq" : @1,
                     };
 
-                    NSDictionary *parameters = @{ @"result" : result };
+                    NSDictionary *parameters = @{@"result" : result};
                     NSData *payload =
                         [NSJSONSerialization dataWithJSONObject:parameters options:0 error:nil];
 
@@ -672,7 +672,7 @@ describe(@"Message Operations", ^{
                     @"seq" : @1,
                 };
 
-                NSDictionary *parameters = @{ @"result" : result };
+                NSDictionary *parameters = @{@"result" : result};
                 NSData *payload =
                     [NSJSONSerialization dataWithJSONObject:parameters options:0 error:nil];
 

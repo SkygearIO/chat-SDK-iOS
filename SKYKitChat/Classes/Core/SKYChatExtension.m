@@ -105,13 +105,13 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 {
     if (!participantIDs || participantIDs.count == 0) {
         if (completion) {
-            completion(nil,
-                       [NSError errorWithDomain:@"SKYChatExtension"
-                                           code:0
-                                       userInfo:@{
-                                           NSLocalizedDescriptionKey :
-                                               @"cannot create conversation with no participants"
-                                       }]);
+            completion(
+                nil, [NSError errorWithDomain:@"SKYChatExtension"
+                                         code:0
+                                     userInfo:@{
+                                         NSLocalizedDescriptionKey :
+                                             @"cannot create conversation with no participants"
+                                     }]);
         }
         return;
     }
