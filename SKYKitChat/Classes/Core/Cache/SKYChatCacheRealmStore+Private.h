@@ -1,5 +1,5 @@
 //
-//  SKYChatCacheController+Private.h
+//  SKYChatCacheRealmStore+Private.h
 //  SKYKitChat
 //
 //  Copyright 2016 Oursky Ltd.
@@ -17,18 +17,11 @@
 //  limitations under the License.
 //
 
-#ifndef SKYChatCacheController_Private_h
-#define SKYChatCacheController_Private_h
+#import <Realm/Realm.h>
 
-#import "SKYChatCacheController.h"
-#import "SKYChatCacheRealmStore.h"
+@interface SKYChatCacheRealmStore ()
 
-@interface SKYChatCacheController ()
-
-@property (strong, nonatomic) SKYChatCacheRealmStore *store;
-
-- (id)initWithStore:(SKYChatCacheRealmStore *)store;
+@property (strong, nonatomic, readonly) RLMRealm *realmInstance;
+@property (strong, nonatomic) RLMRealmConfiguration *realmConfig;
 
 @end
-
-#endif /* SKYChatCacheController_Private_h */

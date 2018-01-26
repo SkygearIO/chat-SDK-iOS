@@ -24,8 +24,6 @@
 
 @interface SKYChatCacheRealmStore : NSObject
 
-@property RLMRealm *realm;
-
 - (instancetype)initWithName:(NSString *)name;
 
 - (instancetype)initInMemoryWithName:(NSString *)name;

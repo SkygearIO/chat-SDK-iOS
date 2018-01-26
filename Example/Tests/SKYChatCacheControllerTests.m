@@ -19,6 +19,7 @@
 
 #import "SKYChatCacheController+Private.h"
 #import "SKYChatCacheController.h"
+#import "SKYChatCacheRealmStore+Private.h"
 #import "SKYChatRecordChange_Private.h"
 
 #import "SKYMessageCacheObject.h"
@@ -64,14 +65,14 @@ SpecBegin(SKYChatCacheController)
                 [messages addObject:messageCacheObject];
             }
 
-            RLMRealm *realm = cacheController.store.realm;
+            RLMRealm *realm = cacheController.store.realmInstance;
             [realm transactionWithBlock:^{
                 [realm addObjects:messages];
             }];
         });
 
         afterEach(^{
-            RLMRealm *realm = cacheController.store.realm;
+            RLMRealm *realm = cacheController.store.realmInstance;
             [realm transactionWithBlock:^{
                 [realm deleteAllObjects];
             }];
@@ -91,7 +92,7 @@ SpecBegin(SKYChatCacheController)
             [store setMessages:@[ message ]];
 
             RLMResults<SKYMessageCacheObject *> *results =
-                [SKYMessageCacheObject allObjectsInRealm:store.realm];
+                [SKYMessageCacheObject allObjectsInRealm:store.realmInstance];
             expect(results.count).to.equal(11);
             expect([results objectsWhere:@"recordID == %@", @"mm1"].count).to.equal(1);
         });
@@ -110,7 +111,7 @@ SpecBegin(SKYChatCacheController)
             [store setMessages:@[ message ]];
 
             RLMResults<SKYMessageCacheObject *> *results =
-                [SKYMessageCacheObject allObjectsInRealm:store.realm];
+                [SKYMessageCacheObject allObjectsInRealm:store.realmInstance];
             expect(results.count).to.equal(10);
 
             RLMResults<SKYMessageCacheObject *> *updatedResults =
@@ -193,12 +194,12 @@ SpecBegin(SKYChatCacheController)
 
             SKYChatCacheRealmStore *store = cacheController.store;
             RLMResults<SKYMessageCacheObject *> *results =
-                [SKYMessageCacheObject objectsInRealm:store.realm
+                [SKYMessageCacheObject objectsInRealm:store.realmInstance
                                                 where:@"conversationID == %@", @"c0"];
             expect(results.count).to.equal(8);
 
             results = [SKYMessageCacheObject
-                objectsInRealm:store.realm
+                objectsInRealm:store.realmInstance
                          where:@"editionDate == %@", [baseDate dateByAddingTimeInterval:50000]];
             expect(results.count).to.equal(5);
 
@@ -241,10 +242,8 @@ SpecBegin(SKYChatCacheController)
             messageToSave.sendDate = [baseDate dateByAddingTimeInterval:50000];
 
             [cacheController didSaveMessage:messageToSave];
-            expect(message.recordID).to.equal(messageToSave.recordID);
-            expect(message.sendDate).to.equal(messageToSave.sendDate);
 
-            RLMRealm *realm = cacheController.store.realm;
+            RLMRealm *realm = cacheController.store.realmInstance;
             RLMResults<SKYMessageCacheObject *> *results =
                 [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"mm1"];
             expect(results.count).to.equal(1);
@@ -283,7 +282,7 @@ SpecBegin(SKYChatCacheController)
 
             [cacheController didSaveMessage:messageToSave];
 
-            RLMRealm *realm = cacheController.store.realm;
+            RLMRealm *realm = cacheController.store.realmInstance;
             RLMResults<SKYMessageCacheObject *> *results =
                 [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"mm1"];
             expect(results.count).to.equal(1);
@@ -302,7 +301,7 @@ SpecBegin(SKYChatCacheController)
 
             [cacheController didDeleteMessage:message];
 
-            RLMRealm *realm = cacheController.store.realm;
+            RLMRealm *realm = cacheController.store.realmInstance;
             RLMResults<SKYMessageCacheObject *> *results =
                 [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"m1"];
             expect(results.count).to.equal(1);
@@ -319,7 +318,7 @@ SpecBegin(SKYChatCacheController)
 
             [cacheController didDeleteMessage:message];
 
-            RLMRealm *realm = cacheController.store.realm;
+            RLMRealm *realm = cacheController.store.realmInstance;
             RLMResults<SKYMessageCacheObject *> *results =
                 [SKYMessageCacheObject allObjectsInRealm:realm];
             expect(results.count).to.equal(11);
@@ -341,14 +340,14 @@ describe(@"Cache Controller handle change event", ^{
     });
 
     afterEach(^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
         [realm transactionWithBlock:^{
             [realm deleteAllObjects];
         }];
     });
 
     it(@"message create, update and delete", ^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
 
         // create
         SKYRecord *messageRecord = [SKYRecord recordWithRecordType:@"message" name:@"m1"];
@@ -389,7 +388,7 @@ describe(@"Cache Controller handle change event", ^{
     });
 
     it(@"non-existing message updated", ^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
         SKYRecord *messageRecord = [SKYRecord recordWithRecordType:@"message" name:@"m1"];
         messageRecord[@"edited_at"] = [baseDate dateByAddingTimeInterval:1000];
         [cacheController handleRecordChange:[[SKYChatRecordChange alloc]
@@ -404,7 +403,7 @@ describe(@"Cache Controller handle change event", ^{
     });
 
     it(@"non-existing message deleted", ^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
         SKYRecord *messageRecord =
             [SKYRecord recordWithRecordType:@"message" name:@"m1" data:@{
                 @"deleted" : @YES
@@ -432,34 +431,14 @@ describe(@"Cache Controller handle message operations", ^{
     });
 
     afterEach(^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
         [realm transactionWithBlock:^{
             [realm deleteAllObjects];
         }];
     });
 
-    it(@"mark pending messages as failed", ^{
-        RLMRealm *realm = cacheController.store.realm;
-
-        SKYMessage *message = [SKYMessage message];
-
-        SKYMessageOperation *operation =
-            [cacheController didStartMessage:message
-                              conversationID:@"c0"
-                               operationType:SKYMessageOperationTypeAdd];
-        expect(operation.status).to.equal(SKYMessageOperationStatusPending);
-
-        [cacheController markMessagesAsFailed];
-
-        SKYMessageOperationCacheObject *cacheObject =
-            [SKYMessageOperationCacheObject objectInRealm:realm
-                                            forPrimaryKey:operation.operationID];
-        SKYMessageOperation *operationInStore = [cacheObject messageOperation];
-        expect(operationInStore.status).to.equal(SKYMessageOperationStatusFailed);
-    });
-
     it(@"start message will create a pending message operation in store", ^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
 
         SKYMessage *message = [SKYMessage message];
 
@@ -479,7 +458,7 @@ describe(@"Cache Controller handle message operations", ^{
     });
 
     it(@"start message will with different operation type", ^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
 
         SKYMessage *message = [SKYMessage message];
 
@@ -496,7 +475,7 @@ describe(@"Cache Controller handle message operations", ^{
     });
 
     it(@"mark message operation as completed", ^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
 
         SKYMessageOperation *operation =
             [cacheController didStartMessage:[SKYMessage message]
@@ -513,7 +492,7 @@ describe(@"Cache Controller handle message operations", ^{
     });
 
     it(@"mark message operation as cancelled", ^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
 
         SKYMessageOperation *operation =
             [cacheController didStartMessage:[SKYMessage message]
@@ -529,7 +508,7 @@ describe(@"Cache Controller handle message operations", ^{
     });
 
     it(@"mark message operation as failed", ^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
 
         SKYMessageOperation *operation =
             [cacheController didStartMessage:[SKYMessage message]
