@@ -113,12 +113,12 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 
 - (NSPredicate *)messagesPredicateWithConversationID:(NSString *)conversationId
                                                limit:(NSInteger)limit
-                                     beforeMessageId:(NSString *)beforeMessageId
+                                     beforeMessageID:(NSString *)beforeMessageID
 {
     NSMutableArray *predicates =
         [self messagesPredicateWithConversationID:conversationId limit:limit];
-    if (beforeMessageId) {
-        SKYMessage *message = [self.store getMessageWithID:beforeMessageId];
+    if (beforeMessageID) {
+        SKYMessage *message = [self.store getMessageWithID:beforeMessageID];
         if (message) {
             [predicates addObject:[NSPredicate predicateWithFormat:@"seq < %d", message.seq]];
         } else {
@@ -141,13 +141,13 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
 
 - (void)fetchMessagesWithConversationID:(NSString *)conversationId
                                   limit:(NSInteger)limit
-                        beforeMessageId:(NSString *)beforeMessageId
+                        beforeMessageID:(NSString *)beforeMessageID
                                   order:(NSString *)order
                              completion:(SKYChatFetchMessagesListCompletion)completion
 {
     NSPredicate *predicate = [self messagesPredicateWithConversationID:conversationId
                                                                  limit:limit
-                                                       beforeMessageId:beforeMessageId];
+                                                       beforeMessageID:beforeMessageID];
     [self fetchMessagesWithPredicate:predicate limit:limit order:order completion:completion];
 }
 

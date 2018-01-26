@@ -35,7 +35,7 @@
 
 - (void)fetchMessagesWithConversationID:(NSString *)conversationId
                                   limit:(NSInteger)limit
-                        beforeMessageId:(NSString *)beforeMessageId
+                        beforeMessageID:(NSString *)beforeMessageID
                                   order:(NSString *)order
                              completion:(SKYChatFetchMessagesListCompletion)completion;
 

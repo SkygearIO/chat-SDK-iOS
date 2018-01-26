@@ -517,20 +517,20 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 {
     [self fetchMessagesWithConversationID:conversation.recordID.recordName
                                     limit:limit
-                          beforeMessageId:beforeMessage.recordID.recordName
+                          beforeMessageID:beforeMessage.recordID.recordName
                                     order:order
                                completion:completion];
 }
 
 - (void)fetchMessagesWithConversation:(SKYConversation *)conversation
                                 limit:(NSInteger)limit
-                      beforeMessageId:(NSString *)beforeMessageId
+                      beforeMessageID:(NSString *)beforeMessageID
                                 order:(NSString *)order
                            completion:(SKYChatFetchMessagesListCompletion)completion
 {
     [self fetchMessagesWithConversationID:conversation.recordID.recordName
                                     limit:limit
-                          beforeMessageId:beforeMessageId
+                          beforeMessageID:beforeMessageID
                                     order:order
                                completion:completion];
 }
@@ -543,7 +543,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 {
     [self fetchMessagesWithConversationID:conversationId
                                     limit:limit
-                          beforeMessageId:beforeMessage.recordID.recordName
+                          beforeMessageID:beforeMessage.recordID.recordName
                                     order:order
                                completion:completion];
 }
@@ -637,15 +637,15 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 - (void)fetchMessagesWithConversationID:(NSString *)conversationId
                                   limit:(NSInteger)limit
-                        beforeMessageId:(NSString *)beforeMessageId
+                        beforeMessageID:(NSString *)beforeMessageID
                                   order:(NSString *)order
                              completion:(SKYChatFetchMessagesListCompletion)completion
 {
 
     NSMutableDictionary *arguments = [NSMutableDictionary
         dictionaryWithObjectsAndKeys:conversationId, @"conversation_id", @(limit), @"limit", nil];
-    if (beforeMessageId) {
-        [arguments setObject:beforeMessageId forKey:@"before_message_id"];
+    if (beforeMessageID) {
+        [arguments setObject:beforeMessageID forKey:@"before_message_id"];
     }
 
     if (order) {
@@ -656,7 +656,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         [self.cacheController
             fetchMessagesWithConversationID:conversationId
                                       limit:limit
-                            beforeMessageId:beforeMessageId
+                            beforeMessageID:beforeMessageID
                                       order:order
                                  completion:^(NSArray<SKYMessage *> *_Nullable messageList,
                                               BOOL isCached, NSError *_Nullable error) {

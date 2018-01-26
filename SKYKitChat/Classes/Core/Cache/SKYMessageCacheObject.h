@@ -30,7 +30,7 @@
 @property NSDate *sendDate;
 
 @property bool deleted;
-@property int seq;
+@property NSInteger seq;
 
 @property NSData *recordData;
 

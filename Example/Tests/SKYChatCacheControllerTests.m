@@ -82,7 +82,7 @@ SpecBegin(SKYChatCacheController)
             [cacheController
                 fetchMessagesWithConversationID:@"c1"
                                           limit:100
-                                beforeMessageId:@"m7"
+                                beforeMessageID:@"m7"
                                           order:nil
                                      completion:^(NSArray<SKYMessage *> *_Nullable messageList,
                                                   BOOL isCached, NSError *_Nullable error) {
@@ -259,7 +259,6 @@ SpecBegin(SKYChatCacheController)
             messageToSave.sendDate = [baseDate dateByAddingTimeInterval:50000];
 
             [cacheController didSaveMessage:messageToSave];
-
             RLMRealm *realm = cacheController.store.realmInstance;
             RLMResults<SKYMessageCacheObject *> *results =
                 [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"mm1"];
@@ -452,6 +451,18 @@ describe(@"Cache Controller handle message operations", ^{
         [realm transactionWithBlock:^{
             [realm deleteAllObjects];
         }];
+    });
+
+    it(@"mark pending messages as failed", ^{
+        RLMRealm *realm = cacheController.store.realm;
+
+        SKYMessage *message = [SKYMessage message];
+
+        SKYMessageOperation *operation =
+            [cacheController didStartMessage:message
+                              conversationID:@"c0"
+                               operationType:SKYMessageOperationTypeAdd];
+        expect(operation.status).to.equal(SKYMessageOperationStatusPending);
     });
 
     it(@"start message will create a pending message operation in store", ^{
