@@ -856,7 +856,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                    completion:(SKYMessageOperationCompletion)completion
 {
     if (operation.status == SKYMessageOperationStatusPending) {
-        NSLog(@"Message operation %@ is still pending. Pending operations cannot be retried.");
+        NSLog(@"Message operation %@ is still pending. Pending operations cannot be retried.",
+              operation.operationID);
         return;
     }
 
@@ -894,7 +895,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 - (void)cancelMessageOperation:(SKYMessageOperation *)operation
 {
     if (operation.status == SKYMessageOperationStatusPending) {
-        NSLog(@"Message operation %@ is still pending. Pending operations cannot be cancelled.");
+        NSLog(@"Message operation %@ is still pending. Pending operations cannot be cancelled.",
+              operation.operationID);
         return;
     }
 
