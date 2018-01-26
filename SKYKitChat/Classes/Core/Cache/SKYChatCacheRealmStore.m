@@ -18,16 +18,10 @@
 //
 
 #import "SKYChatCacheRealmStore.h"
+#import "SKYChatCacheRealmStore+Private.h"
 
 #import "SKYMessageCacheObject.h"
 #import "SKYMessageOperationCacheObject.h"
-
-@interface SKYChatCacheRealmStore()
-
-@property (strong, nonatomic) RLMRealmConfiguration *realmConfig;
-@property (strong, nonatomic, readonly) RLMRealm *realmInstance;
-
-@end
 
 @implementation SKYChatCacheRealmStore
 
