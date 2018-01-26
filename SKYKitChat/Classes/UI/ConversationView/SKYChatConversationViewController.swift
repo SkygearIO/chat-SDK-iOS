@@ -1278,10 +1278,13 @@ extension SKYChatConversationViewController {
         }
 
         // should automaticallyScrollsToMostRecentMessage when reach bottom
-        let scrollViewHeight = scrollView.frame.size.height;
-        let scrollContentSizeHeight = scrollView.contentSize.height;
-        let scrollOffset = scrollView.contentOffset.y;
-        self.automaticallyScrollsToMostRecentMessage = scrollOffset >= scrollContentSizeHeight - scrollViewHeight
+        let scrollViewHeight = scrollView.frame.size.height
+        let scrollContentSizeHeight = scrollView.contentSize.height
+        let scrollOffset = scrollView.contentOffset.y
+        self.automaticallyScrollsToMostRecentMessage = (
+            scrollOffset >=
+                scrollContentSizeHeight - scrollViewHeight - self.inputToolbarHeightConstraint.constant
+        )
     }
 
     open override func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
@@ -1848,16 +1851,21 @@ extension SKYChatConversationViewController {
 
                 self.hasMoreMessageToFetch = msgs.count > 0
 
-                let bottomOffset = self.collectionView.contentSize.height - self.collectionView.contentOffset.y
-
                 self.finishReceivingMessage()
 
                 // force collection view layout
                 // to allow new content offset calculated
                 self.collectionView.layoutIfNeeded()
 
-                let offsetY = max(min(self.collectionView.contentSize.height - self.collectionView.frame.size.height,
-                                  self.collectionView.contentSize.height - bottomOffset), 0)
+                let fullFrameHeight =
+                    self.collectionView.contentSize.height
+                        - self.collectionView.frame.size.height
+                        + self.inputToolbarHeightConstraint.constant
+
+                let additionalOffset = self.topContentAdditionalInset
+                let offsetY = max(
+                    min(fullFrameHeight, self.collectionView.contentOffset.y),
+                    -additionalOffset)
                 self.collectionView.contentOffset = CGPoint(x: 0, y: offsetY)
                 self.collectionView.flashScrollIndicators()
 
