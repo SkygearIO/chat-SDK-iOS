@@ -62,7 +62,15 @@
 - (RLMRealm *)realmInstance
 {
     // create realm instance for each access, prevent cross thread access
-    return [RLMRealm realmWithConfiguration:self.realmConfig error:nil];
+    NSError *error = nil;
+    RLMRealm *realmInstance = [RLMRealm realmWithConfiguration:self.realmConfig error:&error];
+
+    if (error) {
+        NSLog(@"Failed to create Realm instance: %@", error.localizedDescription);
+        return nil;
+    }
+
+    return realmInstance;
 }
 
 - (NSArray<SKYMessage *> *)getMessagesWithPredicate:(NSPredicate *)predicate
