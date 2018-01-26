@@ -1862,7 +1862,10 @@ extension SKYChatConversationViewController {
                         - self.collectionView.frame.size.height
                         + self.inputToolbarHeightConstraint.constant
 
-                let offsetY = max(min(fullFrameHeight, self.collectionView.contentOffset.y), 0)
+                let additionalOffset = self.topContentAdditionalInset
+                let offsetY = max(
+                    min(fullFrameHeight, self.collectionView.contentOffset.y),
+                    -additionalOffset)
                 self.collectionView.contentOffset = CGPoint(x: 0, y: offsetY)
                 self.collectionView.flashScrollIndicators()
 
