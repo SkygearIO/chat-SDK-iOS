@@ -19,10 +19,9 @@
 
 #import <Realm/Realm.h>
 
-@interface SKYChatCacheRealmStore()
+@interface SKYChatCacheRealmStore ()
 
 @property (strong, nonatomic, readonly) RLMRealm *realmInstance;
 @property (strong, nonatomic) RLMRealmConfiguration *realmConfig;
 
 @end
-

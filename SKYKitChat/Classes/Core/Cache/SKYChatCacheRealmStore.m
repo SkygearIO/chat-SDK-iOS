@@ -73,9 +73,8 @@
 {
     RLMRealm *realmInstance = self.realmInstance;
     RLMResults<SKYMessageCacheObject *> *results =
-        [[SKYMessageCacheObject objectsInRealm:realmInstance
-                                 withPredicate:predicate]
-                sortedResultsUsingKeyPath:order
+        [[SKYMessageCacheObject objectsInRealm:realmInstance withPredicate:predicate]
+            sortedResultsUsingKeyPath:order
                             ascending:NO];
     NSMutableArray<SKYMessage *> *messages = [NSMutableArray arrayWithCapacity:results.count];
 
