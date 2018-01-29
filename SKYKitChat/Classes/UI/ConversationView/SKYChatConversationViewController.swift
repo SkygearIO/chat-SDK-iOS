@@ -104,6 +104,12 @@ import SKPhotoBrowser
     @objc optional func messageStatusShouldShowInConversationViewController(
         _ controller: SKYChatConversationViewController) -> Bool
 
+    @objc optional func messageTimestampTextColorInConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UIColor
+
+    @objc optional func messageStatusTextColorInConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UIColor
+
     /**
      * Hooks on send message flow
      */
@@ -324,6 +330,26 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
         }
 
         return SKYChatConversationView.UICustomization().messageStatusShouldShow
+    }
+
+    public var messageTimestampTextColor: UIColor {
+        if let timestampTextColor =
+            self.delegate?.messageTimestampTextColorInConversationViewController?(self)
+        {
+            return timestampTextColor
+        }
+
+        return SKYChatConversationView.UICustomization().messageTimestampTextColor
+    }
+
+    public var messageStatusTextColor: UIColor {
+        if let statusTextColor =
+            self.delegate?.messageStatusTextColorInConversationViewController?(self)
+        {
+            return statusTextColor
+        }
+
+        return SKYChatConversationView.UICustomization().messageStatusTextColor
     }
 
     public var inputToolbarSendButtonState: InputToolbarSendButtonState = .undefined {
@@ -940,7 +966,9 @@ extension SKYChatConversationViewController {
         }
 
         return NSAttributedString(
-            string: textCustomization.getMessageStatus(msg.conversationStatus))
+            string: textCustomization.getMessageStatus(msg.conversationStatus),
+            attributes: [NSForegroundColorAttributeName: self.messageStatusTextColor]
+        )
     }
 
     open override func collectionView(
@@ -964,8 +992,10 @@ extension SKYChatConversationViewController {
         let msgDate = msg.creationDate()
         let dateString =
             SKYChatConversationView.UICustomization().messageDateFormatter.string(from: msgDate)
-        
-        return NSAttributedString(string: dateString)
+        return NSAttributedString(
+            string: dateString,
+            attributes: [NSForegroundColorAttributeName: self.messageTimestampTextColor]
+        )
     }
     
     open override func collectionView(

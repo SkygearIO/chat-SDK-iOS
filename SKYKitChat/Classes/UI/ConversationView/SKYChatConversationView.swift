@@ -91,6 +91,8 @@ public class SKYChatConversationViewCustomization {
     public var typingIndicatorShouldShow: Bool = true
     public var messageStatusShouldShow: Bool = true
 
+    public var messageTimestampTextColor: UIColor = UIColor.gray
+    public var messageStatusTextColor: UIColor = UIColor.lightGray
     public var incomingMessageBubbleColor: UIColor = UIColor.lightGray
     public var outgoingMessageBubbleColor: UIColor = UIColor.jsq_messageBubbleBlue()
     public var incomingMessageTextColor: UIColor = UIColor.white
