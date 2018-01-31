@@ -93,6 +93,16 @@ import SKPhotoBrowser
         _ controller: SKYChatConversationViewController) -> Bool
 
     /**
+     * Hooks on pubsub connectivity
+     */
+
+    @objc optional func pubsubDidConnectedInConversationViewController(
+        _ controller: SKYChatConversationViewController)
+
+    @objc optional func pubsubDidDisconnectedInConversationViewController(
+        _ controller: SKYChatConversationViewController)
+
+    /**
      * Hooks on send message flow
      */
 
@@ -106,6 +116,19 @@ import SKPhotoBrowser
                                                    failedToSendMessageText text: String,
                                                    date: Date,
                                                    error: Error)
+
+    /**
+     * Hooks on receive / update messages
+     */
+
+    @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
+                                                   didReceiveMessage message: SKYMessage)
+
+    @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
+                                                   didUpdateMessage message: SKYMessage)
+
+    @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
+                                                   didDeleteMessage message: SKYMessage)
 
     /**
      * Hooks on fetching participants / fetch message flow
@@ -522,6 +545,7 @@ extension SKYChatConversationViewController {
             self.fetchMessages(before: nil)
         }
 
+        self.subscribeToPubsubConnectivity()
         self.subscribeMessageChanges()
         self.subscribeTypingIndicatorChanges()
     }
@@ -529,6 +553,7 @@ extension SKYChatConversationViewController {
     override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
+        self.unsubscribeToPubsubConnectivity()
         self.unsubscribeMessageChanges()
         self.unsubscribeTypingIndicatorChanges()
         self.skygear.chatExtension?.unsubscribeFromUserChannel()
@@ -1557,18 +1582,39 @@ extension SKYChatConversationViewController {
     }
 }
 
+extension SKYChatConversationViewController: SKYPubsubContainerDelegate {
+    open func pubsubDidOpen(_ pubsub: SKYPubsubContainer) {
+        self.delegate?.pubsubDidConnectedInConversationViewController?(self)
+    }
+
+    open func pubsubDidClose(_ pubsub: SKYPubsubContainer) {
+        self.delegate?.pubsubDidDisconnectedInConversationViewController?(self)
+    }
+}
+
 extension SKYChatConversationViewController {
+
+    open func subscribeToPubsubConnectivity() {
+        self.skygear.pubsub.delegate = self
+    }
+
+    open func unsubscribeToPubsubConnectivity() {
+        self.skygear.pubsub.delegate = nil
+    }
 
     open func subscribeMessageChanges() {
 
         self.unsubscribeMessageChanges()
 
-        let handler: ((SKYChatRecordChangeEvent, SKYMessage) -> Void) = {(event, msg) in
+        let handler: ((SKYChatRecordChangeEvent, SKYMessage) -> Void) =
+        { [unowned self] (event, msg) in
             let msgID = msg.recordID().recordName
             let foundMessage = self.messageList.contains(msgID)
 
             switch event {
             case .create:
+                self.delegate?.conversationViewController?(self, didReceiveMessage: msg)
+
                 if foundMessage {
                     self.messageList.update([msg])
                 } else {
@@ -1584,12 +1630,14 @@ extension SKYChatConversationViewController {
 
                 self.finishReceivingMessage()
             case .update:
+                self.delegate?.conversationViewController?(self, didUpdateMessage: msg)
                 if foundMessage {
                     self.messageList.update([msg])
                     self.collectionView.reloadData()
                     self.collectionView.layoutIfNeeded()
                 }
             case .delete:
+                self.delegate?.conversationViewController?(self, didDeleteMessage: msg)
                 if foundMessage {
                     self.messageList.remove([msg])
                     self.collectionView.reloadData()
