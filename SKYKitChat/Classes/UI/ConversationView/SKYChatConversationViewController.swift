@@ -57,6 +57,15 @@ import SKPhotoBrowser
      * For customizing the views
      */
 
+    @objc optional func backgroundColorForConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UIColor
+
+    @objc optional func backgroundImageForConversationViewController(
+        _ controller: SKYChatConversationViewController) -> UIImage
+
+    @objc optional func backgroundImageURLForConversationViewController(
+        _ controller: SKYChatConversationViewController) -> NSURL
+
     @objc optional func incomingMessageColorForConversationViewController(
         _ controller: SKYChatConversationViewController) -> UIColor
 
@@ -253,8 +262,11 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     public var messageErrorByIDs: [String: Error] = [:]
     public var typingIndicatorShowDuration: TimeInterval = TimeInterval(5)
     public var offsetYToLoadMore: CGFloat = CGFloat(400)
+
     fileprivate var hasMoreMessageToFetch: Bool = false
     fileprivate var isFetchingMessage: Bool = false
+
+    fileprivate var conversationBackgroundView: UIImageView?
 
     public var messagesFetchLimit: UInt {
         get {
@@ -287,6 +299,33 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     public var messageMediaDataFactory = JSQMessageMediaDataFactory()
 
     public var cameraButton: UIButton?
+
+    public var conversationViewBackgroundColor: UIColor {
+        if let color = self.delegate?.backgroundColorForConversationViewController?(self)
+        {
+            return color
+        }
+
+        return SKYChatConversationView.UICustomization().backgroundColor
+    }
+
+    public var conversationViewBackgroundImage: UIImage? {
+        if let image = self.delegate?.backgroundImageForConversationViewController?(self)
+        {
+            return image
+        }
+
+        return SKYChatConversationView.UICustomization().backgroundImage
+    }
+
+    public var conversationViewBackgroundImageURL: NSURL? {
+        if let url = self.delegate?.backgroundImageURLForConversationViewController?(self)
+        {
+            return url
+        }
+
+        return SKYChatConversationView.UICustomization().backgroundImageURL
+    }
 
     public var shouldShowAccessoryButton: Bool {
         return self.delegate?.accessoryButtonShouldShowInConversationViewController?(self) ?? true
@@ -789,6 +828,7 @@ extension SKYChatConversationViewController {
 
     open func customizeViews() {
         self.updateTitle()
+        self.configureBackground()
 
         let sendButton: UIButton? = {
             /* NOTE(cheungpat): Putting send button on the left is not supported.
@@ -835,6 +875,34 @@ extension SKYChatConversationViewController {
         }
 
         self.navigationItem.title = title
+    }
+
+    open func configureBackground() {
+        if self.conversationBackgroundView == nil {
+            self.conversationBackgroundView = UIImageView()
+            self.conversationBackgroundView?.contentMode = .scaleAspectFill
+            self.conversationView?.backgroundView = self.conversationBackgroundView
+        }
+
+        if let urlString = self.conversationViewBackgroundImageURL?.absoluteString {
+            if let data = self.dataCache.getData(forKey: urlString) {
+                self.conversationBackgroundView?.image = UIImage(data: data)
+            } else {
+                let _ = self.downloadDispatcher.download(urlString, compltion: { [unowned self] data in
+                    guard let downloadedData = data else {
+                        return
+                    }
+
+                    self.dataCache.set(data: downloadedData, forKey: urlString)
+                    self.conversationBackgroundView?.image = UIImage(data: downloadedData)
+                })
+            }
+        } else if let image = self.conversationViewBackgroundImage {
+            self.conversationBackgroundView?.image = image
+        } else {
+            self.conversationBackgroundView?.image = nil
+            self.conversationBackgroundView?.backgroundColor = self.conversationViewBackgroundColor
+        }
     }
 
     open override func collectionView(_ collectionView: UICollectionView,

@@ -36,6 +36,11 @@ class ConversationDemoViewController: SKYChatConversationViewController {
 }
 
 extension ConversationDemoViewController: SKYChatConversationViewControllerDelegate {
+    func backgroundColorForConversationViewController(_ controller: SKYChatConversationViewController) -> UIColor
+    {
+        return UIColor(white: 0.95, alpha: 1.0)
+    }
+
     func incomingMessageColorForConversationViewController(
         _ controller: SKYChatConversationViewController) -> UIColor
     {

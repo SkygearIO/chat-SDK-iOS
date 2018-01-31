@@ -86,6 +86,10 @@ public class SKYChatConversationViewCustomization {
 
     public var messageDateFormatter: DateFormatter
 
+    public var backgroundColor: UIColor = UIColor.white
+    public var backgroundImage: UIImage? = nil
+    public var backgroundImageURL: NSURL? = nil
+
     public var cameraButtonShouldShow: Bool = true
     public var voiceMessageButtonShouldShow: Bool = true
     public var typingIndicatorShouldShow: Bool = true
