@@ -454,7 +454,7 @@ describe(@"Cache Controller handle message operations", ^{
     });
 
     it(@"mark pending messages as failed", ^{
-        RLMRealm *realm = cacheController.store.realm;
+        RLMRealm *realm = cacheController.store.realmInstance;
 
         SKYMessage *message = [SKYMessage message];
 
