@@ -36,8 +36,10 @@
     NSURL *url = [NSURL URLWithString:[dir stringByAppendingPathComponent:name]];
 
     self.realmConfig = [RLMRealmConfiguration defaultConfiguration];
+    self.realmConfig.schemaVersion = 2;
+    self.realmConfig.migrationBlock = ^(RLMMigration *migration, uint64_t oldSchemaVersion) {
+    };
     self.realmConfig.fileURL = url;
-
     return self;
 }
 
