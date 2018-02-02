@@ -96,10 +96,10 @@ import SKPhotoBrowser
      * Hooks on pubsub connectivity
      */
 
-    @objc optional func pubsubDidConnectedInConversationViewController(
+    @objc optional func pubsubDidConnectInConversationViewController(
         _ controller: SKYChatConversationViewController)
 
-    @objc optional func pubsubDidDisconnectedInConversationViewController(
+    @objc optional func pubsubDidDisconnectInConversationViewController(
         _ controller: SKYChatConversationViewController)
 
     /**
@@ -553,7 +553,7 @@ extension SKYChatConversationViewController {
     override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
-        self.unsubscribeToPubsubConnectivity()
+        self.unsubscribeFromPubsubConnectivity()
         self.unsubscribeMessageChanges()
         self.unsubscribeTypingIndicatorChanges()
         self.skygear.chatExtension?.unsubscribeFromUserChannel()
@@ -1584,11 +1584,11 @@ extension SKYChatConversationViewController {
 
 extension SKYChatConversationViewController: SKYPubsubContainerDelegate {
     open func pubsubDidOpen(_ pubsub: SKYPubsubContainer) {
-        self.delegate?.pubsubDidConnectedInConversationViewController?(self)
+        self.delegate?.pubsubDidConnectInConversationViewController?(self)
     }
 
     open func pubsubDidClose(_ pubsub: SKYPubsubContainer) {
-        self.delegate?.pubsubDidDisconnectedInConversationViewController?(self)
+        self.delegate?.pubsubDidDisconnectInConversationViewController?(self)
     }
 }
 
@@ -1598,7 +1598,7 @@ extension SKYChatConversationViewController {
         self.skygear.pubsub.delegate = self
     }
 
-    open func unsubscribeToPubsubConnectivity() {
+    open func unsubscribeFromPubsubConnectivity() {
         self.skygear.pubsub.delegate = nil
     }
 
