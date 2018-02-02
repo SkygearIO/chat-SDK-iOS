@@ -29,7 +29,7 @@ public protocol DataCache {
 public class MemoryDataCache: DataCache {
     let store: LruCache
 
-    private static var sharedInstance: MemoryDataCache? = nil
+    private static var sharedInstance: MemoryDataCache?
 
     static func shared() -> MemoryDataCache {
         if self.sharedInstance == nil {

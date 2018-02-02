@@ -23,7 +23,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString * const SKYMessageTypeMetadataKey;
+extern NSString *const SKYMessageTypeMetadataKey;
 
 @class SKYReference;
 
@@ -47,7 +47,7 @@ typedef NS_ENUM(NSInteger, SKYMessageConversationStatus) {
 @property (assign, nonatomic, readonly) SKYMessageConversationStatus conversationStatus;
 
 + (instancetype _Nullable)message;
-+ (instancetype )recordWithRecord:(SKYRecord *)record;
++ (instancetype)recordWithRecord:(SKYRecord *)record;
 @end
 
 NS_ASSUME_NONNULL_END

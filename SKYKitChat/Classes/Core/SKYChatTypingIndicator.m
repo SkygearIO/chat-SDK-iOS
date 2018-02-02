@@ -84,8 +84,7 @@ SKYChatTypingEvent SKYChatTypingEventFromString(NSString *eventString)
 - (NSArray *)typingUserIDs
 {
     NSMutableArray *typingUserIDs = [NSMutableArray array];
-    [self.userIDs enumerateObjectsUsingBlock:^(NSString * userID, NSUInteger idx,
-                                               BOOL * stop) {
+    [self.userIDs enumerateObjectsUsingBlock:^(NSString *userID, NSUInteger idx, BOOL *stop) {
         SKYChatTypingEvent event = [self lastEventWithUserID:userID];
         NSDate *date = [self lastEventDateWithUserID:userID];
 

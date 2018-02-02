@@ -722,10 +722,8 @@ typedef void (^SKYMessageOperationListCompletion)(
  @param handler the typing indicator handler
  @return NSNotificationCenter observer
  */
-- (id )
-subscribeToTypingIndicatorInConversation:(SKYConversation *)conversation
-                                 handler:(void (^)(
-                                             SKYChatTypingIndicator *indicator))handler
+- (id)subscribeToTypingIndicatorInConversation:(SKYConversation *)conversation
+                                       handler:(void (^)(SKYChatTypingIndicator *indicator))handler
     /* clang-format off */ NS_SWIFT_NAME(subscribeToTypingIndicator(in:handler:)); /* clang-format on */
 
 /**
@@ -746,10 +744,9 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *)conversation
  @param handler the message handler
  @return NSNotificationCenter observer
  */
-- (id )subscribeToMessagesInConversation:(SKYConversation *)conversation
-                                         handler:
-                                             (void (^)(SKYChatRecordChangeEvent event,
-                                                               SKYMessage *record))handler
+- (id)subscribeToMessagesInConversation:(SKYConversation *)conversation
+                                handler:(void (^)(SKYChatRecordChangeEvent event,
+                                                  SKYMessage *record))handler
     /* clang-format off */ NS_SWIFT_NAME(subscribeToMessages(in:handler:)); /* clang-format on */
 
 /**
@@ -766,9 +763,8 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *)conversation
  @param handler the conversation handler
  @return NSNotificationCenter observer
  */
-- (id )subscribeToConversation:
-    (void (^)(SKYChatRecordChangeEvent event,
-                      SKYConversation *conversation))handler
+- (id)subscribeToConversation:
+    (void (^)(SKYChatRecordChangeEvent event, SKYConversation *conversation))handler
     /* clang-format off */ NS_SWIFT_NAME(subscribeToConversation(handler:)); /* clang-format on */
 
 /**
@@ -779,7 +775,7 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *)conversation
 
  @param NSNotification observer
  */
-- (void)unsubscribeToConversationWithObserver:(id )observer;
+- (void)unsubscribeToConversationWithObserver:(id)observer;
 
 /**
  Unsubscribe to message events
@@ -789,7 +785,7 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *)conversation
 
  @param NSNotification observer
  */
-- (void)unsubscribeToMessagesWithObserver:(id )observer;
+- (void)unsubscribeToMessagesWithObserver:(id)observer;
 
 /**
  Unsubscribe to typing indicator events
@@ -799,7 +795,7 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *)conversation
 
  @param NSNotification observer
  */
-- (void)unsubscribeToTypingIndicatorWithObserver:(id )observer;
+- (void)unsubscribeToTypingIndicatorWithObserver:(id)observer;
 
 ///-----------------------------------------
 /// @name Managing Failed Message Operations

@@ -80,8 +80,7 @@ extern SKYChatTypingEvent SKYChatTypingEventFromString(NSString *eventString);
 /**
  Returns the last event type of the user.
  */
-- (SKYChatTypingEvent)lastEventWithUserID:(NSString *)userID
-    NS_SWIFT_NAME(lastEvent(userID:));
+- (SKYChatTypingEvent)lastEventWithUserID:(NSString *)userID NS_SWIFT_NAME(lastEvent(userID:));
 
 /**
  Returns the last event date of the user.

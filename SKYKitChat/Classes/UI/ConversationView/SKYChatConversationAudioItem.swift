@@ -20,11 +20,10 @@
 private let maxDisplaySize: CGFloat = 240
 private let minDisplaySize: CGFloat = 80
 
-
 class SKYChatConversationAudioItem: JSQAudioMediaItem {
     var view: UIView?
     var childView: UIView?
-    
+
     var assetCache: SKYAssetCache?
     var asset: SKYAsset?
 
@@ -34,8 +33,7 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
 
     init(withMessage message: SKYMessage,
          assetCache: SKYAssetCache?,
-         maskAsOutgoing isOutGoing: Bool)
-    {
+         maskAsOutgoing isOutGoing: Bool) {
         super.init(data: nil, audioViewAttributes: JSQAudioMediaViewAttributes())
 
         guard let asset = message.attachment else {
@@ -61,7 +59,7 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
                 guard let myself = self else {
                     return
                 }
-                
+
                 guard let data = try? Data(contentsOf: asset.url) else {
                     return
                 }
@@ -79,15 +77,15 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
                         myself.childView = myself.mediaView()
                     }
                 }
-                
+
             }
         }
     }
-    
+
     override func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         super.audioPlayerDidFinishPlaying(player, successfully: flag)
     }
-    
+
     override func mediaView() -> UIView? {
         let view = super.mediaView()
         if view != nil {
@@ -98,11 +96,11 @@ class SKYChatConversationAudioItem: JSQAudioMediaItem {
         }
         return self.view
     }
-    
+
     open func stop() {
         self.clearCachedMediaViews()
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

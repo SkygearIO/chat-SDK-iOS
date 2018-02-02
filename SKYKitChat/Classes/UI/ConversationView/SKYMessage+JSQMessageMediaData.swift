@@ -19,8 +19,7 @@
 
 extension SKYMessage {
     func messageMediaData(withCache cache: SKYAssetCache?,
-                          markedAsOutgoing isOutgoing: Bool) -> JSQMediaItem?
-    {
+                          markedAsOutgoing isOutgoing: Bool) -> JSQMediaItem? {
         guard let asset = self.attachment else {
             return nil
         }
@@ -30,7 +29,7 @@ extension SKYMessage {
                                                 assetCache: cache,
                                                 maskAsOutgoing: isOutgoing)
         }
-        
+
         if asset.mimeType.hasPrefix("audio/") {
             return SKYChatConversationAudioItem(withMessage: self,
                                                 assetCache: cache,
@@ -53,8 +52,7 @@ public class JSQMessageMediaDataFactory {
     }
 
     public func mediaData(with message: SKYMessage,
-                          markedAsOutgoing isOutgoing: Bool) -> JSQMediaItem?
-    {
+                          markedAsOutgoing isOutgoing: Bool) -> JSQMediaItem? {
         return message.messageMediaData(withCache: self.assetCache,
                                         markedAsOutgoing: isOutgoing)
     }

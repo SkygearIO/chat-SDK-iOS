@@ -324,8 +324,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     public var cameraButton: UIButton?
 
     public var conversationViewBackgroundColor: UIColor {
-        if let color = self.delegate?.backgroundColorForConversationViewController?(self)
-        {
+        if let color = self.delegate?.backgroundColorForConversationViewController?(self) {
             return color
         }
 
@@ -333,8 +332,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     }
 
     public var conversationViewBackgroundImage: UIImage? {
-        if let image = self.delegate?.backgroundImageForConversationViewController?(self)
-        {
+        if let image = self.delegate?.backgroundImageForConversationViewController?(self) {
             return image
         }
 
@@ -342,8 +340,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     }
 
     public var conversationViewBackgroundImageURL: NSURL? {
-        if let url = self.delegate?.backgroundImageURLForConversationViewController?(self)
-        {
+        if let url = self.delegate?.backgroundImageURLForConversationViewController?(self) {
             return url
         }
 
@@ -356,8 +353,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
 
     public var shouldShowCameraButton: Bool {
         if let shouldShow =
-            self.delegate?.cameraButtonShouldShowInConversationViewController?(self)
-        {
+            self.delegate?.cameraButtonShouldShowInConversationViewController?(self) {
             return shouldShow
         }
 
@@ -366,8 +362,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
 
     public var shouldShowVoiceMessageButton: Bool {
         if let shouldShow =
-            self.delegate?.voiceMessageButtonShouldShowInConversationViewController?(self)
-        {
+            self.delegate?.voiceMessageButtonShouldShowInConversationViewController?(self) {
             return shouldShow
         }
 
@@ -376,8 +371,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
 
     public var shouldShowTypingIndicator: Bool {
         if let shouldShow =
-            self.delegate?.typingIndicatorShouldShowInConversationViewController?(self)
-        {
+            self.delegate?.typingIndicatorShouldShowInConversationViewController?(self) {
             return shouldShow
         }
 
@@ -386,8 +380,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
 
     public var shouldShowMessageStatus: Bool {
         if let shouldShow =
-            self.delegate?.messageStatusShouldShowInConversationViewController?(self)
-        {
+            self.delegate?.messageStatusShouldShowInConversationViewController?(self) {
             return shouldShow
         }
 
@@ -396,8 +389,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
 
     public var messageTimestampTextColor: UIColor {
         if let timestampTextColor =
-            self.delegate?.messageTimestampTextColorInConversationViewController?(self)
-        {
+            self.delegate?.messageTimestampTextColorInConversationViewController?(self) {
             return timestampTextColor
         }
 
@@ -406,8 +398,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
 
     public var messageStatusTextColor: UIColor {
         if let statusTextColor =
-            self.delegate?.messageStatusTextColorInConversationViewController?(self)
-        {
+            self.delegate?.messageStatusTextColorInConversationViewController?(self) {
             return statusTextColor
         }
 
@@ -561,7 +552,7 @@ extension SKYChatConversationViewController {
 
         UIMenuController.shared.menuItems = [
             UIMenuItem.init(title: "Resend", action: #selector(SKYChatConversationViewController.resendFailedMessage(_:))),
-            UIMenuItem.init(title: "Delete", action: #selector(SKYChatConversationViewController.deleteFailedMessage(_:))),
+            UIMenuItem.init(title: "Delete", action: #selector(SKYChatConversationViewController.deleteFailedMessage(_:)))
         ]
         JSQMessagesCollectionViewCell.registerMenuAction(#selector(SKYChatConversationViewController.resendFailedMessage(_:)))
         JSQMessagesCollectionViewCell.registerMenuAction(#selector(SKYChatConversationViewController.deleteFailedMessage(_:)))
@@ -662,7 +653,7 @@ extension SKYChatConversationViewController {
         let textView = UITextView(frame: frame)
         textView.isEditable = false
         textView.isSelectable = false
-        textView.text = "Slide to Cancel";
+        textView.text = "Slide to Cancel"
         textView.backgroundColor = UIColor.clear
         textView.textColor = UIColor.darkGray
         return textView
@@ -762,7 +753,6 @@ extension SKYChatConversationViewController {
         NSLayoutConstraint.activate(constraints)
     }
 
-
     func createActivityIndicator() {
         self.indicator = UIActivityIndicatorView()
         self.indicator?.activityIndicatorViewStyle = .gray
@@ -793,8 +783,7 @@ extension SKYChatConversationViewController {
         }()
         self.incomingMessageTextColor = {
             if let color =
-                self.delegate?.incomingMessageTextColorForConversationViewController?(self)
-            {
+                self.delegate?.incomingMessageTextColorForConversationViewController?(self) {
                 return color
             }
 
@@ -802,8 +791,7 @@ extension SKYChatConversationViewController {
         }()
         self.outgoingMessageTextColor = {
             if let color =
-                self.delegate?.outgoingMessageTextColorForConversationViewController?(self)
-            {
+                self.delegate?.outgoingMessageTextColorForConversationViewController?(self) {
                 return color
             }
 
@@ -811,8 +799,7 @@ extension SKYChatConversationViewController {
         }()
         self.incomingAudioMessageButtonColor = {
             if let color =
-                self.delegate?.incomingAudioMessageButtonColorForConversationViewController?(self)
-            {
+                self.delegate?.incomingAudioMessageButtonColorForConversationViewController?(self) {
                 return color
             }
 
@@ -820,8 +807,7 @@ extension SKYChatConversationViewController {
         }()
         self.outgoingAudioMessageButtonColor = {
             if let color =
-                self.delegate?.incomingAudioMessageButtonColorForConversationViewController?(self)
-            {
+                self.delegate?.incomingAudioMessageButtonColorForConversationViewController?(self) {
                 return color
             }
 
@@ -878,8 +864,7 @@ extension SKYChatConversationViewController {
         self.slideToCancelTextView = self.createSlideToCancelTextView(self.inputTextView!.frame)
 
         if self.shouldShowVoiceMessageButton &&
-            self.inputToolbar.contentView.textView.text.count == 0
-        {
+            self.inputToolbar.contentView.textView.text.count == 0 {
             self.inputToolbarSendButtonState = .record
         } else {
             self.inputToolbarSendButtonState = .send
@@ -913,7 +898,7 @@ extension SKYChatConversationViewController {
             if let data = self.dataCache.getData(forKey: urlString) {
                 self.conversationBackgroundView?.image = UIImage(data: data)
             } else {
-                let _ = self.downloadDispatcher.download(urlString, compltion: { [unowned self] data in
+                _ = self.downloadDispatcher.download(urlString, compltion: { [unowned self] data in
                     guard let downloadedData = data else {
                         return
                     }
@@ -992,7 +977,7 @@ extension SKYChatConversationViewController {
                 }
                 self.audioDict[key] = audioItem
             }
-            
+
             if let imageItem = mediaData as? SKYChatConversationImageItem {
                 imageItem.delegate = self
             }
@@ -1071,7 +1056,7 @@ extension SKYChatConversationViewController {
     ) -> CGFloat {
         return CGFloat(14)
     }
-    
+
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
         attributedTextForCellTopLabelAt indexPath: IndexPath!
@@ -1090,7 +1075,7 @@ extension SKYChatConversationViewController {
             attributes: [NSForegroundColorAttributeName: self.messageTimestampTextColor]
         )
     }
-    
+
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
         layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!,
@@ -1120,8 +1105,7 @@ extension SKYChatConversationViewController {
     open override func collectionView(
         _ collectionView: JSQMessagesCollectionView!,
         attributedTextForMessageBubbleTopLabelAt indexPath: IndexPath!
-        ) -> NSAttributedString!
-    {
+        ) -> NSAttributedString! {
         let msg = self.messageList.messageAt(indexPath.row)
         let senderName = self.getSenderName(forMessage: msg) ?? ""
         let attrStr = NSMutableAttributedString(string: senderName)
@@ -1178,8 +1162,7 @@ extension SKYChatConversationViewController {
             self,
             avatarForMessage: msg,
             withAuthor: sender,
-            atIndexPath: indexPath)
-        {
+            atIndexPath: indexPath) {
             return JSQMessagesAvatarImage.avatar(with: image)
         }
 
@@ -1194,7 +1177,7 @@ extension SKYChatConversationViewController {
                 }
 
                 // download from url
-                let _ = self.downloadDispatcher.download(senderAvatarUrl, compltion: { data in
+                _ = self.downloadDispatcher.download(senderAvatarUrl, compltion: { data in
                     guard let downloadedData = data else {
                         return
                     }
@@ -1209,7 +1192,7 @@ extension SKYChatConversationViewController {
                 }
 
                 // download asset
-                let _ = self.downloadDispatcher.download(
+                _ = self.downloadDispatcher.download(
                     senderAvatarAsset.url.absoluteString,
                     compltion: { data in
                         guard let downloadedData = data else {
@@ -1229,8 +1212,7 @@ extension SKYChatConversationViewController {
         if let avatarImage = UIImage.avatarImage(forInitialsOfName: senderName,
                                                  backgroundColor: SKYChatConversationView.UICustomization().avatarBackgroundColor,
                                                  textColor: SKYChatConversationView.UICustomization().avatarTextColor),
-            let roundedImage = UIImage.circleImage(fromImage: avatarImage)
-        {
+            let roundedImage = UIImage.circleImage(fromImage: avatarImage) {
             return JSQMessagesAvatarImage.avatar(with: roundedImage)
         }
 
@@ -1265,37 +1247,35 @@ extension SKYChatConversationViewController {
 
         self.showTypingIndicator = false
     }
-    
+
     @objc func recordingButtonDidLongPressed(gesture: UILongPressGestureRecognizer) {
         if gesture.state == .began {
             self.didStartRecord(button: self.recordButton!)
-        }
-        else {
+        } else {
             var cancelled = gesture.state == .cancelled
             if gesture.state == .changed || gesture.state == .ended {
                 guard let view = gesture.view else {
                     return
                 }
-                
+
                 let point = gesture.location(in: view.superview)
                 if point.x < -10 || point.y < -10 {
                     cancelled = true
                 }
             }
-            
+
             if cancelled {
                 self.didStopRecord(button: self.recordButton!, cancelled: true)
-            }
-            else if gesture.state == .ended && !cancelled {
+            } else if gesture.state == .ended && !cancelled {
                 self.didStopRecord(button: self.recordButton!)
             }
         }
     }
-    
+
     open func imageDidTap(_ url: URL?) {
         let photo = SKPhoto.photoWithImageURL(url!.absoluteString)
         let browser = SKPhotoBrowser(photos: [photo])
-        
+
         self.present(browser, animated: true, completion: nil)
     }
 
@@ -1303,7 +1283,6 @@ extension SKYChatConversationViewController {
         let alert = UIAlertController(title: "Actions",
                                       message: nil,
                                       preferredStyle: .actionSheet)
-
 
         // TODO: support Photo or Video
         alert.addAction(
@@ -1332,11 +1311,9 @@ extension SKYChatConversationViewController {
     }
 }
 
-
 // MARK: - Send Message
 
 extension SKYChatConversationViewController {
-
 
     func beforeSending(message msg: SKYMessage) {
         // push the "sending" message to message list
@@ -1355,7 +1332,7 @@ extension SKYChatConversationViewController {
         self.skygear.chatExtension?.sendTypingIndicator(.finished, in: self.conversation!)
         self.delegate?.conversationViewController?(self, readyToSendMessage: msg)
     }
-    
+
     func send(message msg: SKYMessage, done: ((_ sentMsg: SKYMessage) -> Void)? = nil) {
         guard let conv = self.conversation else {
             self.failedToSend(message: msg,
@@ -1375,7 +1352,7 @@ extension SKYChatConversationViewController {
                                       errorMessage: error!.localizedDescription)
                     return
                 }
-                
+
                 guard let sentMsg = result else {
                     print("Error: Got nil sent message")
                     self.failedToSend(message: msg,
@@ -1405,8 +1382,7 @@ extension SKYChatConversationViewController {
 
     func failedToSend(message: SKYMessage?,
                       errorCode: SKYErrorCode,
-                      errorMessage: String)
-    {
+                      errorMessage: String) {
         let err = self.errorCreator.error(with: errorCode, message: errorMessage)
         if let msg = message {
             self.messageList.update([msg])
@@ -1454,7 +1430,7 @@ extension SKYChatConversationViewController {
                                                        alertControllerForAccessoryButton: sender!) {
             self.present(alert, animated: true, completion: nil)
         }
-        
+
         self.present(self.defaultAccessoryButtonAlertController(), animated: true, completion: nil)
     }
 
@@ -1472,7 +1448,7 @@ extension SKYChatConversationViewController {
         self.beforeSending(message: msg)
         self.send(message: msg)
     }
-    
+
     @objc open func didPressSendButton(button: UIButton) {
         self.inputToolbar?.delegate.messagesInputToolbar(self.inputToolbar, didPressRightBarButton: button)
     }
@@ -1488,8 +1464,7 @@ extension SKYChatConversationViewController {
             self.conversationViewContentOffset = offset
             if self.conversationViewDragging &&
                 self.conversationViewDraggingDirection == .down &&
-                self.inputToolbar.contentView.textView.isFirstResponder
-            {
+                self.inputToolbar.contentView.textView.isFirstResponder {
                 self.inputToolbar.contentView.textView.resignFirstResponder()
             }
         }
@@ -1518,7 +1493,7 @@ extension SKYChatConversationViewController {
 
     func shouldLoadMoreMessage() -> Bool {
         let scrollView = self.collectionView!
-        let scrollOffset = scrollView.contentOffset.y;
+        let scrollOffset = scrollView.contentOffset.y
         return !self.isFetchingMessage && self.hasMoreMessageToFetch && scrollOffset < self.offsetYToLoadMore
     }
 
@@ -1554,7 +1529,7 @@ extension SKYChatConversationViewController {
         self.messageList.remove([message])
         self.beforeSending(message: message)
         self.collectionView.reloadData()
-        
+
         let messageID = message.recordID().recordName
         let ext = skygear.chatExtension
         ext?.fetchOutstandingMessageOperations(messageID: messageID,
@@ -1563,7 +1538,7 @@ extension SKYChatConversationViewController {
                                                 guard let operation = operations.first else {
                                                     return
                                                 }
-                                                
+
                                                 self.removeMessageError(message)
                                                 ext?.retry(messageOperation: operation, completion: nil)
         })
@@ -1572,7 +1547,7 @@ extension SKYChatConversationViewController {
     @objc func deleteFailedMessage(_ message: SKYMessage) {
         self.messageList.remove([message])
         self.collectionView.reloadData()
-        
+
         let messageID = message.recordID().recordName
         let ext = skygear.chatExtension
         ext?.fetchOutstandingMessageOperations(messageID: messageID,
@@ -1581,7 +1556,7 @@ extension SKYChatConversationViewController {
                                                 guard let operation = operations.first else {
                                                     return
                                                 }
-                                                
+
                                                 self.removeMessageError(message)
                                                 ext?.cancel(messageOperation: operation)
         })
@@ -1617,7 +1592,6 @@ extension SKYChatConversationViewController: CTAssetsPickerControllerDelegate {
         picker.dismiss(animated: true, completion: nil)
     }
 }
-
 
 // MARK: - Send photos
 
@@ -1689,7 +1663,7 @@ extension SKYChatConversationViewController {
             }
         }
     }
-    
+
     func didStartRecord(button: UIButton) {
         print("Voice Recording: Recording Button Did Pressed Down")
 
@@ -1710,7 +1684,7 @@ extension SKYChatConversationViewController {
             recordingSession.requestRecordPermission() { allowed in }
         }
     }
-    
+
     open func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
         print("Voice Recording: Audio Recorder Finished")
 
@@ -1750,7 +1724,7 @@ extension SKYChatConversationViewController {
         self.beforeSending(message: msg)
         self.send(message: msg)
     }
-    
+
     func didStopRecord(button: UIButton, cancelled: Bool = false) {
         let recordingSession = AVAudioSession.sharedInstance()
         if recordingSession.recordPermission() == .granted {
@@ -1798,8 +1772,7 @@ extension SKYChatConversationViewController {
 
         self.unsubscribeMessageChanges()
 
-        let handler: ((SKYChatRecordChangeEvent, SKYMessage) -> Void) =
-        { [unowned self] (event, msg) in
+        let handler: ((SKYChatRecordChangeEvent, SKYMessage) -> Void) = { [unowned self] (event, msg) in
             let msgID = msg.recordID().recordName
             let foundMessage = self.messageList.contains(msgID)
 
@@ -1953,37 +1926,37 @@ extension SKYChatConversationViewController {
 
             }, perRecordErrorHandler: nil)
     }
-    
+
     func messageError(_ message: SKYMessage) -> Error? {
         let messageID = message.recordID().recordName
         return self.messageErrorByIDs[messageID]
     }
-    
+
     func setMessageError(_ message: SKYMessage, error: Error) {
         let messageID = message.recordID().recordName
         guard !self.messageList.contains(messageID) else {
             return
         }
-        
+
         guard self.messageErrorByIDs[messageID] == nil else {
             return
         }
-        
+
         self.messageList.append([message])
         self.messageErrorByIDs[messageID] = error
     }
-    
+
     func removeMessageError(_ message: SKYMessage) {
         let messageID = message.recordID().recordName
         self.messageErrorByIDs.removeValue(forKey: messageID)
     }
-    
+
     func firstSuccessMessage() -> SKYMessage? {
         return self.messageList.first { (message) -> Bool in
             return self.messageErrorByIDs[message.recordID().recordName] == nil
         }
     }
-    
+
     open func fetchUnsentMessages() {
         let chatExt = self.skygear.chatExtension
         chatExt?.fetchOutstandingMessageOperations(conversationID: self.conversation!.recordID().recordName,
@@ -1994,7 +1967,7 @@ extension SKYChatConversationViewController {
                                                         guard operation.status == SKYMessageOperationStatus.failed else {
                                                             continue
                                                         }
-                                                        
+
                                                         let error: Error = {
                                                             if let err = operation.error {
                                                                 return err
@@ -2002,7 +1975,7 @@ extension SKYChatConversationViewController {
                                                             return NSError(domain:"", code:0, userInfo:[NSLocalizedDescriptionKey: "Error occurred sending message."])
                                                         }()
                                                         self.setMessageError(operation.message, error: error)
-                                                        unsentMessages.append(operation.message);
+                                                        unsentMessages.append(operation.message)
                                                     }
                                                     self.delegate?.conversationViewController?(self, didFetchedMessages: unsentMessages, isCached: true)
                                                     self.finishReceivingMessage()
@@ -2075,7 +2048,6 @@ extension SKYChatConversationViewController {
                 for msg in msgs {
                     self.removeMessageError(msg)
                 }
-
 
                 if !isCached {
                     if msgs.count > 0, let first = msgs.first {
