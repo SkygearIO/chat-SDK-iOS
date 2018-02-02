@@ -61,7 +61,7 @@
     cacheObject.deleted = message.deleted;
     cacheObject.sendDate = message.sendDate;
     cacheObject.recordData = [NSKeyedArchiver archivedDataWithRootObject:message.record];
-
+    cacheObject.seq = message.seq;
     return cacheObject;
 }
 

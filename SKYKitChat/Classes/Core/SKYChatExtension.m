@@ -499,18 +499,6 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 - (void)fetchMessagesWithConversation:(SKYConversation *)conversation
                                 limit:(NSInteger)limit
                            beforeTime:(NSDate *)beforeTime
-                           completion:(SKYChatFetchMessagesListCompletion)completion
-{
-    [self fetchMessagesWithConversationID:conversation.recordID.recordName
-                                    limit:limit
-                               beforeTime:beforeTime
-                                    order:nil
-                               completion:completion];
-}
-
-- (void)fetchMessagesWithConversation:(SKYConversation *)conversation
-                                limit:(NSInteger)limit
-                           beforeTime:(NSDate *)beforeTime
                                 order:(NSString *)order
                            completion:(SKYChatFetchMessagesListCompletion)completion
 {
@@ -521,38 +509,48 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                completion:completion];
 }
 
+- (void)fetchMessagesWithConversation:(SKYConversation *)conversation
+                                limit:(NSInteger)limit
+                        beforeMessage:(SKYMessage *)beforeMessage
+                                order:(NSString *)order
+                           completion:(SKYChatFetchMessagesListCompletion)completion
+{
+    [self fetchMessagesWithConversationID:conversation.recordID.recordName
+                                    limit:limit
+                          beforeMessageID:beforeMessage.recordID.recordName
+                                    order:order
+                               completion:completion];
+}
+
+- (void)fetchMessagesWithConversation:(SKYConversation *)conversation
+                                limit:(NSInteger)limit
+                      beforeMessageID:(NSString *)beforeMessageID
+                                order:(NSString *)order
+                           completion:(SKYChatFetchMessagesListCompletion)completion
+{
+    [self fetchMessagesWithConversationID:conversation.recordID.recordName
+                                    limit:limit
+                          beforeMessageID:beforeMessageID
+                                    order:order
+                               completion:completion];
+}
+
 - (void)fetchMessagesWithConversationID:(NSString *)conversationId
                                   limit:(NSInteger)limit
-                             beforeTime:(NSDate *)beforeTime
+                          beforeMessage:(SKYMessage *)beforeMessage
                                   order:(NSString *)order
                              completion:(SKYChatFetchMessagesListCompletion)completion
 {
+    [self fetchMessagesWithConversationID:conversationId
+                                    limit:limit
+                          beforeMessageID:beforeMessage.recordID.recordName
+                                    order:order
+                               completion:completion];
+}
 
-    NSMutableDictionary *arguments = [NSMutableDictionary
-        dictionaryWithObjectsAndKeys:conversationId, @"conversation_id", @(limit), @"limit", nil];
-    if (beforeTime) {
-        NSString *dateString = [SKYDataSerialization stringFromDate:beforeTime];
-        NSLog(@"dateString :%@", dateString);
-
-        [arguments setObject:dateString forKey:@"before_time"];
-    }
-
-    if (order) {
-        [arguments setObject:order forKey:@"order"];
-    }
-
-    if (completion) {
-        [self.cacheController
-            fetchMessagesWithConversationID:conversationId
-                                      limit:limit
-                                 beforeTime:beforeTime
-                                      order:order
-                                 completion:^(NSArray<SKYMessage *> *_Nullable messageList,
-                                              BOOL isCached, NSError *_Nullable error) {
-                                     completion(messageList, YES, error);
-                                 }];
-    }
-
+- (void)fetchMessagesWithArguments:(NSDictionary *)arguments
+                        completion:(SKYChatFetchMessagesListCompletion)completion
+{
     [self.container callLambda:@"chat:get_messages"
            dictionaryArguments:arguments
              completionHandler:^(NSDictionary *response, NSError *error) {
@@ -601,6 +599,71 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      [self markDeliveredMessages:returnArray completion:nil];
                  }
              }];
+}
+
+- (void)fetchMessagesWithConversationID:(NSString *)conversationId
+                                  limit:(NSInteger)limit
+                             beforeTime:(NSDate *)beforeTime
+                                  order:(NSString *)order
+                             completion:(SKYChatFetchMessagesListCompletion)completion
+{
+
+    NSMutableDictionary *arguments = [NSMutableDictionary
+        dictionaryWithObjectsAndKeys:conversationId, @"conversation_id", @(limit), @"limit", nil];
+    if (beforeTime) {
+        NSString *dateString = [SKYDataSerialization stringFromDate:beforeTime];
+        NSLog(@"dateString :%@", dateString);
+
+        [arguments setObject:dateString forKey:@"before_time"];
+    }
+
+    if (order) {
+        [arguments setObject:order forKey:@"order"];
+    }
+
+    if (completion) {
+        [self.cacheController
+            fetchMessagesWithConversationID:conversationId
+                                      limit:limit
+                                 beforeTime:beforeTime
+                                      order:order
+                                 completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                              BOOL isCached, NSError *_Nullable error) {
+                                     completion(messageList, YES, error);
+                                 }];
+    }
+    [self fetchMessagesWithArguments:arguments completion:completion];
+}
+
+- (void)fetchMessagesWithConversationID:(NSString *)conversationId
+                                  limit:(NSInteger)limit
+                        beforeMessageID:(NSString *)beforeMessageID
+                                  order:(NSString *)order
+                             completion:(SKYChatFetchMessagesListCompletion)completion
+{
+
+    NSMutableDictionary *arguments = [NSMutableDictionary
+        dictionaryWithObjectsAndKeys:conversationId, @"conversation_id", @(limit), @"limit", nil];
+    if (beforeMessageID) {
+        [arguments setObject:beforeMessageID forKey:@"before_message_id"];
+    }
+
+    if (order) {
+        [arguments setObject:order forKey:@"order"];
+    }
+
+    if (completion) {
+        [self.cacheController
+            fetchMessagesWithConversationID:conversationId
+                                      limit:limit
+                            beforeMessageID:beforeMessageID
+                                      order:order
+                                 completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                              BOOL isCached, NSError *_Nullable error) {
+                                     completion(messageList, YES, error);
+                                 }];
+    }
+    [self fetchMessagesWithArguments:arguments completion:completion];
 }
 
 #pragma mark Delivery and Read Status

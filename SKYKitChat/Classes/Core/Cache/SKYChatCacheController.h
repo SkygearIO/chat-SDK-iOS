@@ -33,6 +33,12 @@
                                   order:(NSString *)order
                              completion:(SKYChatFetchMessagesListCompletion)completion;
 
+- (void)fetchMessagesWithConversationID:(NSString *)conversationId
+                                  limit:(NSInteger)limit
+                        beforeMessageID:(NSString *)beforeMessageID
+                                  order:(NSString *)order
+                             completion:(SKYChatFetchMessagesListCompletion)completion;
+
 - (void)fetchMessagesWithIDs:(NSArray<NSString *> *)messageIDs
                   completion:(SKYChatFetchMessagesListCompletion)completion;
 
@@ -67,5 +73,4 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)didCancelMessageOperation:(SKYMessageOperation *)messageOperation;
 
 NS_ASSUME_NONNULL_END
-
 @end

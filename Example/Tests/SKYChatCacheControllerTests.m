@@ -59,7 +59,7 @@ SpecBegin(SKYChatCacheController)
                                                                                           i % 2]]];
                 message.creationDate = [baseDate dateByAddingTimeInterval:i * 1000];
                 message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:i * 2000];
-
+                message.record[@"seq"] = [NSNumber numberWithLong:i];
                 SKYMessageCacheObject *messageCacheObject =
                     [SKYMessageCacheObject cacheObjectFromMessage:message];
                 [messages addObject:messageCacheObject];
@@ -76,6 +76,22 @@ SpecBegin(SKYChatCacheController)
             [realm transactionWithBlock:^{
                 [realm deleteAllObjects];
             }];
+        });
+
+        it(@"fetch message by beforeMessage", ^{
+            [cacheController
+                fetchMessagesWithConversationID:@"c1"
+                                          limit:100
+                                beforeMessageID:@"m7"
+                                          order:nil
+                                     completion:^(NSArray<SKYMessage *> *_Nullable messageList,
+                                                  BOOL isCached, NSError *_Nullable error) {
+                                         expect(messageList).to.haveLength(3);
+                                         expect(messageList[0].seq).to.equal(5);
+                                         expect(messageList[1].seq).to.equal(3);
+                                         expect(messageList[2].seq).to.equal(1);
+                                     }];
+
         });
 
         it(@"store insert new record for new record id", ^{
@@ -165,18 +181,19 @@ SpecBegin(SKYChatCacheController)
                 [NSMutableArray arrayWithCapacity:messageCount];
 
             for (NSInteger i = 0; i < messageCount; i++) {
+                long j = (i + 3) * 2;
                 SKYMessage *message = [[SKYMessage alloc]
                     initWithRecordData:[SKYRecord
                                            recordWithRecordType:@"message"
                                                            name:[NSString
-                                                                    stringWithFormat:@"m%ld",
-                                                                                     (i + 3) * 2]]];
+                                                                    stringWithFormat:@"m%ld", j]]];
                 message.conversationRef = [SKYReference
                     referenceWithRecordID:[SKYRecordID recordIDWithRecordType:@"conversation"
                                                                          name:@"c0"]];
                 message.creationDate = [baseDate dateByAddingTimeInterval:(i + 3) * 2000];
                 message.record[@"edited_at"] = [baseDate dateByAddingTimeInterval:50000];
                 message.body = @"fetched message";
+                message.record[@"seq"] = [NSNumber numberWithLong:j];
                 [messages addObject:message];
             }
 
@@ -242,7 +259,6 @@ SpecBegin(SKYChatCacheController)
             messageToSave.sendDate = [baseDate dateByAddingTimeInterval:50000];
 
             [cacheController didSaveMessage:messageToSave];
-
             RLMRealm *realm = cacheController.store.realmInstance;
             RLMResults<SKYMessageCacheObject *> *results =
                 [SKYMessageCacheObject objectsInRealm:realm where:@"recordID == %@", @"mm1"];
@@ -435,6 +451,18 @@ describe(@"Cache Controller handle message operations", ^{
         [realm transactionWithBlock:^{
             [realm deleteAllObjects];
         }];
+    });
+
+    it(@"mark pending messages as failed", ^{
+        RLMRealm *realm = cacheController.store.realmInstance;
+
+        SKYMessage *message = [SKYMessage message];
+
+        SKYMessageOperation *operation =
+            [cacheController didStartMessage:message
+                              conversationID:@"c0"
+                               operationType:SKYMessageOperationTypeAdd];
+        expect(operation.status).to.equal(SKYMessageOperationStatusPending);
     });
 
     it(@"start message will create a pending message operation in store", ^{
