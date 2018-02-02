@@ -27,7 +27,7 @@ public protocol SKYAssetCache {
 public class SKYAssetMemoryCache: SKYAssetCache {
     let store: MemoryDataCache
 
-    private static var sharedInstance: SKYAssetMemoryCache? = nil
+    private static var sharedInstance: SKYAssetMemoryCache?
 
     static func shared() -> SKYAssetMemoryCache {
         if self.sharedInstance == nil {
@@ -61,4 +61,3 @@ public class SKYAssetMemoryCache: SKYAssetCache {
         self.store.purgeAll()
     }
 }
-

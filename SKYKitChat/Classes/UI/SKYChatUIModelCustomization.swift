@@ -20,7 +20,7 @@
 import UIKit
 
 public class SKYChatUIModelCustomization {
-    fileprivate static var sharedInstance: SKYChatUIModelCustomization? = nil
+    fileprivate static var sharedInstance: SKYChatUIModelCustomization?
 
     public fileprivate(set) var userNameField = "username"
     public fileprivate(set) var userAvatarField = "avatar"

@@ -42,8 +42,7 @@ public extension UIImage {
 
     class func avatarImage(forInitialsOfName name: String,
                            backgroundColor: UIColor?,
-                           textColor: UIColor?) -> UIImage?
-    {
+                           textColor: UIColor?) -> UIImage? {
         var gradientColors: [UIColor]
         if let bgColor = backgroundColor {
             gradientColors = [bgColor, bgColor]
@@ -60,8 +59,7 @@ public extension UIImage {
                                 size: txtSize)
     }
 
-    class func avatarImage(forInitialsOfName name: String, gradientColors colors: [UIColor]) -> UIImage?
-    {
+    class func avatarImage(forInitialsOfName name: String, gradientColors colors: [UIColor]) -> UIImage? {
         return UIImage.avatarImage(forInitialsOfName: name,
                                    gradientColors: colors,
                                    size: self.getAvatarDefaultSize())

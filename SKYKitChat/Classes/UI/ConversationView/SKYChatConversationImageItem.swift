@@ -30,7 +30,7 @@ class SKYChatConversationImageItem: JSQMediaItem {
     var image: UIImage?
     var displaySize: CGSize = CGSize.zero
     var thumbnailImage: UIImage?
-    var tap:  UITapGestureRecognizer?
+    var tap: UITapGestureRecognizer?
     weak var delegate: SKYChatConversationImageItemDelegate?
     var assetUrl: URL?
 
@@ -93,7 +93,7 @@ extension SKYChatConversationImageItem {
 
         self.tap = UITapGestureRecognizer(target: self, action: #selector(imageDidTap))
         self.tap?.numberOfTapsRequired = 1
-        
+
         let asset = message.attachment
         self.assetUrl = asset?.url
         let metadata = message.metadata ?? [String: Any]()
@@ -118,7 +118,7 @@ extension SKYChatConversationImageItem {
             return self.getImage(fromAsset: asset)
         }
     }
-    
+
     @objc func imageDidTap() {
         if let delegate = self.delegate {
             delegate.imageDidTap(self.assetUrl)

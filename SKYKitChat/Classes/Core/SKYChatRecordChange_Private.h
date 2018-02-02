@@ -19,6 +19,8 @@
 
 #import "SKYChatRecordChange.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SKYChatRecordChange ()
 
 /**
@@ -26,8 +28,10 @@
 
  App developer should not call this method.
  */
-+ (BOOL)isRecordChangeEventType:(NSString *_Nullable)eventType;
++ (BOOL)isRecordChangeEventType:(NSString *)eventType;
 
-- (instancetype)initWithEvent:(SKYChatRecordChangeEvent)event record:(SKYRecord *_Nonnull)record;
+- (instancetype)initWithEvent:(SKYChatRecordChangeEvent)event record:(SKYRecord *)record;
 
 @end
+
+NS_ASSUME_NONNULL_END

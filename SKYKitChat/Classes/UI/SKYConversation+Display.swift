@@ -59,8 +59,7 @@ public extension SKYConversation {
         }
 
         if let nameList = self.nameList(fromParticipants: participants,
-                                        ignoringUserIDs: [currentUserID])
-        {
+                                        ignoringUserIDs: [currentUserID]) {
             return String.localizedStringWithFormat("%@ and You", nameList)
         } else {
             return nil

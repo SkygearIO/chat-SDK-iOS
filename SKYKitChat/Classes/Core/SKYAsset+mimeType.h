@@ -19,9 +19,13 @@
 
 #import <SKYKit/SKYKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SKYAsset (mimeType)
 
 /// Undocumented
 + (instancetype)assetWithName:(NSString *)name mimeType:(NSString *)mimeType data:(NSData *)data;
 
 @end
+
+NS_ASSUME_NONNULL_END

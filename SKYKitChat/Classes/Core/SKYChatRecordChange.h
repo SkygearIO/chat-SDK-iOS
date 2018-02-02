@@ -19,6 +19,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class SKYRecord;
 
 /**
@@ -60,17 +62,19 @@ typedef NS_ENUM(NSInteger, SKYChatRecordChangeEvent) {
 /**
  Gets the name of the record type of the changed record.
  */
-@property (nonatomic, readonly, nonnull) NSString *recordType;
+@property (nonatomic, readonly) NSString *recordType;
 
 /**
  Gets the record.
  */
-@property (nonatomic, readonly, nonnull) SKYRecord *record;
+@property (nonatomic, readonly) SKYRecord *record;
 
 /**
  Instantiates an instance of SKYChatRecordChange.
  */
-- (instancetype _Nullable)initWithDictionary:(NSDictionary<NSString *, id> *_Nonnull)dict
+- (instancetype _Nullable)initWithDictionary:(NSDictionary<NSString *, id> *)dict
                                    eventType:(NSString *_Nullable)eventType;
 
 @end
+
+NS_ASSUME_NONNULL_END

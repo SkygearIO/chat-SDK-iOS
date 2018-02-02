@@ -18,7 +18,7 @@
 //
 
 class SimpleDownloadDispatcher {
-    fileprivate static var sharedInstance: SimpleDownloadDispatcher? = nil
+    fileprivate static var sharedInstance: SimpleDownloadDispatcher?
 
     private var items: [String: SimpleDownloadDispatchItem] = [:]
 
@@ -32,8 +32,7 @@ class SimpleDownloadDispatcher {
 
     func download(_ urlString: String,
                   compltion block: ((_ data: Data?) -> Void)? = nil
-        ) -> SimpleDownloadDispatchItemCallback?
-    {
+        ) -> SimpleDownloadDispatchItemCallback? {
         let item: SimpleDownloadDispatchItem
 
         if let found = self.items[urlString] {
@@ -59,13 +58,13 @@ class SimpleDownloadDispatcher {
             return
         }
 
-        let _ = item.remove(callback: callback)
+        _ = item.remove(callback: callback)
     }
 }
 
 class SimpleDownloadDispatchItem {
     private let urlString: String
-    private var data: Data? = nil
+    private var data: Data?
     private(set) var started = false
     private(set) var callbacks: [SimpleDownloadDispatchItemCallback] = []
 
@@ -111,8 +110,7 @@ class SimpleDownloadDispatchItem {
 
 class SimpleDownloadDispatchItemCallback: Equatable {
     static func ==(lhs: SimpleDownloadDispatchItemCallback,
-                   rhs: SimpleDownloadDispatchItemCallback) -> Bool
-    {
+                   rhs: SimpleDownloadDispatchItemCallback) -> Bool {
         return lhs.id == lhs.id
     }
 

@@ -23,6 +23,8 @@
 #import "SKYMessage.h"
 #import "SKYMessageOperation.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SKYChatCacheController : NSObject
 
 + (instancetype)defaultController;
@@ -51,8 +53,6 @@
 
 - (void)handleRecordChange:(SKYChatRecordChange *)recordChange;
 
-NS_ASSUME_NONNULL_BEGIN
-
 - (void)fetchMessageOperationsWithConversationID:(NSString *)conversationId
                                    operationType:(SKYMessageOperationType)type
                                       completion:
@@ -72,5 +72,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)didCancelMessageOperation:(SKYMessageOperation *)messageOperation;
 
-NS_ASSUME_NONNULL_END
 @end
+
+NS_ASSUME_NONNULL_END

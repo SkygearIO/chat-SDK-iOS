@@ -19,6 +19,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  Message receipt status.
  */
@@ -48,7 +50,7 @@ typedef NS_ENUM(NSInteger, SKYChatReceiptStatus) {
 /**
  The User ID of the user to whom the message is delivered or read.
  */
-@property (nonatomic, readonly, nonnull) NSString *userID;
+@property (nonatomic, readonly) NSString *userID;
 
 /**
  Gets date and time the message is delivered to the user.
@@ -58,7 +60,7 @@ typedef NS_ENUM(NSInteger, SKYChatReceiptStatus) {
 /**
  Gets date and time the message is read by the user.
  */
-@property (nonatomic, readonly, nullable) NSDate *readAt;
+@property (nonatomic, readonly) NSDate *readAt;
 
 /**
  Gets the receipt status.
@@ -73,6 +75,8 @@ typedef NS_ENUM(NSInteger, SKYChatReceiptStatus) {
  Most developer do not need to create an instance of SKYChatReceipt. The SDK creates instances
  of this class to provide information of message receipt.
  */
-- (instancetype _Nullable)initWithReceiptDictionary:(NSDictionary<NSString *, id> *_Nonnull)dict;
+- (instancetype _Nullable)initWithReceiptDictionary:(NSDictionary<NSString *, id> *)dict;
 
 @end
+
+NS_ASSUME_NONNULL_END
