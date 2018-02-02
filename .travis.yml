@@ -13,7 +13,8 @@ before_install:
 - pod repo update > /dev/null
 - pod install --project-directory=Example
 script:
-- xcodebuild -scheme "$SCHEME" -workspace "$WORKSPACE" -sdk "$SDK" -destination "$DESTINATION" build test | xcpretty
+- sh -eo pipefail -c "xcodebuild -scheme \"SKYKitChat-Example\" -workspace \"$WORKSPACE\" -sdk \"$SDK\" -destination \"$DESTINATION\" build test | xcpretty"
+- sh -eo pipefail -c "xcodebuild -scheme \"Swift Example\" -workspace \"$WORKSPACE\" -sdk \"$SDK\" -destination \"$DESTINATION\" build | xcpretty"
 - pod lib lint --allow-warnings --quick
 - ./clang-check.sh
 # swiftlint is not finding config file path from the current directory
@@ -26,8 +27,7 @@ env:
     - LC_CTYPE=en_US.UTF-8
     - LANG=en_US.UTF-8
     - WORKSPACE=Example/SkyKitChat.xcworkspace
-    - SCHEME="SKYKitChat-Example"
-    - DESTINATION="OS=10.0,name=iPhone 6S"
+    - DESTINATION="OS=10.1,name=iPhone 6s"
     - SDK=iphonesimulator
 notifications:
   slack:
