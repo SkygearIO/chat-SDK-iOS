@@ -7,7 +7,7 @@ PODS:
     - FMDB/standard (= 2.6.2)
   - FMDB/standard (2.6.2)
   - JSQSystemSoundPlayer (2.0.1)
-  - Kingfisher (3.13.1)
+  - Kingfisher (4.6.1)
   - LruCache (0.1)
   - MagicKit-Skygear (0.0.6)
   - OHHTTPStubs (6.1.0):
@@ -54,7 +54,7 @@ PODS:
 
 DEPENDENCIES:
   - Expecta
-  - Kingfisher (~> 3.0)
+  - Kingfisher (~> 4.0)
   - OHHTTPStubs
   - SKYKitChat (from `../`)
   - SKYKitChat/UI (from `../`)
@@ -70,7 +70,7 @@ SPEC CHECKSUMS:
   Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
   FMDB: 854a0341b4726e53276f2a8996f06f1b80f9259a
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
-  Kingfisher: ed9707a409cc47fddafbcd12a43a9757e3600af5
+  Kingfisher: 1f9157d9c02b380cbd0b7cc890161195164eb634
   LruCache: 3a1a9dbed4db352c980bc1ad956e3046bce32515
   MagicKit-Skygear: ca78735168eb8ae24be2307af462e632278bced0
   OHHTTPStubs: 1e21c7d2c084b8153fc53d48400d8919d2d432d0
@@ -83,6 +83,6 @@ SPEC CHECKSUMS:
   Specta: 3e1bd89c3517421982dc4d1c992503e48bd5fe66
   SVProgressHUD: c404a55d78acbeb7ebb78b76d3faf986475a6994
 
-PODFILE CHECKSUM: aa79b15ff21a7a19930616f6f8b6ae78f66f1ac6
+PODFILE CHECKSUM: 0dff3e727ac83786653b08a9cf35a5c61ccd172f
 
 COCOAPODS: 1.3.1
