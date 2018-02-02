@@ -19,6 +19,8 @@
 
 #import <SKYKit/SKYKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class SKYChatExtension;
 
 @interface SKYContainer (Chat)
@@ -32,3 +34,5 @@
 @property (nonatomic, readonly, nullable) SKYChatExtension *chatExtension;
 
 @end
+
+NS_ASSUME_NONNULL_END

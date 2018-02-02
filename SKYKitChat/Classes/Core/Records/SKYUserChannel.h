@@ -20,6 +20,8 @@
 #import "SKYChatRecord.h"
 #import <SKYKit/SKYKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  SKYUserChannel is a record containing information of the pubsub channel where
  server-side notifications are sent.
@@ -36,5 +38,8 @@
  */
 + (instancetype _Nullable)userChannel;
 
-- (id _Nonnull)init;
+- (id)init;
 @end
+
+NS_ASSUME_NONNULL_END
+

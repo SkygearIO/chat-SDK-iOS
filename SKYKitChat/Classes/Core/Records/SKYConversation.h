@@ -22,6 +22,8 @@
 #import "SKYChatRecord.h"
 #import "SKYMessage.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  SKYConversation contains information of a conversation that is shared among all participants.
 
@@ -33,12 +35,12 @@
 /**
  Gets or sets the user ID of the participants of this conversation.
  */
-@property (copy, nonatomic, nonnull) NSArray<NSString *> *participantIds;
+@property (copy, nonatomic) NSArray<NSString *> *participantIds;
 
 /**
  Gets or sets the user ID of the admins of this conversation.
  */
-@property (copy, nonatomic, nonnull) NSArray<NSString *> *adminIds;
+@property (copy, nonatomic) NSArray<NSString *> *adminIds;
 
 /**
  Gets or sets the title of this conversation.
@@ -65,8 +67,10 @@
 @property (strong, nonatomic, nullable) SKYMessage *lastMessage;
 @property (strong, nonatomic, nullable) SKYMessage *lastReadMessage;
 
-- (NSString *_Nonnull)toString;
-- (NSString *_Nonnull)recordName;
-- (SKYRecordID *_Nonnull)recordID;
-+ (instancetype _Nonnull)recordWithRecord:(SKYRecord *_Nullable)record;
+- (NSString *)toString;
+- (NSString *)recordName;
+- (SKYRecordID *)recordID;
++ (instancetype)recordWithRecord:(SKYRecord *_Nullable)record;
 @end
+
+NS_ASSUME_NONNULL_END

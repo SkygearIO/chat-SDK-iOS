@@ -19,18 +19,22 @@
 
 #import <SKYKit/SKYKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SKYChatRecord : NSObject
 
-- (id _Nonnull)initWithRecordData:(SKYRecord *_Nonnull)record;
+- (id)initWithRecordData:(SKYRecord *)record;
 
-@property (copy, nonatomic, nonnull) SKYRecord *record;
+@property (copy, nonatomic) SKYRecord *record;
 
-- (NSString *_Nonnull)creatorUserRecordID;
-- (NSDate *_Nonnull)creationDate;
-- (SKYRecordID *_Nonnull)recordID;
-- (NSString *_Nonnull)recordType;
+- (NSString *)creatorUserRecordID;
+- (NSDate *)creationDate;
+- (SKYRecordID *)recordID;
+- (NSString *)recordType;
 
-- (void)setCreatorUserRecordID:(NSString *_Nonnull)recordID;
-- (void)setCreationDate:(NSDate *_Nonnull)date;
-- (NSDictionary *_Nonnull)dictionary;
+- (void)setCreatorUserRecordID:(NSString *)recordID;
+- (void)setCreationDate:(NSDate *)date;
+- (NSDictionary *)dictionary;
 @end
+
+NS_ASSUME_NONNULL_END

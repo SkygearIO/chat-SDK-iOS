@@ -19,9 +19,14 @@
 
 #import <Realm/Realm.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SKYChatCacheRealmStore ()
 
 @property (strong, nonatomic, readonly) RLMRealm *realmInstance;
 @property (strong, nonatomic) RLMRealmConfiguration *realmConfig;
 
 @end
+
+NS_ASSUME_NONNULL_END
+

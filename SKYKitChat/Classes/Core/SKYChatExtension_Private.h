@@ -20,15 +20,17 @@
 #import "SKYChatCacheController.h"
 #import "SKYChatExtension.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SKYChatExtension ()
 
 /**
  Gets an instance of SKYContainer used by this SKYChatExtension.
  */
-@property (assign, nonatomic, readonly, nonnull)
+@property (assign, nonatomic, readonly)
     SKYContainer *container; // SKYContainer will keep a strong reference of this object.
 
-@property (assign, nonatomic, readonly, nonnull) SKYChatCacheController *cacheController;
+@property (assign, nonatomic, readonly) SKYChatCacheController *cacheController;
 
 /**
  Creates an instance of SKYChatExtension.
@@ -39,7 +41,9 @@
  @param container the SKYContainer that contains user credentials and server configuration
  @return an instance of SKYChatExtension
  */
-- (nullable instancetype)initWithContainer:(nonnull SKYContainer *)container
-                           cacheController:(nonnull SKYChatCacheController *)cacheController;
+- (nullable instancetype)initWithContainer:(SKYContainer *)container
+                           cacheController:(SKYChatCacheController *)cacheController;
 
 @end
+
+NS_ASSUME_NONNULL_END

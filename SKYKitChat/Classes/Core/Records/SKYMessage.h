@@ -21,7 +21,9 @@
 
 #import "SKYChatRecord.h"
 
-extern NSString *_Nonnull const SKYMessageTypeMetadataKey;
+NS_ASSUME_NONNULL_BEGIN
+
+extern NSString * const SKYMessageTypeMetadataKey;
 
 @class SKYReference;
 
@@ -45,5 +47,7 @@ typedef NS_ENUM(NSInteger, SKYMessageConversationStatus) {
 @property (assign, nonatomic, readonly) SKYMessageConversationStatus conversationStatus;
 
 + (instancetype _Nullable)message;
-+ (instancetype _Nonnull)recordWithRecord:(SKYRecord *_Nonnull)record;
++ (instancetype )recordWithRecord:(SKYRecord *)record;
 @end
+
+NS_ASSUME_NONNULL_END

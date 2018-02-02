@@ -22,7 +22,7 @@
 
 @implementation SKYChatReceipt
 
-- (instancetype)initWithReceiptDictionary:(NSDictionary<NSString *, id> *_Nonnull)dict
+- (instancetype)initWithReceiptDictionary:(NSDictionary<NSString *, id> *)dict
 {
     if ((self = [super init])) {
         _userID = dict[@"user"];

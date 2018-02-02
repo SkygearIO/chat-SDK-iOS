@@ -46,7 +46,7 @@
     return self.record.creationDate;
 }
 
-- (NSDictionary *_Nonnull)dictionary
+- (NSDictionary *)dictionary
 {
     return self.record.dictionary;
 }
@@ -56,17 +56,17 @@
     return self.record.recordID;
 }
 
-- (NSString *_Nonnull)recordType
+- (NSString *)recordType
 {
     return self.record.recordType;
 }
 
-- (void)setCreatorUserRecordID:(NSString *_Nonnull)recordID
+- (void)setCreatorUserRecordID:(NSString *)recordID
 {
     self.record.creatorUserRecordID = recordID;
 }
 
-- (void)setCreationDate:(NSDate *_Nonnull)date
+- (void)setCreationDate:(NSDate *)date
 {
     self.record.creationDate = date;
 }

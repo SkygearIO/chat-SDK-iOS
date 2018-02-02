@@ -24,39 +24,41 @@
 #import "SKYChatTypingIndicator.h"
 #import "SKYMessageOperation.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  When obtaining a dictionary containing unread count information, use this
  key to get the number of unread messages.
  */
-extern NSString *_Nonnull const SKYChatMessageUnreadCountKey;
+extern NSString *const SKYChatMessageUnreadCountKey;
 
 /**
  When obtaining a dictionary containing unread count information, use this
  key to get the number of unread conversations.
  */
-extern NSString *_Nonnull const SKYChatConversationUnreadCountKey;
+extern NSString *const SKYChatConversationUnreadCountKey;
 
 /**
  This notification is posted when the client receives an event for typing indicator.
  */
-extern NSString *_Nonnull const SKYChatDidReceiveTypingIndicatorNotification;
+extern NSString *const SKYChatDidReceiveTypingIndicatorNotification;
 
 /**
  This notification is posted when the client receives an event for record change.
  */
-extern NSString *_Nonnull const SKYChatDidReceiveRecordChangeNotification;
+extern NSString *const SKYChatDidReceiveRecordChangeNotification;
 
 /**
  For the SKYChatDidReceiveTypingIndicatorNotification, this user info key
  can be used to get an object of SKYChatTypingIndicator.
  */
-extern NSString *_Nonnull const SKYChatTypingIndicatorUserInfoKey;
+extern NSString *const SKYChatTypingIndicatorUserInfoKey;
 
 /**
  For the SKYChatDidReceiveRecordChangeNotification, this user info key
  can be used to get an object of SKYChatRecordChange.
  */
-extern NSString *_Nonnull const SKYChatRecordChangeUserInfoKey;
+extern NSString *const SKYChatRecordChangeUserInfoKey;
 
 @class SKYConversation, SKYMessage, SKYUserChannel, SKYMessageOperation;
 
@@ -70,6 +72,7 @@ extern NSString *_Nonnull const SKYChatRecordChangeUserInfoKey;
  a SKYChatExtension through the `-[SKYContainer chatExtension]` category method.
  */
 @interface SKYChatExtension : NSObject
+
 typedef void (^SKYChatDeleteConversationCompletion)(NSNumber *_Nullable result,
                                                     NSError *_Nullable error);
 typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable conversation,
@@ -85,13 +88,13 @@ typedef void (^SKYChatFetchMessagesListCompletion)(NSArray<SKYMessage *> *_Nulla
                                                    BOOL isCached, NSError *_Nullable error);
 typedef void (^SKYChatFetchMessageOperationsListCompletion)(
     NSArray<SKYMessageOperation *> *_Nullable messageOperationList);
-NS_ASSUME_NONNULL_BEGIN
+
 typedef void (^SKYMessageOperationCompletion)(SKYMessageOperation *messageOperation,
                                               SKYMessage *_Nullable message,
                                               NSError *_Nullable error);
 typedef void (^SKYMessageOperationListCompletion)(
     NSArray<SKYMessageOperation *> *messageOperations);
-NS_ASSUME_NONNULL_END
+
 /**
  Gets or sets whether messages fetched from server are automatically marked as delivered.
 
@@ -110,7 +113,7 @@ NS_ASSUME_NONNULL_END
  For most apps, get messages from user channel with notifications posted by chat extension.
  */
 @property (nonatomic, copy, nullable) void (^userChannelMessageHandler)
-    (NSDictionary<NSString *, id> *_Nonnull);
+    (NSDictionary<NSString *, id> *);
 
 ///------------------------------------------
 /// @name Creating and fetching conversations
@@ -130,7 +133,7 @@ NS_ASSUME_NONNULL_END
  @param metadata application metadata for the conversation
  @param completion completion block
  */
-- (void)createConversationWithParticipantIDs:(NSArray<NSString *> *_Nonnull)participantIDs
+- (void)createConversationWithParticipantIDs:(NSArray<NSString *> *)participantIDs
                                        title:(NSString *_Nullable)title
                                     metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                                   completion:(SKYChatConversationCompletion _Nullable)completion
@@ -153,7 +156,7 @@ NS_ASSUME_NONNULL_END
  @param completion completion block
  */
 
-- (void)createConversationWithParticipantIDs:(NSArray<NSString *> *_Nonnull)participantIDs
+- (void)createConversationWithParticipantIDs:(NSArray<NSString *> *)participantIDs
                                        title:(NSString *_Nullable)title
                                     metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                                     adminIDs:(NSArray<NSString *> *_Nullable)adminIDs
@@ -174,7 +177,7 @@ NS_ASSUME_NONNULL_END
  @param metadata application metadata for the conversation
  @param completion completion block
  */
-- (void)createDirectConversationWithUserID:(NSString *_Nonnull)userID
+- (void)createDirectConversationWithUserID:(NSString *)userID
                                      title:(NSString *_Nullable)title
                                   metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                                 completion:(SKYChatConversationCompletion _Nullable)completion
@@ -191,7 +194,7 @@ NS_ASSUME_NONNULL_END
  @param conversation the conversation to be saved
  @param completion completion block
  */
-- (void)saveConversation:(SKYConversation *_Nonnull)conversation
+- (void)saveConversation:(SKYConversation *)conversation
               completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(saveConversation(_:completion:)); /* clang-format on */
 
@@ -202,7 +205,7 @@ NS_ASSUME_NONNULL_END
  @param conversation the conversation to be saved
  @param completion completion block
  */
-- (void)deleteConversation:(SKYConversation *_Nonnull)conversation
+- (void)deleteConversation:(SKYConversation *)conversation
                 completion:(SKYChatDeleteConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(deleteConversation(_:completion:)); /* clang-format on */
 
@@ -235,7 +238,7 @@ NS_ASSUME_NONNULL_END
  @param fetchLastMessage whether to fetch the last message
  @param completion completion block
  */
-- (void)fetchConversationWithConversationID:(NSString *_Nonnull)conversationID
+- (void)fetchConversationWithConversationID:(NSString *)conversationID
                            fetchLastMessage:(BOOL)fetchLastMessage
                                  completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(fetchConversation(conversationID:fetchLastMessage:completion:)); /* clang-format on */
@@ -254,8 +257,8 @@ NS_ASSUME_NONNULL_END
  @param conversation conversation record
  @param completion completion block
  */
-- (void)addParticipantsWithUserIDs:(NSArray<NSString *> *_Nonnull)userIDs
-                    toConversation:(SKYConversation *_Nonnull)conversation
+- (void)addParticipantsWithUserIDs:(NSArray<NSString *> *)userIDs
+                    toConversation:(SKYConversation *)conversation
                         completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(addParticipants(userIDs:to:completion:)); /* clang-format on */
 
@@ -269,8 +272,8 @@ NS_ASSUME_NONNULL_END
  @param conversation conversation record
  @param completion completion block
  */
-- (void)removeParticipantsWithUserIDs:(NSArray<NSString *> *_Nonnull)userIDs
-                     fromConversation:(SKYConversation *_Nonnull)conversation
+- (void)removeParticipantsWithUserIDs:(NSArray<NSString *> *)userIDs
+                     fromConversation:(SKYConversation *)conversation
                            completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(removeParticipants(userIDs:from:completion:)); /* clang-format on */
 
@@ -284,8 +287,8 @@ NS_ASSUME_NONNULL_END
  @param conversation conversation record
  @param completion completion block
  */
-- (void)addAdminsWithUserIDs:(NSArray<NSString *> *_Nonnull)userIDs
-              toConversation:(SKYConversation *_Nonnull)conversation
+- (void)addAdminsWithUserIDs:(NSArray<NSString *> *)userIDs
+              toConversation:(SKYConversation *)conversation
                   completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(addAdmins(userIDs:to:completion:)); /* clang-format on */
 
@@ -299,8 +302,8 @@ NS_ASSUME_NONNULL_END
  @param conversation conversation record
  @param completion completion block
  */
-- (void)removeAdminsWithUserIDs:(NSArray<NSString *> *_Nonnull)userIDs
-               fromConversation:(SKYConversation *_Nonnull)conversation
+- (void)removeAdminsWithUserIDs:(NSArray<NSString *> *)userIDs
+               fromConversation:(SKYConversation *)conversation
                      completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(removeAdmins(userIDs:from:completion:)); /* clang-format on */
 
@@ -311,7 +314,7 @@ NS_ASSUME_NONNULL_END
  the participant list is only allowed if the user is an admin, calling
  -removeParticipantsWithUserIDs:fromConversation:completion: does not work.
  */
-- (void)leaveConversation:(SKYConversation *_Nonnull)conversation
+- (void)leaveConversation:(SKYConversation *)conversation
                completion:(void (^_Nullable)(NSError *_Nullable error))completion;
 
 /**
@@ -321,7 +324,7 @@ NS_ASSUME_NONNULL_END
  the participant list is only allowed if the user is an admin, calling
  -removeParticipantsWithUserIDs:fromConversation:completion: does not work.
  */
-- (void)leaveConversationWithConversationID:(NSString *_Nonnull)conversationID
+- (void)leaveConversationWithConversationID:(NSString *)conversationID
                                  completion:(void (^_Nullable)(NSError *_Nullable error))completion
     /* clang-format off */ NS_SWIFT_NAME(leave(conversationID:completion:)); /* clang-format on */
 
@@ -337,7 +340,7 @@ NS_ASSUME_NONNULL_END
  @param metadata application metadata for the conversation
  @param completion completion block
  */
-- (void)createMessageWithConversation:(SKYConversation *_Nonnull)conversation
+- (void)createMessageWithConversation:(SKYConversation *)conversation
                                  body:(NSString *_Nullable)body
                              metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
                            completion:(SKYChatMessageCompletion _Nullable)completion
@@ -352,7 +355,7 @@ NS_ASSUME_NONNULL_END
  @param metadata application metadata for the conversation
  @param completion completion block
  */
-- (void)createMessageWithConversation:(SKYConversation *_Nonnull)conversation
+- (void)createMessageWithConversation:(SKYConversation *)conversation
                                  body:(NSString *_Nullable)body
                            attachment:(SKYAsset *_Nullable)attachment
                              metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
@@ -370,8 +373,8 @@ NS_ASSUME_NONNULL_END
  @param conversation conversation object
  @param completion completion block
  */
-- (void)addMessage:(SKYMessage *_Nonnull)message
-    toConversation:(SKYConversation *_Nonnull)conversation
+- (void)addMessage:(SKYMessage *)message
+    toConversation:(SKYConversation *)conversation
         completion:(SKYChatMessageCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(addMessage(_:to:completion:)); /* clang-format on */
 
@@ -384,7 +387,7 @@ NS_ASSUME_NONNULL_END
  @param order order of the messages, either 'edited_at' or '_created_at'
  @param completion completion block
  */
-- (void)fetchMessagesWithConversation:(SKYConversation *_Nonnull)conversation
+- (void)fetchMessagesWithConversation:(SKYConversation *)conversation
                                 limit:(NSInteger)limit
                            beforeTime:(NSDate *_Nullable)beforeTime
                                 order:(NSString *_Nullable)order
@@ -400,7 +403,7 @@ NS_ASSUME_NONNULL_END
  @param order order of the messages, either 'edited_at' or '_created_at'
  @param completion completion block
  */
-- (void)fetchMessagesWithConversationID:(NSString *_Nonnull)conversationId
+- (void)fetchMessagesWithConversationID:(NSString *)conversationId
                                   limit:(NSInteger)limit
                              beforeTime:(NSDate *_Nullable)beforeTime
                                   order:(NSString *_Nullable)order
@@ -483,7 +486,7 @@ NS_ASSUME_NONNULL_END
  @param messages messages to mark
  @param completion completion block
  */
-- (void)markReadMessages:(NSArray<SKYMessage *> *_Nonnull)messages
+- (void)markReadMessages:(NSArray<SKYMessage *> *)messages
               completion:(void (^_Nullable)(NSError *_Nullable error))completion
     /* clang-format off */ NS_SWIFT_NAME(markReadMessages(_:completion:)); /* clang-format on */
 
@@ -495,7 +498,7 @@ NS_ASSUME_NONNULL_END
  @param messageIDs ID of messages to mark
  @param completion completion block
  */
-- (void)markReadMessagesWithID:(NSArray<NSString *> *_Nonnull)messageIDs
+- (void)markReadMessagesWithID:(NSArray<NSString *> *)messageIDs
                     completion:(void (^_Nullable)(NSError *_Nullable error))completion
     /* clang-format off */ NS_SWIFT_NAME(markReadMessages(id:completion:)); /* clang-format on */
 
@@ -508,7 +511,7 @@ NS_ASSUME_NONNULL_END
  @param messages messages to delivered
  @param completion completion block
  */
-- (void)markDeliveredMessages:(NSArray<SKYMessage *> *_Nonnull)messages
+- (void)markDeliveredMessages:(NSArray<SKYMessage *> *)messages
                    completion:(void (^_Nullable)(NSError *_Nullable error))completion
     /* clang-format off */ NS_SWIFT_NAME(markDeliveredMessages(_:completion:)); /* clang-format on */
 
@@ -521,7 +524,7 @@ NS_ASSUME_NONNULL_END
  @param messageIDs ID of messages to delivered
  @param completion completion block
  */
-- (void)markDeliveredMessagesWithID:(NSArray<NSString *> *_Nonnull)messageIDs
+- (void)markDeliveredMessagesWithID:(NSArray<NSString *> *)messageIDs
                          completion:(void (^_Nullable)(NSError *_Nullable error))completion
     /* clang-format off */ NS_SWIFT_NAME(markDeliveredMessages(id:completion:)); /* clang-format on */
 
@@ -531,7 +534,7 @@ NS_ASSUME_NONNULL_END
  @param message the message object
  @param completion completion block
  */
-- (void)fetchReceiptsWithMessage:(SKYMessage *_Nonnull)message
+- (void)fetchReceiptsWithMessage:(SKYMessage *)message
                       completion:(void (^_Nullable)(NSArray<SKYChatReceipt *> *_Nullable receipts,
                                                     NSError *_Nullable error))completion
     /* clang-format off */ NS_SWIFT_NAME(fetchReceipts(message:completion:)); /* clang-format on */
@@ -550,8 +553,8 @@ NS_ASSUME_NONNULL_END
  @param conversation the conversation object
  @param completion completion block
  */
-- (void)deleteMessage:(SKYMessage *_Nonnull)message
-       inConversation:(SKYConversation *_Nonnull)conversation
+- (void)deleteMessage:(SKYMessage *)message
+       inConversation:(SKYConversation *)conversation
            completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(deleteMessage(_:in:completion:)); /* clang-format on */
 
@@ -564,8 +567,8 @@ NS_ASSUME_NONNULL_END
  @param body the new message body
  @param completion completion block
  */
-- (void)editMessage:(SKYMessage *_Nonnull)message
-           withBody:(NSString *_Nonnull)body
+- (void)editMessage:(SKYMessage *)message
+           withBody:(NSString *)body
          completion:(SKYChatMessageCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(editMessage(_:with:completion:)); /* clang-format on */
 
@@ -584,8 +587,8 @@ NS_ASSUME_NONNULL_END
  @param conversation the conversation object
  @param completion completion block
  */
-- (void)markLastReadMessage:(SKYMessage *_Nonnull)message
-             inConversation:(SKYConversation *_Nonnull)conversation
+- (void)markLastReadMessage:(SKYMessage *)message
+             inConversation:(SKYConversation *)conversation
                  completion:(SKYChatConversationCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(markLastReadMessage(_:in:completion:)); /* clang-format on */
 
@@ -595,7 +598,7 @@ NS_ASSUME_NONNULL_END
  @param conversation the conversation object
  @param completion completion block
  */
-- (void)fetchUnreadCountWithConversation:(SKYConversation *_Nonnull)conversation
+- (void)fetchUnreadCountWithConversation:(SKYConversation *)conversation
                               completion:(SKYChatUnreadCountCompletion _Nullable)completion
     /* clang-format off */ NS_SWIFT_NAME(fetchUnreadCount(conversation:completion:)); /* clang-format on */
 
@@ -621,7 +624,7 @@ NS_ASSUME_NONNULL_END
  @param conversation the conversation
  */
 - (void)sendTypingIndicator:(SKYChatTypingEvent)typingEvent
-             inConversation:(SKYConversation *_Nonnull)conversation
+             inConversation:(SKYConversation *)conversation
     /* clang-format off */ NS_SWIFT_NAME(sendTypingIndicator(_:in:)); /* clang-format on */
 
 /**
@@ -636,8 +639,8 @@ NS_ASSUME_NONNULL_END
  @param completion the completion handler
  */
 - (void)sendTypingIndicator:(SKYChatTypingEvent)typingEvent
-             inConversation:(SKYConversation *_Nonnull)conversation
-                       date:(NSDate *_Nonnull)date
+             inConversation:(SKYConversation *)conversation
+                       date:(NSDate *)date
                  completion:(void (^_Nullable)(NSError *_Nullable error))completion
     /* clang-format off */ NS_SWIFT_NAME(sendTypingIndicator(_:in:at:completion:)); /* clang-format on */
 
@@ -719,10 +722,10 @@ NS_ASSUME_NONNULL_END
  @param handler the typing indicator handler
  @return NSNotificationCenter observer
  */
-- (id _Nonnull)
-subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
-                                 handler:(void (^_Nonnull)(
-                                             SKYChatTypingIndicator *_Nonnull indicator))handler
+- (id )
+subscribeToTypingIndicatorInConversation:(SKYConversation *)conversation
+                                 handler:(void (^)(
+                                             SKYChatTypingIndicator *indicator))handler
     /* clang-format off */ NS_SWIFT_NAME(subscribeToTypingIndicator(in:handler:)); /* clang-format on */
 
 /**
@@ -743,10 +746,10 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
  @param handler the message handler
  @return NSNotificationCenter observer
  */
-- (id _Nonnull)subscribeToMessagesInConversation:(SKYConversation *_Nonnull)conversation
+- (id )subscribeToMessagesInConversation:(SKYConversation *)conversation
                                          handler:
-                                             (void (^_Nonnull)(SKYChatRecordChangeEvent event,
-                                                               SKYMessage *_Nonnull record))handler
+                                             (void (^)(SKYChatRecordChangeEvent event,
+                                                               SKYMessage *record))handler
     /* clang-format off */ NS_SWIFT_NAME(subscribeToMessages(in:handler:)); /* clang-format on */
 
 /**
@@ -763,9 +766,9 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
  @param handler the conversation handler
  @return NSNotificationCenter observer
  */
-- (id _Nonnull)subscribeToConversation:
-    (void (^_Nonnull)(SKYChatRecordChangeEvent event,
-                      SKYConversation *_Nonnull conversation))handler
+- (id )subscribeToConversation:
+    (void (^)(SKYChatRecordChangeEvent event,
+                      SKYConversation *conversation))handler
     /* clang-format off */ NS_SWIFT_NAME(subscribeToConversation(handler:)); /* clang-format on */
 
 /**
@@ -776,7 +779,7 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
 
  @param NSNotification observer
  */
-- (void)unsubscribeToConversationWithObserver:(id _Nonnull)observer;
+- (void)unsubscribeToConversationWithObserver:(id )observer;
 
 /**
  Unsubscribe to message events
@@ -786,7 +789,7 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
 
  @param NSNotification observer
  */
-- (void)unsubscribeToMessagesWithObserver:(id _Nonnull)observer;
+- (void)unsubscribeToMessagesWithObserver:(id )observer;
 
 /**
  Unsubscribe to typing indicator events
@@ -796,13 +799,11 @@ subscribeToTypingIndicatorInConversation:(SKYConversation *_Nonnull)conversation
 
  @param NSNotification observer
  */
-- (void)unsubscribeToTypingIndicatorWithObserver:(id _Nonnull)observer;
+- (void)unsubscribeToTypingIndicatorWithObserver:(id )observer;
 
 ///-----------------------------------------
 /// @name Managing Failed Message Operations
 ///-----------------------------------------
-
-NS_ASSUME_NONNULL_BEGIN
 
 /**
  Fetches outstanding message operations of a conversation.
@@ -864,6 +865,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)cancelMessageOperation:(SKYMessageOperation *)operation
     /* clang-format off */ NS_SWIFT_NAME(cancel(messageOperation:)); /* clang-format on */
 
-NS_ASSUME_NONNULL_END
-
 @end
+
+NS_ASSUME_NONNULL_END

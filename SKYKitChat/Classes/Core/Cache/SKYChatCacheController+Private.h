@@ -23,6 +23,8 @@
 #import "SKYChatCacheController.h"
 #import "SKYChatCacheRealmStore.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SKYChatCacheController ()
 
 @property (strong, nonatomic) SKYChatCacheRealmStore *store;
@@ -32,3 +34,5 @@
 @end
 
 #endif /* SKYChatCacheController_Private_h */
+
+NS_ASSUME_NONNULL_END
