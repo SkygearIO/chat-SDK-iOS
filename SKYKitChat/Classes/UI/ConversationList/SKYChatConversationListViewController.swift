@@ -119,7 +119,7 @@ extension SKYChatConversationListViewController {
         }
     }
 
-    public func handleRefresh(refreshControl: UIRefreshControl) {
+    @objc public func handleRefresh(refreshControl: UIRefreshControl) {
         self.performQuery(callback: {
             refreshControl.endRefreshing()
         })
@@ -262,7 +262,7 @@ extension SKYChatConversationListViewController {
             .filter { !currentCachedUserKeys.contains($0) }
 
         if userIDs.count > 0 {
-            self.performUserQuery(byIDs: userIDs)
+            self.performUserQuery(byIDs: Array(userIDs))
         }
     }
 
