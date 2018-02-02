@@ -1045,7 +1045,7 @@ extension SKYChatConversationViewController {
 
         return NSAttributedString(
             string: textCustomization.getMessageStatus(msg.conversationStatus),
-            attributes: [NSForegroundColorAttributeName: self.messageStatusTextColor]
+            attributes: [NSAttributedStringKey.foregroundColor: self.messageStatusTextColor]
         )
     }
 
@@ -1072,7 +1072,7 @@ extension SKYChatConversationViewController {
             SKYChatConversationView.UICustomization().messageDateFormatter.string(from: msgDate)
         return NSAttributedString(
             string: dateString,
-            attributes: [NSForegroundColorAttributeName: self.messageTimestampTextColor]
+            attributes: [NSAttributedStringKey.foregroundColor: self.messageTimestampTextColor]
         )
     }
 
