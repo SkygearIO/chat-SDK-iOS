@@ -30,7 +30,6 @@ This is the client library for the Skygear Chat extension.
 
   s.subspec 'UI' do |sp|
 
-    sp.public_header_files = 'SKYKitChat/Classes/UI/**/*.h'
     sp.source_files = 'SKYKitChat/Classes/UI/**/*'
 
     sp.dependency 'SKYKitChat/Core'
