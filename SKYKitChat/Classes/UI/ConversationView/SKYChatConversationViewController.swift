@@ -21,6 +21,7 @@ import ALCameraViewController
 import CTAssetsPickerController
 import AVFoundation
 import SKPhotoBrowser
+import JSQMessagesViewController
 
 @objc public enum InputToolbarSendButtonState: Int {
     case undefined

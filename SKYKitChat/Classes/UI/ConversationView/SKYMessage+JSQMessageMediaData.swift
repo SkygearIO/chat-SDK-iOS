@@ -17,6 +17,8 @@
 //  limitations under the License.
 //
 
+import JSQMessagesViewController
+
 extension SKYMessage {
     func messageMediaData(withCache cache: SKYAssetCache?,
                           markedAsOutgoing isOutgoing: Bool) -> JSQMediaItem? {

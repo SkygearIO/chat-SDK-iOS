@@ -10,7 +10,7 @@ This is the client library for the Skygear Chat extension.
   s.homepage         = 'https://github.com/SkygearIO/chat-SDK-iOS'
   s.license          = 'Apache License, Version 2.0'
   s.author           = { "Oursky Ltd." => "hello@oursky.com" }
-  s.source           = { :git => 'https://github.com/SkygearIO/chat-SDK-iOS.git', :tag => s.version.to_s, :submodules => true }
+  s.source           = { :git => 'https://github.com/SkygearIO/chat-SDK-iOS.git', :tag => s.version.to_s }
 
   s.ios.deployment_target = '8.2'
   s.default_subspecs = 'Core'
@@ -30,23 +30,18 @@ This is the client library for the Skygear Chat extension.
 
   s.subspec 'UI' do |sp|
 
-    sp.public_header_files = 'SKYKitChat/Classes/UI/**/*.h', 'lib/JSQMessagesViewController/JSQMessagesViewController/**/*.h'
-    sp.source_files = 'SKYKitChat/Classes/UI/**/*', 'lib/JSQMessagesViewController/**/*.{h,m}'
-    sp.exclude_files = 'lib/JSQMessagesViewController/JSQMessagesTests/**/*', 'lib/JSQMessagesViewController/JSQMessagesDemo/**/*'
-
-	s.resources = [
-        'lib/JSQMessagesViewController/JSQMessagesViewController/Assets/JSQMessagesAssets.bundle',
-        'lib/JSQMessagesViewController/JSQMessagesViewController/**/*.{xib}'
-    ]
+    sp.public_header_files = 'SKYKitChat/Classes/UI/**/*.h'
+    sp.source_files = 'SKYKitChat/Classes/UI/**/*'
 
     sp.dependency 'SKYKitChat/Core'
-    sp.dependency 'SKYKit/Core',               '~> 1.3.1'
-    sp.dependency 'SVProgressHUD',             '~> 2.1.0'
-    sp.dependency 'ALCameraViewController',    '~> 3.0'
-    sp.dependency 'LruCache',                  '~> 0.1'
-    sp.dependency 'CTAssetsPickerController',  '~> 3.3.1'
-    sp.dependency 'SKPhotoBrowser',            '~> 5.0'
-    sp.dependency 'JSQSystemSoundPlayer',      '~> 2.0.1'
+    sp.dependency 'SKYKit/Core',                       '~> 1.3.1'
+    sp.dependency 'SVProgressHUD',                     '~> 2.1.0'
+    sp.dependency 'ALCameraViewController',            '~> 3.0'
+    sp.dependency 'LruCache',                          '~> 0.1'
+    sp.dependency 'CTAssetsPickerController',          '~> 3.3.1'
+    sp.dependency 'SKPhotoBrowser',                    '~> 5.0'
+    sp.dependency 'JSQSystemSoundPlayer',              '~> 2.0.1'
+    sp.dependency 'JSQMessagesViewController-Skygear', '7.3.5.1'
   end
 
 end

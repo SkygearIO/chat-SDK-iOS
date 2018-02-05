@@ -17,6 +17,8 @@
 //  limitations under the License.
 //
 
+import JSQMessagesViewController
+
 @objc public enum SKYChatConversationViewUserAvatarType: Int {
     case initial
     case image

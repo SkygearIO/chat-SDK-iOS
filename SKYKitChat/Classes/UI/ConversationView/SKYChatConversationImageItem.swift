@@ -17,6 +17,8 @@
 //  limitations under the License.
 //
 
+import JSQMessagesViewController
+
 private let maxDisplaySize: CGFloat = 240
 private let minDisplaySize: CGFloat = 80
 
