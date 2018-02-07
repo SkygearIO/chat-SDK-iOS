@@ -1347,7 +1347,7 @@ extension SKYChatConversationViewController {
             to: conv,
             completion: {(result, error) in
                 guard error == nil else {
-                    print("Failed to sent message: \(error!.localizedDescription)")
+                    print("Failed to send message: \(error!.localizedDescription)")
                     self.failedToSend(message: msg,
                                       errorCode: SKYErrorBadResponse,
                                       errorMessage: error!.localizedDescription)
@@ -1528,21 +1528,40 @@ extension SKYChatConversationViewController {
 
     @objc func resendFailedMessage(_ message: SKYMessage) {
         self.messageList.remove([message])
+        self.removeMessageError(message)
         self.beforeSending(message: message)
         self.collectionView.reloadData()
 
         let messageID = message.recordID().recordName
-        let ext = skygear.chatExtension
+        let ext = self.skygear.chatExtension
+
+        let retryMessageCallback: SKYMessageOperationCompletion
+            = { [weak self] (operation, retriedMessage, error) in
+                guard error == nil else {
+                    print("Failed to send message: \(error!.localizedDescription)")
+                    self?.failedToSend(message: message,
+                                      errorCode: SKYErrorBadResponse,
+                                      errorMessage: error!.localizedDescription)
+                    return
+                }
+
+                let sentMsg = retriedMessage ?? message
+                self?.successfullySending(message: sentMsg)
+            }
+
+        let fetchMessageCallback: SKYMessageOperationListCompletion
+            = { (operations) in
+                guard let operation = operations.first else {
+                    return
+                }
+
+                ext?.retry(messageOperation: operation,
+                           completion: retryMessageCallback)
+            }
+
         ext?.fetchOutstandingMessageOperations(messageID: messageID,
                                                operationType: SKYMessageOperationType.add,
-                                               completion: { (operations) in
-                                                guard let operation = operations.first else {
-                                                    return
-                                                }
-
-                                                self.removeMessageError(message)
-                                                ext?.retry(messageOperation: operation, completion: nil)
-        })
+                                               completion: fetchMessageCallback)
     }
 
     @objc func deleteFailedMessage(_ message: SKYMessage) {
