@@ -38,7 +38,7 @@ This is the client library for the Skygear Chat extension.
     sp.dependency 'ALCameraViewController',            '~> 3.0'
     sp.dependency 'LruCache',                          '~> 0.1'
     sp.dependency 'CTAssetsPickerController',          '~> 3.3.1'
-    sp.dependency 'SKPhotoBrowser',                    '~> 5.0'
+    sp.dependency 'SKPhotoBrowser',                    '~> 5.0.5'
     sp.dependency 'JSQSystemSoundPlayer',              '~> 2.0.1'
     sp.dependency 'JSQMessagesViewController-Skygear', '7.3.5.3'
   end
