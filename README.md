@@ -81,6 +81,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 ```
 
+If you project is in Objective-C, and you need to use the UI classes, you need
+to add the generated interface header:
+
+```objective-c
+#import <SKYKitChat/SKYKitChat-Swift.h>
+```
+
 ## Example
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
