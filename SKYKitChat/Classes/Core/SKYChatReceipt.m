@@ -25,7 +25,7 @@
 - (instancetype)initWithReceiptDictionary:(NSDictionary<NSString *, id> *)dict
 {
     if ((self = [super init])) {
-        _userID = dict[@"user"];
+        _participantID = dict[@"user"];
 
         NSString *deliveredAt = dict[@"delivered_at"];
         if (deliveredAt) {

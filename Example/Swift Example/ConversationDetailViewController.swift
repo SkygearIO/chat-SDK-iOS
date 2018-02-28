@@ -42,8 +42,8 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
     // MARK: - Action
     @IBAction func addParticipant(_ sender: AnyObject) {
         if let id = participantTextField.text, !id.isEmpty {
-            SKYContainer.default().chatExtension?.addParticipants(
-                userIDs: [id],
+            SKYContainer.default().chatExtension?.add(
+                participantIDs: [id],
                 to: self.conversation
             ) { (conversation, error) in
                 if let err = error {
@@ -60,8 +60,8 @@ class ConversationDetailViewController: UITableViewController, UITextFieldDelega
 
     @IBAction func removeParticipant(_ sender: AnyObject) {
         if let id = participantTextField.text, !id.isEmpty {
-            SKYContainer.default().chatExtension?.removeParticipants(
-                userIDs: [id],
+            SKYContainer.default().chatExtension?.remove(
+                participantIDs: [id],
                 from: self.conversation
             ) { (conversation, error) in
                 if let err = error {

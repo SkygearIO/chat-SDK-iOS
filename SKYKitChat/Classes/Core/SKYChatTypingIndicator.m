@@ -76,40 +76,41 @@ SKYChatTypingEvent SKYChatTypingEventFromString(NSString *eventString)
     return self;
 }
 
-- (NSArray *)userIDs
+- (NSArray *)participantIDs
 {
     return [userTypingInfos allKeys];
 }
 
-- (NSArray *)typingUserIDs
+- (NSArray *)typingParticipantIDs
 {
-    NSMutableArray *typingUserIDs = [NSMutableArray array];
-    [self.userIDs enumerateObjectsUsingBlock:^(NSString *userID, NSUInteger idx, BOOL *stop) {
-        SKYChatTypingEvent event = [self lastEventWithUserID:userID];
-        NSDate *date = [self lastEventDateWithUserID:userID];
+    NSMutableArray *typingParticipantIDs = [NSMutableArray array];
+    [self.participantIDs
+        enumerateObjectsUsingBlock:^(NSString *eachID, NSUInteger idx, BOOL *stop) {
+            SKYChatTypingEvent event = [self lastEventWithParticipantID:eachID];
+            NSDate *date = [self lastEventDateWithParticipantID:eachID];
 
-        if (event == SKYChatTypingEventBegin && [date timeIntervalSinceNow] > -5.0) {
-            // Last event is typing and the event is less than 5 seconds ago.
-            [typingUserIDs addObject:userID];
-        }
-    }];
-    return typingUserIDs;
+            if (event == SKYChatTypingEventBegin && [date timeIntervalSinceNow] > -5.0) {
+                // Last event is typing and the event is less than 5 seconds ago.
+                [typingParticipantIDs addObject:eachID];
+            }
+        }];
+    return typingParticipantIDs;
 }
 
-- (NSDictionary *)userInfoWithUserID:(NSString *)userID
+- (NSDictionary *)userInfoWithParticipantID:(NSString *)participantID
 {
-    return [userTypingInfos objectForKey:userID];
+    return [userTypingInfos objectForKey:participantID];
 }
 
-- (SKYChatTypingEvent)lastEventWithUserID:(NSString *)userID
+- (SKYChatTypingEvent)lastEventWithParticipantID:(NSString *)participantID
 {
-    NSString *eventType = [[self userInfoWithUserID:userID] objectForKey:@"event"];
+    NSString *eventType = [[self userInfoWithParticipantID:participantID] objectForKey:@"event"];
     return SKYChatTypingEventFromString(eventType);
 }
 
-- (NSDate *)lastEventDateWithUserID:(NSString *)userID
+- (NSDate *)lastEventDateWithParticipantID:(NSString *)participantID
 {
-    NSString *eventDate = [[self userInfoWithUserID:userID] objectForKey:@"at"];
+    NSString *eventDate = [[self userInfoWithParticipantID:participantID] objectForKey:@"at"];
     if (![eventDate isKindOfClass:[NSString class]]) {
         return nil;
     }
@@ -120,7 +121,7 @@ SKYChatTypingEvent SKYChatTypingEventFromString(NSString *eventString)
     (SKYChatTypingIndicator *)indicator
 {
     NSString *conversationID =
-        [indicator.conversationID isEqualToString:_conversationID] ? indicator : nil;
+        [indicator.conversationID isEqualToString:_conversationID] ? indicator.conversationID : nil;
     NSMutableDictionary *infos = [userTypingInfos mutableCopy];
     [infos addEntriesFromDictionary:indicator->userTypingInfos];
     return [[SKYChatTypingIndicator alloc] initWithDictionary:infos conversationID:conversationID];

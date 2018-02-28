@@ -40,7 +40,7 @@ class CreateDirectConversationViewController: UIViewController {
             if id.hasPrefix("user/") {
                 id = id.substring(from: "user/".endIndex)
             }
-            SKYContainer.default().chatExtension?.createDirectConversation(userID: id, title: nil, metadata: nil) { (conversation, error) in
+            SKYContainer.default().chatExtension?.createDirectConversation(participantID: id, title: nil, metadata: nil) { (conversation, error) in
                 if let err = error {
                     let alert = UIAlertController(title: "Unable to create direct conversation", message: err.localizedDescription, preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))

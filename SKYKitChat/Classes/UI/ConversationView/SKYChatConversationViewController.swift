@@ -1844,7 +1844,7 @@ extension SKYChatConversationViewController {
                 self.typingIndicatorPromptTimer = nil
             }
 
-            let shouldShowIndicator: Bool = indicator.userIDs
+            let shouldShowIndicator: Bool = indicator.participantIDs
                 .flatMap({ SKYRecordID(canonicalString: $0).recordName })
                 .filter({ $0 != self.senderId })
                 .count > 0

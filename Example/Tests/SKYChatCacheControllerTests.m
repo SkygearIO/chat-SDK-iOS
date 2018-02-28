@@ -91,7 +91,6 @@ SpecBegin(SKYChatCacheController)
                                          expect(messageList[1].seq).to.equal(3);
                                          expect(messageList[2].seq).to.equal(1);
                                      }];
-
         });
 
         it(@"store insert new record for new record id", ^{
