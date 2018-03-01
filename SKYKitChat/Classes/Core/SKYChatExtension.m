@@ -27,6 +27,7 @@
 #import "SKYChatTypingIndicator_Private.h"
 #import "SKYConversation.h"
 #import "SKYMessage.h"
+#import "SKYParticipant.h"
 #import "SKYReference.h"
 #import "SKYUserChannel.h"
 
@@ -83,6 +84,19 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 #pragma mark - Conversations
 
+- (void)createConversationWithParticipants:(NSArray<SKYParticipant *> *)participants
+                                     title:(NSString *)title
+                                  metadata:(NSDictionary<NSString *, id> *)metadata
+                                completion:(SKYChatConversationCompletion)completion
+{
+    [self createConversationWithParticipants:participants
+                                       title:title
+                                    metadata:metadata
+                                      admins:nil
+                      distinctByParticipants:NO
+                                  completion:completion];
+}
+
 - (void)createConversationWithParticipantIDs:(NSArray<NSString *> *)participantIDs
                                        title:(NSString *)title
                                     metadata:(NSDictionary<NSString *, id> *)metadata
@@ -93,6 +107,28 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                                       metadata:metadata
                                       adminIDs:nil
                         distinctByParticipants:NO
+                                    completion:completion];
+}
+
+- (void)createConversationWithParticipants:(NSArray<SKYParticipant *> *)participants
+                                     title:(NSString *)title
+                                  metadata:(NSDictionary<NSString *, id> *)metadata
+                                    admins:(NSArray<SKYParticipant *> *)admins
+                    distinctByParticipants:(BOOL)distinctByParticipants
+                                completion:(SKYChatConversationCompletion)completion
+{
+    NSMutableArray<NSString *> *participantIDs = [self participantIDsFromParticipants:participants];
+
+    NSMutableArray<NSString *> *adminIDs = nil;
+    if (admins) {
+        adminIDs = [self participantIDsFromParticipants:admins];
+    }
+
+    [self createConversationWithParticipantIDs:participantIDs
+                                         title:title
+                                      metadata:metadata
+                                      adminIDs:adminIDs
+                        distinctByParticipants:distinctByParticipants
                                     completion:completion];
 }
 
@@ -184,12 +220,23 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         }];
 }
 
-- (void)createDirectConversationWithUserID:(NSString *)userID
-                                     title:(NSString *)title
-                                  metadata:(NSDictionary<NSString *, id> *)metadata
-                                completion:(SKYChatConversationCompletion)completion
+- (void)createDirectConversationWithParticipant:(SKYParticipant *)participant
+                                          title:(NSString *)title
+                                       metadata:(NSDictionary<NSString *, id> *)metadata
+                                     completion:(SKYChatConversationCompletion)completion
 {
-    [self createConversationWithParticipantIDs:@[ userID ]
+    [self createDirectConversationWithParticipantID:participant.recordName
+                                              title:title
+                                           metadata:metadata
+                                         completion:completion];
+}
+
+- (void)createDirectConversationWithParticipantID:(NSString *)participantID
+                                            title:(NSString *)title
+                                         metadata:(NSDictionary<NSString *, id> *)metadata
+                                       completion:(SKYChatConversationCompletion)completion
+{
+    [self createConversationWithParticipantIDs:@[ participantID ]
                                          title:title
                                       metadata:metadata
                                       adminIDs:nil
@@ -324,12 +371,12 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 #pragma mark Conversation Memberships
 
 - (void)updateMembershipsWithLambda:(NSString *)lambda
-                            UserIDs:(NSArray<NSString *> *)userIDs
+                     participantIDs:(NSArray<NSString *> *)participantIDs
                      toConversation:(SKYConversation *)conversation
                          completion:(SKYChatConversationCompletion)completion
 {
     [self.container callLambda:lambda
-                     arguments:@[ conversation.recordID.recordName, userIDs ]
+                     arguments:@[ conversation.recordID.recordName, participantIDs ]
              completionHandler:^(NSDictionary *response, NSError *error) {
                  if (error) {
                      NSLog(@"error calling chat:%@: %@", lambda, error);
@@ -349,44 +396,78 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
              }];
 }
 
-- (void)addParticipantsWithUserIDs:(NSArray<NSString *> *)userIDs
-                    toConversation:(SKYConversation *)conversation
-                        completion:(SKYChatConversationCompletion)completion
+- (void)addParticipantsWithIDs:(NSArray<NSString *> *)participantIDs
+                toConversation:(SKYConversation *)conversation
+                    completion:(SKYChatConversationCompletion)completion
 {
     [self updateMembershipsWithLambda:@"chat:add_participants"
-                              UserIDs:userIDs
+                       participantIDs:participantIDs
                        toConversation:conversation
                            completion:completion];
 }
 
-- (void)removeParticipantsWithUserIDs:(NSArray<NSString *> *)userIDs
-                     fromConversation:(SKYConversation *)conversation
-                           completion:(SKYChatConversationCompletion)completion
+- (void)addParticipants:(NSArray<SKYParticipant *> *)participants
+         toConversation:(SKYConversation *)conversation
+             completion:(SKYChatConversationCompletion)completion
+{
+    NSArray<NSString *> *participantIDs = [self participantIDsFromParticipants:participants];
+    [self addParticipantsWithIDs:participantIDs toConversation:conversation completion:completion];
+}
+
+- (void)removeParticipantsWithIDs:(NSArray<NSString *> *)participantIDs
+                 fromConversation:(SKYConversation *)conversation
+                       completion:(SKYChatConversationCompletion)completion
 {
     [self updateMembershipsWithLambda:@"chat:remove_participants"
-                              UserIDs:userIDs
+                       participantIDs:participantIDs
                        toConversation:conversation
                            completion:completion];
 }
 
-- (void)addAdminsWithUserIDs:(NSArray<NSString *> *)userIDs
-              toConversation:(SKYConversation *)conversation
-                  completion:(SKYChatConversationCompletion)completion
+- (void)removeParticipants:(NSArray<SKYParticipant *> *)participants
+          fromConversation:(SKYConversation *)conversation
+                completion:(SKYChatConversationCompletion)completion
+{
+    NSArray<NSString *> *participantIDs = [self participantIDsFromParticipants:participants];
+    [self removeParticipantsWithIDs:participantIDs
+                   fromConversation:conversation
+                         completion:completion];
+}
+
+- (void)addAdminsWithIDs:(NSArray<NSString *> *)adminIDs
+          toConversation:(SKYConversation *)conversation
+              completion:(SKYChatConversationCompletion)completion
 {
     [self updateMembershipsWithLambda:@"chat:add_admins"
-                              UserIDs:userIDs
+                       participantIDs:adminIDs
                        toConversation:conversation
                            completion:completion];
 }
 
-- (void)removeAdminsWithUserIDs:(NSArray<NSString *> *)userIDs
-               fromConversation:(SKYConversation *)conversation
-                     completion:(SKYChatConversationCompletion)completion
+- (void)addAdmins:(NSArray<SKYParticipant *> *)admins
+    toConversation:(SKYConversation *)conversation
+        completion:(SKYChatConversationCompletion)completion
+{
+    NSArray<NSString *> *adminIDs = [self participantIDsFromParticipants:admins];
+    [self addAdminsWithIDs:adminIDs toConversation:conversation completion:completion];
+}
+
+- (void)removeAdminsWithIDs:(NSArray<NSString *> *)adminIDs
+           fromConversation:(SKYConversation *)conversation
+                 completion:(SKYChatConversationCompletion)completion
 {
     [self updateMembershipsWithLambda:@"chat:remove_admins"
-                              UserIDs:userIDs
+                       participantIDs:adminIDs
                        toConversation:conversation
                            completion:completion];
+}
+
+- (void)removeAdmins:(NSArray<SKYParticipant *> *)admins
+    fromConversation:(SKYConversation *)conversation
+          completion:(SKYChatConversationCompletion)completion
+{
+    NSArray<NSString *> *adminIDs = [self participantIDsFromParticipants:admins];
+    [self removeAdminsWithIDs:adminIDs fromConversation:conversation completion:completion];
 }
 
 - (void)leaveConversation:(SKYConversation *)conversation
@@ -802,7 +883,6 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                      completion(nil, error);
                  }
                  completion(conversation, error);
-
              }];
 }
 
@@ -847,7 +927,6 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                  }];
 
                  completion(fixedResponse, error);
-
              }];
 }
 
@@ -1257,4 +1336,16 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                   name:SKYChatDidReceiveTypingIndicatorNotification
                 object:self];
 }
+
+- (NSArray<NSString *> *)participantIDsFromParticipants:(NSArray<SKYParticipant *> *)participants
+{
+    NSMutableArray<NSString *> *participantIDs = [@[] mutableCopy];
+    [participants
+        enumerateObjectsUsingBlock:^(SKYParticipant *eachParticipant, NSUInteger idx, BOOL *stop) {
+            [participantIDs addObject:eachParticipant.recordName];
+        }];
+
+    return participantIDs;
+}
+
 @end

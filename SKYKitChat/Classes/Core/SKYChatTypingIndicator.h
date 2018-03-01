@@ -26,17 +26,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 typedef NS_ENUM(NSInteger, SKYChatTypingEvent) {
     /**
-     The user began typing.
+     The participant began typing.
      */
     SKYChatTypingEventBegin,
 
     /**
-     The user stopped typing.
+     The participant stopped typing.
      */
     SKYChatTypingEventPause,
 
     /**
-     The user stopped typing and the message is sent.
+     The participant stopped typing and the message is sent.
      */
     SKYChatTypingEventFinished,
 };
@@ -52,19 +52,20 @@ extern NSString *SKYChatTypingEventToString(SKYChatTypingEvent event);
 extern SKYChatTypingEvent SKYChatTypingEventFromString(NSString *eventString);
 
 /**
- SKYChatTypingIndicator contains information about the typing event of the user in a conversation.
+ SKYChatTypingIndicator contains information about the typing event of
+ the participant in a conversation.
  */
 @interface SKYChatTypingIndicator : NSObject
 
 /**
- Gets the ID of all users who currently have typing indicator event.
+ Gets the ID of all participants who currently have typing indicator event.
  */
-@property (nonatomic, readonly) NSArray<NSString *> *userIDs;
+@property (nonatomic, readonly) NSArray<NSString *> *participantIDs;
 
 /**
- Gets the ID of all users who are typing.
+ Gets the ID of all participants who are typing.
  */
-@property (nonatomic, readonly) NSArray<NSString *> *typingUserIDs;
+@property (nonatomic, readonly) NSArray<NSString *> *typingParticipantIDs;
 
 /**
  Returns the conversation ID for the typing event.
@@ -78,15 +79,16 @@ extern SKYChatTypingEvent SKYChatTypingEventFromString(NSString *eventString);
     (SKYChatTypingIndicator *)indicator NS_SWIFT_NAME(typingIndicatorWithUpdates(_:));
 
 /**
- Returns the last event type of the user.
+ Returns the last event type of the participant.
  */
-- (SKYChatTypingEvent)lastEventWithUserID:(NSString *)userID NS_SWIFT_NAME(lastEvent(userID:));
+- (SKYChatTypingEvent)lastEventWithParticipantID:(NSString *)participantID
+    NS_SWIFT_NAME(lastEvent(participantID:));
 
 /**
- Returns the last event date of the user.
+ Returns the last event date of the participant.
  */
-- (NSDate *_Nullable)lastEventDateWithUserID:(NSString *)userID
-    NS_SWIFT_NAME(lastEventDate(userID:));
+- (NSDate *_Nullable)lastEventDateWithParticipantID:(NSString *)participantID
+    NS_SWIFT_NAME(lastEventDate(participantID:));
 
 /**
  Instantiate an instance of SKYChatTypingIndicator.

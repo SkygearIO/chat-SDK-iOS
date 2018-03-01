@@ -42,23 +42,23 @@ typedef NS_ENUM(NSInteger, SKYChatReceiptStatus) {
 };
 
 /**
- SKYChatReceipt contains information about the receipt status of a message for each user. Receipt
- contains date and time for delivery and read status.
+ SKYChatReceipt contains information about the receipt status of a message for each participant.
+ Receipt contains date and time for delivery and read status.
  */
 @interface SKYChatReceipt : NSObject
 
 /**
- The User ID of the user to whom the message is delivered or read.
+ The ID of the participant to whom the message is delivered or read.
  */
-@property (nonatomic, readonly) NSString *userID;
+@property (nonatomic, readonly) NSString *participantID;
 
 /**
- Gets date and time the message is delivered to the user.
+ Gets date and time the message is delivered to the participant.
  */
 @property (nonatomic, readonly, nullable) NSDate *deliveredAt;
 
 /**
- Gets date and time the message is read by the user.
+ Gets date and time the message is read by the participant.
  */
 @property (nonatomic, readonly) NSDate *readAt;
 

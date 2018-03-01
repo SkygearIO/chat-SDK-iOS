@@ -60,7 +60,7 @@ extern NSString *const SKYChatTypingIndicatorUserInfoKey;
  */
 extern NSString *const SKYChatRecordChangeUserInfoKey;
 
-@class SKYConversation, SKYMessage, SKYUserChannel, SKYMessageOperation;
+@class SKYParticipant, SKYConversation, SKYMessage, SKYUserChannel, SKYMessageOperation;
 
 /**
  SKYChatExtension is a simple object that expose easy to use helper methods to develop a chat
@@ -126,7 +126,7 @@ typedef void (^SKYMessageOperationListCompletion)(
  will not be distinct by participants by default.
 
  If participants list do not include the current user, the current user will be added to the
- list as well. The same apply for admins list.
+ list as well. The same applies for admins list.
 
  @param participantIDs an array of all participants in the conversation
  @param title title of the conversation
@@ -142,8 +142,28 @@ typedef void (^SKYMessageOperationListCompletion)(
 /**
  Creates a conversation with the selected participants.
 
+ All participants will also become the admins of the created conversation. The conversation
+ will not be distinct by participants by default.
+
  If participants list do not include the current user, the current user will be added to the
- list as well. The same apply for admins list. If the admins list is not specified, the admins
+ list as well. The same applies for admins list.
+
+ @param participants an array of all participants in the conversation
+ @param title title of the conversation
+ @param metadata application metadata for the conversation
+ @param completion completion block
+ */
+- (void)createConversationWithParticipants:(NSArray<SKYParticipant *> *)participants
+                                     title:(NSString *_Nullable)title
+                                  metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
+                                completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(createConversation(participants:title:metadata:completion:)); /* clang-format on */
+
+/**
+ Creates a conversation with the selected participants.
+
+ If participants list do not include the current user, the current user will be added to the
+ list as well. The same applies for admins list. If the admins list is not specified, the admins
  list will be the same as the participants list.
 
  If distinctByParticipants is set to YES, the chat extension will attempt to find an existing
@@ -165,23 +185,68 @@ typedef void (^SKYMessageOperationListCompletion)(
     /* clang-format off */ NS_SWIFT_NAME(createConversation(participantIDs:title:metadata:adminIDs:distinctByParticipants:completion:)); /* clang-format on */
 
 /**
- Creates a direct conversation with a specific user.
+ Creates a conversation with the selected participants.
 
- The current user and the specified user will be in the participants list and admins list.
+ If participants list do not include the current user, the current user will be added to the
+ list as well. The same applies for admins list. If the admins list is not specified, the admins
+ list will be the same as the participants list.
+
+ If distinctByParticipants is set to YES, the chat extension will attempt to find an existing
+ conversation with the same list of participants before creating a new one.
+
+ @param participants an array of all participants in the conversation
+ @param title title of the conversation
+ @param metadata application metadata for the conversation
+ @param admins an array of all participants that can administrate the conversation
+ @param completion completion block
+ */
+
+- (void)createConversationWithParticipants:(NSArray<SKYParticipant *> *)participants
+                                     title:(NSString *_Nullable)title
+                                  metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
+                                    admins:(NSArray<SKYParticipant *> *_Nullable)admins
+                    distinctByParticipants:(BOOL)distinctByParticipants
+                                completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(createConversation(participants:title:metadata:admins:distinctByParticipants:completion:)); /* clang-format on */
+
+/**
+ Creates a direct conversation with a specific participant.
+
+ The current user and the specified participant will be in the participants list and admins list.
 
  The new conversation will have distinctByParticipants set to YES. This allows the application
- to reuse an exisitng direct conversation.
+ to reuse an existing direct conversation.
 
- @param userID the ID of the other user in the direct conversation
+ @param participantID the ID of the participant in the direct conversation
  @param title title of the conversation
  @param metadata application metadata for the conversation
  @param completion completion block
  */
-- (void)createDirectConversationWithUserID:(NSString *)userID
-                                     title:(NSString *_Nullable)title
-                                  metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
-                                completion:(SKYChatConversationCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(createDirectConversation(userID:title:metadata:completion:)); /* clang-format on */
+- (void)createDirectConversationWithParticipantID:(NSString *)participantID
+                                            title:(NSString *_Nullable)title
+                                         metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
+                                       completion:
+                                           (SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(createDirectConversation(participantID:title:metadata:completion:)); /* clang-format on */
+
+/**
+ Creates a direct conversation with a specific participant.
+
+ The current user and the specified participant will be in the participants list and admins list.
+
+ The new conversation will have distinctByParticipants set to YES. This allows the application
+ to reuse an existing direct conversation.
+
+ @param participant the participant in the direct conversation
+ @param title title of the conversation
+ @param metadata application metadata for the conversation
+ @param completion completion block
+ */
+- (void)createDirectConversationWithParticipant:(SKYParticipant *)participant
+                                          title:(NSString *_Nullable)title
+                                       metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
+                                     completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(createDirectConversation(participant:title:metadata:completion:)); /* clang-format on */
 
 /**
  Saves a conversation.
@@ -222,8 +287,6 @@ typedef void (^SKYMessageOperationListCompletion)(
  Fetches conversations with optional last message in conversation.
 
  @param fetchLastMessage whether to fetch the last message
- @param page     page index of conversations to be fetched
- @param pageSize maximum number of conversations to be fetched
  @param completion completion block
  */
 - (void)fetchConversationsWithFetchLastMessage:(BOOL)fetchLastMessage
@@ -250,47 +313,107 @@ typedef void (^SKYMessageOperationListCompletion)(
 /**
  Adds participants to a conversation.
 
- The specified user IDs are added to the conversation record as participants. The modified
+ The specified participant IDs are added to the conversation record as participants. The modified
  conversation will be saved to the server.
 
- @param userIDs array of participant user ID
+ @param participantIDs the array of participant IDs
  @param conversation conversation record
  @param completion completion block
  */
-- (void)addParticipantsWithUserIDs:(NSArray<NSString *> *)userIDs
-                    toConversation:(SKYConversation *)conversation
-                        completion:(SKYChatConversationCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(addParticipants(userIDs:to:completion:)); /* clang-format on */
+- (void)addParticipantsWithIDs:(NSArray<NSString *> *)participantIDs
+                toConversation:(SKYConversation *)conversation
+                    completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(add(participantIDs:to:completion:)); /* clang-format on */
+
+/**
+ Adds participants to a conversation.
+
+ The specified participants are added to the conversation record as participants. The modified
+ conversation will be saved to the server.
+
+ @param participants the array of participants
+ @param conversation conversation record
+ @param completion completion block
+ */
+- (void)addParticipants:(NSArray<SKYParticipant *> *)participants
+         toConversation:(SKYConversation *)conversation
+             completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(add(participants:to:completion:)); /* clang-format on */
 
 /**
  Removes participants from a conversation.
 
- The specified user IDs are removed from the conversation record as participants. The modified
- conversation will be saved to the server.
+ The specified participant IDs are removed from the conversation record as participants. The
+ modified conversation will be saved to the server.
 
- @param userIDs array of participant user ID
+ @param participantIDs the array of participant IDs
  @param conversation conversation record
  @param completion completion block
  */
-- (void)removeParticipantsWithUserIDs:(NSArray<NSString *> *)userIDs
-                     fromConversation:(SKYConversation *)conversation
-                           completion:(SKYChatConversationCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(removeParticipants(userIDs:from:completion:)); /* clang-format on */
+- (void)removeParticipantsWithIDs:(NSArray<NSString *> *)participantIDs
+                 fromConversation:(SKYConversation *)conversation
+                       completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(remove(participantIDs:from:completion:)); /* clang-format on */
+
+/**
+ Removes participants from a conversation.
+
+ The specified participants are removed from the conversation record as participants. The modified
+ conversation will be saved to the server.
+
+ @param participants the array of participants
+ @param conversation conversation record
+ @param completion completion block
+ */
+- (void)removeParticipants:(NSArray<SKYParticipant *> *)participants
+          fromConversation:(SKYConversation *)conversation
+                completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(remove(participantIDs:from:completion:)); /* clang-format on */
 
 /**
  Adds admins to a conversation.
 
- The specified user IDs are added to the conversation record as admins. The modified
+ The specified admin IDs are added to the conversation record as admins. The modified
  conversation will be saved to the server.
 
- @param userIDs array of admin user ID
+ @param adminIDs the array of admin IDs
  @param conversation conversation record
  @param completion completion block
  */
-- (void)addAdminsWithUserIDs:(NSArray<NSString *> *)userIDs
-              toConversation:(SKYConversation *)conversation
-                  completion:(SKYChatConversationCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(addAdmins(userIDs:to:completion:)); /* clang-format on */
+- (void)addAdminsWithIDs:(NSArray<NSString *> *)adminIDs
+          toConversation:(SKYConversation *)conversation
+              completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(add(adminIDs:to:completion:)); /* clang-format on */
+
+/**
+ Adds admins to a conversation.
+
+ The specified admins are added to the conversation record as admins. The modified
+ conversation will be saved to the server.
+
+ @param admins the array of admins
+ @param conversation conversation record
+ @param completion completion block
+ */
+- (void)addAdmins:(NSArray<SKYParticipant *> *)admins
+    toConversation:(SKYConversation *)conversation
+        completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(add(admins:to:completion:)); /* clang-format on */
+
+/**
+ Removes admins to a conversation.
+
+ The specified admin IDs are removed from the conversation record as admins. The modified
+ conversation will be saved to the server.
+
+ @param adminIDs the array of admin IDs
+ @param conversation conversation record
+ @param completion completion block
+ */
+- (void)removeAdminsWithIDs:(NSArray<NSString *> *)adminIDs
+           fromConversation:(SKYConversation *)conversation
+                 completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(remove(adminIDs:from:completion:)); /* clang-format on */
 
 /**
  Removes admins to a conversation.
@@ -298,21 +421,21 @@ typedef void (^SKYMessageOperationListCompletion)(
  The specified user IDs are removed from the conversation record as admins. The modified
  conversation will be saved to the server.
 
- @param userIDs array of admin user ID
+ @param admins the array of admins
  @param conversation conversation record
  @param completion completion block
  */
-- (void)removeAdminsWithUserIDs:(NSArray<NSString *> *)userIDs
-               fromConversation:(SKYConversation *)conversation
-                     completion:(SKYChatConversationCompletion _Nullable)completion
-    /* clang-format off */ NS_SWIFT_NAME(removeAdmins(userIDs:from:completion:)); /* clang-format on */
+- (void)removeAdmins:(NSArray<SKYParticipant *> *)admins
+    fromConversation:(SKYConversation *)conversation
+          completion:(SKYChatConversationCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(remove(admins:from:completion:)); /* clang-format on */
 
 /**
  Remove the current user from the specified conversation.
 
  This method should be called when the current user wants to leave a conversation. Since modifying
  the participant list is only allowed if the user is an admin, calling
- -removeParticipantsWithUserIDs:fromConversation:completion: does not work.
+ -removeParticipantsWithIDs:fromConversation:completion: does not work.
  */
 - (void)leaveConversation:(SKYConversation *)conversation
                completion:(void (^_Nullable)(NSError *_Nullable error))completion;
@@ -322,7 +445,7 @@ typedef void (^SKYMessageOperationListCompletion)(
 
  This method should be called when the current user wants to leave a conversation. Since modifying
  the participant list is only allowed if the user is an admin, calling
- -removeParticipantsWithUserIDs:fromConversation:completion: does not work.
+ -removeParticipantsWithIDs:fromConversation:completion: does not work.
  */
 - (void)leaveConversationWithConversationID:(NSString *)conversationID
                                  completion:(void (^_Nullable)(NSError *_Nullable error))completion
@@ -773,7 +896,7 @@ typedef void (^SKYMessageOperationListCompletion)(
  This method removes an observer from NSNotificationCenter for message events. The observer can be
  obtained when subscribing conversation events.
 
- @param NSNotification observer
+ @param observer the observer
  */
 - (void)unsubscribeToConversationWithObserver:(id)observer;
 
@@ -783,7 +906,7 @@ typedef void (^SKYMessageOperationListCompletion)(
  This method removes an observer from NSNotificationCenter for message events. The observer can be
  obtained when subscribing message events.
 
- @param NSNotification observer
+ @param observer the observer
  */
 - (void)unsubscribeToMessagesWithObserver:(id)observer;
 
@@ -793,7 +916,7 @@ typedef void (^SKYMessageOperationListCompletion)(
  This method removes an observer from NSNotificationCenter for typing indicator events. The
  observer can be obtained when subscribing typing indicator events.
 
- @param NSNotification observer
+ @param observer the observer
  */
 - (void)unsubscribeToTypingIndicatorWithObserver:(id)observer;
 
