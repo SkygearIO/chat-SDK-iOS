@@ -85,9 +85,9 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 #pragma mark - Conversations
 
 - (void)createConversationWithParticipants:(NSArray<SKYParticipant *> *)participants
-                                     title:(NSString *_Nullable)title
-                                  metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
-                                completion:(SKYChatConversationCompletion _Nullable)completion
+                                     title:(NSString *)title
+                                  metadata:(NSDictionary<NSString *, id> *)metadata
+                                completion:(SKYChatConversationCompletion)completion
 {
     [self createConversationWithParticipants:participants
                                        title:title
@@ -111,11 +111,11 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 }
 
 - (void)createConversationWithParticipants:(NSArray<SKYParticipant *> *)participants
-                                     title:(NSString *_Nullable)title
-                                  metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
-                                    admins:(NSArray<SKYParticipant *> *_Nullable)admins
+                                     title:(NSString *)title
+                                  metadata:(NSDictionary<NSString *, id> *)metadata
+                                    admins:(NSArray<SKYParticipant *> *)admins
                     distinctByParticipants:(BOOL)distinctByParticipants
-                                completion:(SKYChatConversationCompletion _Nullable)completion
+                                completion:(SKYChatConversationCompletion)completion
 {
     NSMutableArray<NSString *> *participantIDs = [self participantIDsFromParticipants:participants];
 
@@ -221,9 +221,9 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 }
 
 - (void)createDirectConversationWithParticipant:(SKYParticipant *)participant
-                                          title:(NSString *_Nullable)title
-                                       metadata:(NSDictionary<NSString *, id> *_Nullable)metadata
-                                     completion:(SKYChatConversationCompletion _Nullable)completion
+                                          title:(NSString *)title
+                                       metadata:(NSDictionary<NSString *, id> *)metadata
+                                     completion:(SKYChatConversationCompletion)completion
 {
     [self createDirectConversationWithParticipantID:participant.recordName
                                               title:title
@@ -426,7 +426,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 - (void)removeParticipants:(NSArray<SKYParticipant *> *)participants
           fromConversation:(SKYConversation *)conversation
-                completion:(SKYChatConversationCompletion _Nullable)completion
+                completion:(SKYChatConversationCompletion)completion
 {
     NSArray<NSString *> *participantIDs = [self participantIDsFromParticipants:participants];
     [self removeParticipantsWithIDs:participantIDs
@@ -436,7 +436,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 - (void)addAdminsWithIDs:(NSArray<NSString *> *)adminIDs
           toConversation:(SKYConversation *)conversation
-              completion:(SKYChatConversationCompletion _Nullable)completion
+              completion:(SKYChatConversationCompletion)completion
 {
     [self updateMembershipsWithLambda:@"chat:add_admins"
                        participantIDs:adminIDs
@@ -454,7 +454,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 - (void)removeAdminsWithIDs:(NSArray<NSString *> *)adminIDs
            fromConversation:(SKYConversation *)conversation
-                 completion:(SKYChatConversationCompletion _Nullable)completion
+                 completion:(SKYChatConversationCompletion)completion
 {
     [self updateMembershipsWithLambda:@"chat:remove_admins"
                        participantIDs:adminIDs

@@ -126,7 +126,7 @@ typedef void (^SKYMessageOperationListCompletion)(
  will not be distinct by participants by default.
 
  If participants list do not include the current user, the current user will be added to the
- list as well. The same apply for admins list.
+ list as well. The same applies for admins list.
 
  @param participantIDs an array of all participants in the conversation
  @param title title of the conversation
@@ -146,7 +146,7 @@ typedef void (^SKYMessageOperationListCompletion)(
  will not be distinct by participants by default.
 
  If participants list do not include the current user, the current user will be added to the
- list as well. The same apply for admins list.
+ list as well. The same applies for admins list.
 
  @param participants an array of all participants in the conversation
  @param title title of the conversation
@@ -163,7 +163,7 @@ typedef void (^SKYMessageOperationListCompletion)(
  Creates a conversation with the selected participants.
 
  If participants list do not include the current user, the current user will be added to the
- list as well. The same apply for admins list. If the admins list is not specified, the admins
+ list as well. The same applies for admins list. If the admins list is not specified, the admins
  list will be the same as the participants list.
 
  If distinctByParticipants is set to YES, the chat extension will attempt to find an existing
@@ -188,7 +188,7 @@ typedef void (^SKYMessageOperationListCompletion)(
  Creates a conversation with the selected participants.
 
  If participants list do not include the current user, the current user will be added to the
- list as well. The same apply for admins list. If the admins list is not specified, the admins
+ list as well. The same applies for admins list. If the admins list is not specified, the admins
  list will be the same as the participants list.
 
  If distinctByParticipants is set to YES, the chat extension will attempt to find an existing
@@ -215,7 +215,7 @@ typedef void (^SKYMessageOperationListCompletion)(
  The current user and the specified participant will be in the participants list and admins list.
 
  The new conversation will have distinctByParticipants set to YES. This allows the application
- to reuse an exisitng direct conversation.
+ to reuse an existing direct conversation.
 
  @param participantID the ID of the participant in the direct conversation
  @param title title of the conversation
@@ -235,7 +235,7 @@ typedef void (^SKYMessageOperationListCompletion)(
  The current user and the specified participant will be in the participants list and admins list.
 
  The new conversation will have distinctByParticipants set to YES. This allows the application
- to reuse an exisitng direct conversation.
+ to reuse an existing direct conversation.
 
  @param participant the participant in the direct conversation
  @param title title of the conversation
@@ -435,7 +435,7 @@ typedef void (^SKYMessageOperationListCompletion)(
 
  This method should be called when the current user wants to leave a conversation. Since modifying
  the participant list is only allowed if the user is an admin, calling
- - removeParticipantsWithIDs:fromConversation:completion: does not work.
+ -removeParticipantsWithIDs:fromConversation:completion: does not work.
  */
 - (void)leaveConversation:(SKYConversation *)conversation
                completion:(void (^_Nullable)(NSError *_Nullable error))completion;
@@ -445,7 +445,7 @@ typedef void (^SKYMessageOperationListCompletion)(
 
  This method should be called when the current user wants to leave a conversation. Since modifying
  the participant list is only allowed if the user is an admin, calling
- - removeParticipantsWithIDs:fromConversation:completion: does not work.
+ -removeParticipantsWithIDs:fromConversation:completion: does not work.
  */
 - (void)leaveConversationWithConversationID:(NSString *)conversationID
                                  completion:(void (^_Nullable)(NSError *_Nullable error))completion
