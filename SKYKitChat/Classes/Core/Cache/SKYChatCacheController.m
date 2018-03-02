@@ -66,6 +66,35 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     [self markPendingMessageOperationsAsFailed];
 }
 
+- (void)fetchParticipants:(NSArray<NSString *> *)participantIDs
+               completion:(SKYChatFetchParticpantsCompletion)completion
+{
+    if (!completion) {
+        // do nothing
+        return;
+    }
+
+    if (participantIDs.count == 0) {
+        completion(@{}, YES, nil);
+        return;
+    }
+
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"recordID IN %@", participantIDs];
+    NSArray<SKYParticipant *> *participants = [self.store getParticipantsWithPredicate:predicate];
+    NSMutableDictionary<NSString *, SKYParticipant *> *participantMap = [@{} mutableCopy];
+    [participants
+        enumerateObjectsUsingBlock:^(SKYParticipant *eachParticipant, NSUInteger idx, BOOL *stop) {
+            [participantMap setObject:eachParticipant forKey:eachParticipant.recordName];
+        }];
+
+    completion(participantMap, YES, nil);
+}
+
+- (void)updateParticipants:(NSArray<SKYParticipant *> *)participants
+{
+    [self.store setParticipants:participants];
+}
+
 - (void)fetchMessagesWithPredicate:(NSPredicate *)predicate
                              limit:(NSInteger)limit
                              order:(NSString *)order

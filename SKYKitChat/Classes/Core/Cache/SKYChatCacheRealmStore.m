@@ -22,6 +22,7 @@
 
 #import "SKYMessageCacheObject.h"
 #import "SKYMessageOperationCacheObject.h"
+#import "SKYParticipantCacheObject.h"
 
 @implementation SKYChatCacheRealmStore
 
@@ -67,6 +68,37 @@
     }
 
     return realmInstance;
+}
+
+- (NSArray<SKYParticipant *> *)getParticipantsWithPredicate:(NSPredicate *)predicate
+{
+    RLMRealm *realmInstance = self.realmInstance;
+    RLMResults<SKYParticipantCacheObject *> *results =
+        [SKYParticipantCacheObject objectsInRealm:realmInstance withPredicate:predicate];
+
+    NSMutableArray<SKYParticipant *> *participants = [@[] mutableCopy];
+    NSUInteger resultCount = results.count;
+    for (NSUInteger i = 0; i < resultCount; i++) {
+        SKYParticipantCacheObject *eachCacheObject = results[i];
+        SKYParticipant *eachParticipant = [eachCacheObject participantRecord];
+        [participants addObject:eachParticipant];
+    }
+
+    return participants;
+}
+
+- (void)setParticipants:(NSArray<SKYParticipant *> *)participants
+{
+    RLMRealm *realmInstance = self.realmInstance;
+    [realmInstance beginWriteTransaction];
+
+    for (SKYParticipant *eachParticipant in participants) {
+        SKYParticipantCacheObject *eachCacheObject =
+            [SKYParticipantCacheObject cacheObjectFromParticipant:eachParticipant];
+        [realmInstance addOrUpdateObject:eachCacheObject];
+    }
+
+    [realmInstance commitWriteTransaction];
 }
 
 - (NSArray<SKYMessage *> *)getMessagesWithPredicate:(NSPredicate *)predicate

@@ -22,12 +22,18 @@
 #import "SKYChatExtension.h"
 #import "SKYMessage.h"
 #import "SKYMessageOperation.h"
+#import "SKYParticipant.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface SKYChatCacheController : NSObject
 
 + (instancetype)defaultController;
+
+- (void)fetchParticipants:(NSArray<NSString *> *)participantIDs
+               completion:(SKYChatFetchParticpantsCompletion _Nullable)completion;
+
+- (void)updateParticipants:(NSArray<SKYParticipant *> *)participants;
 
 - (void)fetchMessagesWithConversationID:(NSString *)conversationId
                                   limit:(NSInteger)limit

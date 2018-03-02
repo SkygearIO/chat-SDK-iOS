@@ -21,6 +21,7 @@
 
 #import "SKYMessage.h"
 #import "SKYMessageOperation.h"
+#import "SKYParticipant.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -29,6 +30,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithName:(NSString *)name;
 
 - (instancetype)initInMemoryWithName:(NSString *)name;
+
+- (NSArray<SKYParticipant *> *)getParticipantsWithPredicate:(NSPredicate *)predicate;
+
+- (void)setParticipants:(NSArray<SKYParticipant *> *)participants;
 
 - (NSArray<SKYMessage *> *)getMessagesWithPredicate:(NSPredicate *)predicate
                                               limit:(NSInteger)limit
