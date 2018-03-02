@@ -21,7 +21,7 @@ open class SKYChatConversationTableViewCell: UITableViewCell {
     let untitledConversation: String = "Untitled Conversation"
 
     public var conversation: SKYConversation?
-    public var participants: [SKYRecord] = []
+    public var participants: [SKYParticipant] = []
     public var conversationMessage: String?
     public var conversationInformation: String?
     public var unreadMessageCount: Int?

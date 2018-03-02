@@ -17,17 +17,15 @@
 //  limitations under the License.
 //
 
-import SKYKitChat
-
 public extension SKYConversation {
     /**
      Generate a name list from a list of participant. The title will be concatenating all
      participant names.
      */
-    public func nameList(fromParticipants participants: [SKYRecord]) -> String? {
+    public func nameList(fromParticipants participants: [SKYParticipant]) -> String? {
         let userNameField = SKYChatUIModelCustomization.default().userNameField
         let participantNames = participants.flatMap { (eachParticipant) -> String? in
-            return eachParticipant.object(forKey: userNameField) as? String
+            return eachParticipant.record.object(forKey: userNameField) as? String
         }
 
         guard participantNames.count > 0 else {
@@ -41,9 +39,9 @@ public extension SKYConversation {
      Generate a name list from a list of participant. The title will be concatenating all
      participant names and ignoring some of the users.
      */
-    public func nameList(fromParticipants participants: [SKYRecord],
+    public func nameList(fromParticipants participants: [SKYParticipant],
                          ignoringUserIDs: [String]) -> String? {
-        let filtered = participants.filter { !ignoringUserIDs.contains($0.recordID.recordName) }
+        let filtered = participants.filter { !ignoringUserIDs.contains($0.recordName) }
         return self.nameList(fromParticipants: filtered)
     }
 
@@ -51,10 +49,10 @@ public extension SKYConversation {
      Generate a name list from a list of participant. The title will be concatenating all
      participant names and current user name will be shown as "You".
      */
-    public func nameList(fromParticipants participants: [SKYRecord],
+    public func nameList(fromParticipants participants: [SKYParticipant],
                          currentUserID: String) -> String? {
 
-        guard participants.contains(where: { $0.recordID.recordName == currentUserID }) else {
+        guard participants.contains(where: { $0.recordName == currentUserID }) else {
             return self.nameList(fromParticipants: participants)
         }
 

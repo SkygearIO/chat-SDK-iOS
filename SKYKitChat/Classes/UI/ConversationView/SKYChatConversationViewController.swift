@@ -105,7 +105,7 @@ import JSQMessagesViewController
     @objc optional func conversationViewController(
         _ controller: SKYChatConversationViewController,
         avatarForMessage message: SKYMessage,
-        withAuthor author: SKYRecord?,
+        withAuthor author: SKYParticipant?,
         atIndexPath indexPath: IndexPath) -> UIImage?
 
     @objc optional func typingIndicatorShouldShowInConversationViewController(
@@ -163,7 +163,7 @@ import JSQMessagesViewController
      */
 
     @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
-                                                   didFetchedParticipants participants: [SKYRecord])
+                                                   didFetchedParticipants participants: [SKYParticipant])
 
     @objc optional func conversationViewController(
         _ controller: SKYChatConversationViewController,
@@ -191,7 +191,7 @@ open class MessageList {
     }
 
     public func compare(messageA: SKYMessage, messageB: SKYMessage) -> Bool {
-        return messageA.creationDate() < messageB.creationDate()
+        return messageA.creationDate < messageB.creationDate
     }
 
     public func contains(_ messageID: String) -> Bool {
@@ -200,7 +200,7 @@ open class MessageList {
 
     public func update(_ messages: [SKYMessage]) {
         messages.forEach { (msg: SKYMessage) in
-            let msgID = msg.recordID().recordName
+            let msgID = msg.recordName
             self.messages[msgID] = msg
         }
     }
@@ -208,7 +208,7 @@ open class MessageList {
     public func append(_ messages: [SKYMessage]) {
         let msgs = Array(messages)
         let msgIDs = msgs.map { (msg: SKYMessage) -> String in
-            return msg.recordID().recordName
+            return msg.recordName
         }
 
         self.messageIDs.addObjects(from: msgIDs)
@@ -229,7 +229,7 @@ open class MessageList {
 
     public func remove(_ messages: [SKYMessage]) {
         messages.forEach { (msg: SKYMessage) in
-            let msgID = msg.recordID().recordName
+            let msgID = msg.recordName
             self.messageIDs.remove(msgID)
             self.messages.removeValue(forKey: msgID)
         }
@@ -241,7 +241,7 @@ open class MessageList {
     }
 
     public func indexOf(_ message: SKYMessage) -> Int {
-        return self.messageIDs.index(of: message.recordID().recordName)
+        return self.messageIDs.index(of: message.recordName)
     }
 
     public func messageAt(_ index: Int) -> SKYMessage {
@@ -281,7 +281,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
 
     public var skygear: SKYContainer = SKYContainer.default()
     public var conversation: SKYConversation?
-    public var participants: [String: SKYRecord] = [:]
+    public var participants: [String: SKYParticipant] = [:]
     public var messageList: MessageList = MessageList()
     public var messageErrorByIDs: [String: Error] = [:]
     public var typingIndicatorShowDuration: TimeInterval = TimeInterval(5)
@@ -916,19 +916,19 @@ extension SKYChatConversationViewController {
         let msg = self.messageList.messageAt(indexPath.row)
         let msgSenderName = self.getSenderName(forMessage: msg) ?? ""
 
-        let isOutgoingMessage = msg.creatorUserRecordID() == self.senderId
+        let isOutgoingMessage = msg.creatorUserRecordID == self.senderId
         let mediaData = self.messageMediaDataFactory.mediaData(with: msg,
                                                                markedAsOutgoing: isOutgoingMessage)
         let jsqMessage: JSQMessage
         if mediaData == nil {
-            jsqMessage = JSQMessage(senderId: msg.creatorUserRecordID(),
+            jsqMessage = JSQMessage(senderId: msg.creatorUserRecordID,
                                     senderDisplayName: msgSenderName,
-                                    date: msg.creationDate(),
+                                    date: msg.creationDate,
                                     text: msg.body)
         } else {
-            jsqMessage = JSQMessage(senderId: msg.creatorUserRecordID(),
+            jsqMessage = JSQMessage(senderId: msg.creatorUserRecordID,
                                     senderDisplayName: msgSenderName,
-                                    date: msg.creationDate(),
+                                    date: msg.creationDate,
                                     media: mediaData)
 
             /* Need to store strong reference for audio data
@@ -962,7 +962,7 @@ extension SKYChatConversationViewController {
                     return self.incomingAudioMessageButtonColor
                 }())
 
-                let key = msg.recordID().canonicalString
+                let key = msg.recordID.canonicalString
                 if let origAudioItem = self.audioDict[key] {
                     origAudioItem.stop()
                 }
@@ -993,7 +993,7 @@ extension SKYChatConversationViewController {
     ) -> UIColor! {
         let msg = self.messageList.messageAt(indexPath.row)
 
-        if msg.creatorUserRecordID() == self.senderId {
+        if msg.creatorUserRecordID == self.senderId {
             return self.outgoingMessageTextColor
         }
 
@@ -1006,7 +1006,7 @@ extension SKYChatConversationViewController {
     ) -> JSQMessageBubbleImageDataSource! {
         let msg = self.messageList.messageAt(indexPath.row)
 
-        if msg.creatorUserRecordID() == self.senderId {
+        if msg.creatorUserRecordID == self.senderId {
             return self.outgoingMessageBubble
         }
 
@@ -1024,7 +1024,7 @@ extension SKYChatConversationViewController {
 
         let msg = self.messageList.messageAt(indexPath.row)
 
-        if msg.creatorUserRecordID() != self.senderId {
+        if msg.creatorUserRecordID != self.senderId {
             return nil
         }
 
@@ -1058,7 +1058,7 @@ extension SKYChatConversationViewController {
         }
 
         let msg = self.messageList.messageAt(indexPath.row)
-        let msgDate = msg.creationDate()
+        let msgDate = msg.creationDate
         let dateString =
             SKYChatConversationView.UICustomization().messageDateFormatter.string(from: msgDate)
         return NSAttributedString(
@@ -1120,7 +1120,7 @@ extension SKYChatConversationViewController {
             // default behaviour
             // skip when it is "me" or only two members or sender name is the same as previous one
             let msg = self.messageList.messageAt(indexPath.row)
-            if msg.creatorUserRecordID() == self.senderId || self.participants.count < 3 {
+            if msg.creatorUserRecordID == self.senderId || self.participants.count < 3 {
                 shouldShow = false
             } else if indexPath.row == 0 {
                 shouldShow = true
@@ -1160,7 +1160,7 @@ extension SKYChatConversationViewController {
         if SKYChatConversationView.UICustomization().avatarType == .image {
             // get from avatar field
             let avatarField = SKYChatUIModelCustomization.default().userAvatarField
-            let senderAvatar = sender?.object(forKey: avatarField)
+            let senderAvatar = sender?.record.object(forKey: avatarField)
             switch senderAvatar {
             case let senderAvatarUrl as String:
                 if let data = self.dataCache.getData(forKey: senderAvatarUrl) {
@@ -1377,14 +1377,14 @@ extension SKYChatConversationViewController {
         let err = self.errorCreator.error(with: errorCode, message: errorMessage)
         if let msg = message {
             self.messageList.update([msg])
-            self.messageErrorByIDs[msg.recordID().recordName] = err
+            self.messageErrorByIDs[msg.recordName] = err
             self.collectionView?.reloadData()
         }
 
         self.delegate?.conversationViewController?(
             self,
             failedToSendMessageText: message?.body ?? "",
-            date: message?.creationDate() ?? Date() ,
+            date: message?.creationDate ?? Date() ,
             error: err)
 
         /**
@@ -1433,8 +1433,8 @@ extension SKYChatConversationViewController {
 
         let msg = SKYMessage()
         msg.body = text
-        msg.setCreatorUserRecordID(self.senderId)
-        msg.setCreationDate(date)
+        msg.creatorUserRecordID = self.senderId
+        msg.creationDate = date
 
         self.beforeSending(message: msg)
         self.send(message: msg)
@@ -1522,7 +1522,7 @@ extension SKYChatConversationViewController {
         self.beforeSending(message: message)
         self.collectionView.reloadData()
 
-        let messageID = message.recordID().recordName
+        let messageID = message.recordName
         let ext = self.skygear.chatExtension
 
         let retryMessageCallback: SKYMessageOperationCompletion
@@ -1558,7 +1558,7 @@ extension SKYChatConversationViewController {
         self.messageList.remove([message])
         self.collectionView.reloadData()
 
-        let messageID = message.recordID().recordName
+        let messageID = message.recordName
         let ext = skygear.chatExtension
         ext?.fetchOutstandingMessageOperations(messageID: messageID,
                                                operationType: SKYMessageOperationType.add,
@@ -1638,8 +1638,8 @@ extension SKYChatConversationViewController {
         }
 
         let msg = SKYMessage(withImage: image)
-        msg.setCreatorUserRecordID(self.senderId)
-        msg.setCreationDate(date)
+        msg.creatorUserRecordID = self.senderId
+        msg.creationDate = date
 
         self.beforeSending(message: msg)
         self.send(message: msg)
@@ -1728,8 +1728,8 @@ extension SKYChatConversationViewController {
         msg.body = ""
         msg.metadata = ["length": Int(self.audioTime! * 1000)]
         msg.attachment = asset
-        msg.setCreatorUserRecordID(self.senderId)
-        msg.setCreationDate(Date())
+        msg.creatorUserRecordID = self.senderId
+        msg.creationDate = Date()
 
         self.beforeSending(message: msg)
         self.send(message: msg)
@@ -1783,7 +1783,7 @@ extension SKYChatConversationViewController {
         self.unsubscribeMessageChanges()
 
         let handler: ((SKYChatRecordChangeEvent, SKYMessage) -> Void) = { [unowned self] (event, msg) in
-            let msgID = msg.recordID().recordName
+            let msgID = msg.recordName
             let foundMessage = self.messageList.contains(msgID)
 
             switch event {
@@ -1886,64 +1886,56 @@ extension SKYChatConversationViewController {
             return
         }
 
-        let participantIDs = self.conversation!.participantIds
-            .map { (eachParticipantID) -> SKYRecordID in
-                return SKYRecordID(recordType: "user", name: eachParticipantID)
-            }
+        guard let participantIDs = self.conversation?.participantIds else {
+            print("Cannot find participant IDs")
+            return
+        }
 
-        self.skygear.publicCloudDatabase
-            .fetchRecords(with: participantIDs, completionHandler: { (result, error) in
-                guard error == nil else {
-                    print("Failed to fetch participants: \(error?.localizedDescription ?? "")")
-                    self.delegate?.conversationViewController?(
-                        self, failedFetchingParticipantWithError: error!)
-
-                    return
-                }
-
-                guard let participantMap = result as? [SKYRecordID: SKYRecord] else {
-                    print("Fetched participants are in wrong format")
-                    let err = self.errorCreator.error(
-                        with: SKYErrorBadResponse,
-                        message: "Fetched participants are in wrong format")
-
-                    self.delegate?.conversationViewController?(
-                        self, failedFetchingParticipantWithError: err)
-
-                    return
-                }
-
-                var participants: [SKYRecord] = []
-                for (k, v) in participantMap {
-                    self.participants[k.recordName] = v
-                    participants.append(v)
-                }
-
-                if let senderRecord = self.participants[self.senderId] {
-                    let userNameField = SKYChatUIModelCustomization.default().userNameField
-                    if let senderName = senderRecord.object(forKey: userNameField) as? String {
-                        self.senderDisplayName = senderName
+        self.skygear
+            .chatExtension?
+            .fetchParticipants(
+                participantIDs: participantIDs,
+                completion: { [weak self] (participants, isCached, error) in
+                    guard let strongSelf = self else {
+                        return
                     }
-                }
 
-                self.updateTitle()
+                    guard error == nil else {
+                        print("Failed to fetch participants: \(error?.localizedDescription ?? "")")
+                        strongSelf.delegate?.conversationViewController?(
+                            strongSelf, failedFetchingParticipantWithError: error!)
 
-                self.delegate?.conversationViewController?(
-                    self, didFetchedParticipants: participants)
+                        return
+                    }
 
-                self.collectionView?.reloadData()
-                self.collectionView?.layoutIfNeeded()
+                    for (eachParticipantID, eachParticipant) in participants {
+                        strongSelf.participants[eachParticipantID] = eachParticipant
+                    }
 
-            }, perRecordErrorHandler: nil)
+                    if let senderParticipant = strongSelf.participants[strongSelf.senderId] {
+                        let senderNameField = SKYChatUIModelCustomization.default().userNameField
+                        if let senderName = senderParticipant.record.object(forKey: senderNameField) as? String {
+                            strongSelf.senderDisplayName = senderName
+                        }
+                    }
+
+                    strongSelf.updateTitle()
+
+                    strongSelf.delegate?.conversationViewController?(
+                        strongSelf, didFetchedParticipants: participants.map { $0.value })
+
+                    strongSelf.collectionView?.reloadData()
+                    strongSelf.collectionView?.layoutIfNeeded()
+            })
     }
 
     func messageError(_ message: SKYMessage) -> Error? {
-        let messageID = message.recordID().recordName
+        let messageID = message.recordName
         return self.messageErrorByIDs[messageID]
     }
 
     func setMessageError(_ message: SKYMessage, error: Error) {
-        let messageID = message.recordID().recordName
+        let messageID = message.recordName
         guard !self.messageList.contains(messageID) else {
             return
         }
@@ -1957,19 +1949,19 @@ extension SKYChatConversationViewController {
     }
 
     func removeMessageError(_ message: SKYMessage) {
-        let messageID = message.recordID().recordName
+        let messageID = message.recordName
         self.messageErrorByIDs.removeValue(forKey: messageID)
     }
 
     func firstSuccessMessage() -> SKYMessage? {
         return self.messageList.first { (message) -> Bool in
-            return self.messageErrorByIDs[message.recordID().recordName] == nil
+            return self.messageErrorByIDs[message.recordName] == nil
         }
     }
 
     open func fetchUnsentMessages() {
         let chatExt = self.skygear.chatExtension
-        chatExt?.fetchOutstandingMessageOperations(conversationID: self.conversation!.recordID().recordName,
+        chatExt?.fetchOutstandingMessageOperations(conversationID: self.conversation!.recordName,
                                                    operationType: SKYMessageOperationType.add,
                                                    completion: { (operations) in
                                                     var unsentMessages = [SKYMessage]()
@@ -2098,8 +2090,8 @@ extension SKYChatConversationViewController {
         })
     }
 
-    open func getSender(forMessage message: SKYMessage) -> SKYRecord? {
-        let msgAuthorID = message.creatorUserRecordID()
+    open func getSender(forMessage message: SKYMessage) -> SKYParticipant? {
+        let msgAuthorID = message.creatorUserRecordID
 
         guard self.participants.keys.contains(msgAuthorID) else {
             print("Warning: Participant ID \(msgAuthorID) is not fetched")
@@ -2115,7 +2107,7 @@ extension SKYChatConversationViewController {
         }
 
         let userNameField = SKYChatUIModelCustomization.default().userNameField
-        return sender.object(forKey: userNameField) as? String
+        return sender.record.object(forKey: userNameField) as? String
     }
 }
 
