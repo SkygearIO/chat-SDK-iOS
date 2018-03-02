@@ -25,9 +25,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SKYParticipant : SKYChatRecord
 
-@property (strong, nonatomic, readonly) NSString *recordName;
-@property (strong, nonatomic, readonly) SKYRecordID *recordID;
-
 + (instancetype)recordWithRecord:(SKYRecord *_Nullable)record;
 
 @end

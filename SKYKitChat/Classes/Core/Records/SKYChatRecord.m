@@ -58,7 +58,12 @@
 
 - (NSString *)recordType
 {
-    return self.record.recordType;
+    return self.recordID.recordType;
+}
+
+- (NSString *)recordName
+{
+    return self.recordID.recordName;
 }
 
 - (void)setCreatorUserRecordID:(NSString *)recordID
