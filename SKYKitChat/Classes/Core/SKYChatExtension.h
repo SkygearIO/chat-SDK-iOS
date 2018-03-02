@@ -77,9 +77,9 @@ typedef void (^SKYChatDeleteConversationCompletion)(NSNumber *_Nullable result,
                                                     NSError *_Nullable error);
 typedef void (^SKYChatConversationCompletion)(SKYConversation *_Nullable conversation,
                                               NSError *_Nullable error);
-typedef void (^SKYChatFetchParticpantsCompletion)(NSDictionary<NSString *, SKYParticipant *>* participantsMap,
-                                                  BOOL isCached,
-                                                  NSError *_Nullable error);
+typedef void (^SKYChatFetchParticpantsCompletion)(
+    NSDictionary<NSString *, SKYParticipant *> *participantsMap, BOOL isCached,
+    NSError *_Nullable error);
 typedef void (^SKYChatMessageCompletion)(SKYMessage *_Nullable message, NSError *_Nullable error);
 typedef void (^SKYChatUnreadCountCompletion)(
     NSDictionary<NSString *, NSNumber *> *_Nullable response, NSError *_Nullable error);
@@ -323,9 +323,9 @@ typedef void (^SKYMessageOperationListCompletion)(
  @param participantIDs the array of participant IDs
  @param completion the completion callback
  */
-- (void)fetchParticipants:(NSArray<NSString*> *)participantIDs
+- (void)fetchParticipants:(NSArray<NSString *> *)participantIDs
                completion:(SKYChatFetchParticpantsCompletion _Nullable)completion
-/* clang-format off */ NS_SWIFT_NAME(fetchParticipants(participantIDs:completion:)); /* clang-format on */
+    /* clang-format off */ NS_SWIFT_NAME(fetchParticipants(participantIDs:completion:)); /* clang-format on */
 
 /**
  Adds participants to a conversation.
