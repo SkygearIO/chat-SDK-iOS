@@ -180,7 +180,8 @@ import JSQMessagesViewController
         failedFetchingMessagesWithError error: Error)
 }
 
-open class MessageList {
+@objcMembers
+open class MessageList: NSObject {
 
     public var messageIDs: NSMutableOrderedSet = NSMutableOrderedSet()
     public var messages: [String: SKYMessage] = [:]
@@ -275,6 +276,7 @@ open class MessageList {
     }
 }
 
+@objcMembers
 open class SKYChatConversationViewController: JSQMessagesViewController, AVAudioRecorderDelegate, SKYChatConversationImageItemDelegate {
 
     weak public var delegate: SKYChatConversationViewControllerDelegate?

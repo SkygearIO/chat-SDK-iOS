@@ -42,14 +42,15 @@ extension SKYMessage {
     }
 }
 
-public class JSQMessageMediaDataFactory {
+@objcMembers
+public class JSQMessageMediaDataFactory: NSObject {
     let assetCache: SKYAssetCache?
 
     public init(with assetCache: SKYAssetCache?) {
         self.assetCache = assetCache
     }
 
-    public convenience init() {
+    public convenience override init() {
         self.init(with: SKYAssetMemoryCache.shared())
     }
 

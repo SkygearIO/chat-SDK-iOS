@@ -17,6 +17,7 @@
 //  limitations under the License.
 //
 
+@objcMembers
 open class SKYChatParticipantListViewCell: UITableViewCell {
     let unnamedParticipant: String = "Unnamed Participant"
 

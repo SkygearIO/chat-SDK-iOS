@@ -17,13 +17,15 @@
 //  limitations under the License.
 //
 
-public protocol SKYAssetCache {
+
+@objc public protocol SKYAssetCache {
     func get(asset: SKYAsset) -> Data?
     func set(data: Data, for asset: SKYAsset)
     func purge(asset: SKYAsset)
     func purgeAll()
 }
 
+@objcMembers
 public class SKYAssetMemoryCache: SKYAssetCache {
     let store: MemoryDataCache
 

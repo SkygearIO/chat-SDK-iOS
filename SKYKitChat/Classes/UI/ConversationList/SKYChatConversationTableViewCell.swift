@@ -17,6 +17,7 @@
 //  limitations under the License.
 //
 
+@objcMembers
 open class SKYChatConversationTableViewCell: UITableViewCell {
     let untitledConversation: String = "Untitled Conversation"
 

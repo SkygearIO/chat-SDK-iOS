@@ -19,13 +19,14 @@
 
 import LruCache
 
-public protocol DataCache {
+@objc public protocol DataCache {
     func getData(forKey key: String) -> Data?
     func set(data: Data, forKey key: String)
     func purgeData(forKey key: String)
     func purgeAll()
 }
 
+@objcMembers
 public class MemoryDataCache: DataCache {
     let store: LruCache
 

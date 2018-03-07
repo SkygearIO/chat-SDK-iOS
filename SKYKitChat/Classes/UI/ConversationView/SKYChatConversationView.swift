@@ -36,7 +36,8 @@ import JSQMessagesViewController
     case otherParticipants
 }
 
-public class SKYChatConversationViewTextCustomization {
+@objcMembers
+public class SKYChatConversationViewTextCustomization: NSObject {
 
     public var sendButton = NSLocalizedString("Send", comment: "")
 
@@ -57,7 +58,8 @@ public class SKYChatConversationViewTextCustomization {
     }
 }
 
-public class SKYChatConversationViewCustomization {
+@objcMembers
+public class SKYChatConversationViewCustomization: NSObject {
     static var sharedInstance: SKYChatConversationViewCustomization?
 
     public var titleDisplayType: SKYChatConversationViewTitleOptions = .`default`
@@ -106,7 +108,7 @@ public class SKYChatConversationViewCustomization {
     public var incomingAudioMessageButtonColor: UIColor = UIColor.white
     public var outgoingAudioMessageButtonColor: UIColor = UIColor.jsq_messageBubbleBlue()
 
-    init() {
+    override init() {
         self.messageDateFormatter = {
             let df = DateFormatter()
             df.dateStyle = .medium
@@ -125,6 +127,7 @@ public class SKYChatConversationViewCustomization {
     }
 }
 
+@objcMembers
 open class SKYChatConversationView: JSQMessagesCollectionView {
     public static func UICustomization() -> SKYChatConversationViewCustomization {
          return SKYChatConversationViewCustomization.default()

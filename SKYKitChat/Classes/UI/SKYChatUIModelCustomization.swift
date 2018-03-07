@@ -19,7 +19,8 @@
 
 import UIKit
 
-public class SKYChatUIModelCustomization {
+@objcMembers
+public class SKYChatUIModelCustomization: NSObject {
     fileprivate static var sharedInstance: SKYChatUIModelCustomization?
 
     public fileprivate(set) var userNameField = "username"
@@ -29,7 +30,7 @@ public class SKYChatUIModelCustomization {
 // MARK: - Singleton
 public extension SKYChatUIModelCustomization {
 
-    static func `default`() -> SKYChatUIModelCustomization {
+    public static func `default`() -> SKYChatUIModelCustomization {
         if self.sharedInstance == nil {
             self.sharedInstance = SKYChatUIModelCustomization()
         }

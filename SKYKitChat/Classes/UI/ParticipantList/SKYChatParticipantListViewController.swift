@@ -49,6 +49,7 @@ public enum SKYChatParticipantQueryMethod: UInt {
                                            atIndexPath indexPath: IndexPath) -> UIImage?
 }
 
+@objcMembers
 open class SKYChatParticipantListViewController: UIViewController {
 
     static let queryMethodCoderKey = "QUERY_METHOD"

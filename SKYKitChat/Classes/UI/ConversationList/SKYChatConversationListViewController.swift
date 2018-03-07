@@ -37,6 +37,7 @@ import SVProgressHUD
                                            didSelectConversation conversation: SKYConversation)
 }
 
+@objcMembers
 open class SKYChatConversationListViewController: UIViewController {
 
     public var skygear: SKYContainer = SKYContainer.default()
