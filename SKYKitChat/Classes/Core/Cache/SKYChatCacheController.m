@@ -90,7 +90,7 @@ static NSString *SKYChatCacheStoreName = @"SKYChatCache";
     completion(participantMap, YES, nil);
 }
 
-- (void)updateParticipants:(NSArray<SKYParticipant *> *)participants
+- (void)didFetchParticipants:(NSArray<SKYParticipant *> *)participants
 {
     [self.store setParticipants:participants];
 }

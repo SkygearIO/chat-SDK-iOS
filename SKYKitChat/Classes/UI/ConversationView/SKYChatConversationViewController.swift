@@ -163,7 +163,7 @@ import JSQMessagesViewController
      */
 
     @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
-                                                   didFetchedParticipants participants: [SKYParticipant])
+                                                   didFetchParticipants participants: [SKYParticipant])
 
     @objc optional func conversationViewController(
         _ controller: SKYChatConversationViewController,
@@ -1922,7 +1922,7 @@ extension SKYChatConversationViewController {
                     strongSelf.updateTitle()
 
                     strongSelf.delegate?.conversationViewController?(
-                        strongSelf, didFetchedParticipants: participants.map { $0.value })
+                        strongSelf, didFetchParticipants: participants.map { $0.value })
 
                     strongSelf.collectionView?.reloadData()
                     strongSelf.collectionView?.layoutIfNeeded()

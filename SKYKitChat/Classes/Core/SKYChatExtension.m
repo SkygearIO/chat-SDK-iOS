@@ -405,7 +405,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                     [participantMap setObject:eachParticipant forKey:eachParticipant.recordName];
                 }];
 
-            [self.cacheController updateParticipants:participantMap.allValues];
+            [self.cacheController didFetchParticipants:participantMap.allValues];
 
             if (completion) {
                 completion(participantMap, NO, nil);

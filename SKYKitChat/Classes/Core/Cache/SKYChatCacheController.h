@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)fetchParticipants:(NSArray<NSString *> *)participantIDs
                completion:(SKYChatFetchParticpantsCompletion _Nullable)completion;
 
-- (void)updateParticipants:(NSArray<SKYParticipant *> *)participants;
+- (void)didFetchParticipants:(NSArray<SKYParticipant *> *)participants;
 
 - (void)fetchMessagesWithConversationID:(NSString *)conversationId
                                   limit:(NSInteger)limit
