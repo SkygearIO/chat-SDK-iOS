@@ -1691,8 +1691,35 @@ extension SKYChatConversationViewController {
                 print("Cannot start recording session.")
             }
         } else {
-            recordingSession.requestRecordPermission() { allowed in }
+            recordingSession.requestRecordPermission() { [weak self] allowed in
+                if !allowed {
+                    self?.showPermissionDeniedAlert()
+                }
+            }
         }
+    }
+
+    open func showPermissionDeniedAlert() {
+        let alertController = UIAlertController(
+            title: "Unable to send voice messaage",
+            message: "Microphone permission is needed for sending voice message. " +
+                     "Please grant the permission in the application Settings.",
+            preferredStyle: .alert
+        )
+
+        let settingsAction = UIAlertAction(title: "Settings", style: .default) { (_) -> Void in
+            guard let settingsUrl = URL(string: UIApplicationOpenSettingsURLString) else {
+                return
+            }
+
+            UIApplication.shared.openURL(settingsUrl)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+
+        alertController.addAction(settingsAction)
+        alertController.addAction(cancelAction)
+
+        self.present(alertController, animated: true, completion: nil)
     }
 
     open func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
