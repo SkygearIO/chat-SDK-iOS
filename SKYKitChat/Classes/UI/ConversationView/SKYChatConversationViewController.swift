@@ -808,7 +808,7 @@ extension SKYChatConversationViewController {
         }()
         self.outgoingAudioMessageButtonColor = {
             if let color =
-                self.delegate?.incomingAudioMessageButtonColorForConversationViewController?(self) {
+                self.delegate?.outgoingAudioMessageButtonColorForConversationViewController?(self) {
                 return color
             }
 
