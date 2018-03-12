@@ -370,6 +370,49 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 #pragma mark Conversation Memberships
 
+- (void)fetchParticipants:(NSArray<NSString *> *)participantIDs
+               completion:(SKYChatFetchParticpantsCompletion _Nullable)completion
+{
+    if (participantIDs.count == 0) {
+        if (completion) {
+            completion(@{}, NO, nil);
+        }
+        return;
+    }
+
+    [self.cacheController fetchParticipants:participantIDs completion:completion];
+
+    SKYQuery *userQuery = [[SKYQuery alloc]
+        initWithRecordType:@"user"
+                 predicate:[NSPredicate predicateWithFormat:@"_id IN %@", participantIDs]];
+    [userQuery setLimit:participantIDs.count];
+
+    [self.container.publicCloudDatabase
+             performQuery:userQuery
+        completionHandler:^(NSArray *_Nullable results, NSError *_Nullable error) {
+            NSMutableDictionary<NSString *, SKYParticipant *> *participantMap = [@{} mutableCopy];
+            if (error) {
+                if (completion) {
+                    completion(participantMap, NO, error);
+                }
+                return;
+            }
+
+            [results
+                enumerateObjectsUsingBlock:^(SKYRecord *eachRecord, NSUInteger idx, BOOL *stop) {
+                    SKYParticipant *eachParticipant =
+                        [[SKYParticipant alloc] initWithRecordData:eachRecord];
+                    [participantMap setObject:eachParticipant forKey:eachParticipant.recordName];
+                }];
+
+            [self.cacheController didFetchParticipants:participantMap.allValues];
+
+            if (completion) {
+                completion(participantMap, NO, nil);
+            }
+        }];
+}
+
 - (void)updateMembershipsWithLambda:(NSString *)lambda
                      participantIDs:(NSArray<NSString *> *)participantIDs
                      toConversation:(SKYConversation *)conversation

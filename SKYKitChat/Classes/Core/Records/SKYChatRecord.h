@@ -26,15 +26,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (id)initWithRecordData:(SKYRecord *)record;
 
 @property (copy, nonatomic) SKYRecord *record;
+@property (strong, nonatomic) NSString *creatorUserRecordID;
+@property (strong, nonatomic) NSDate *creationDate;
+@property (strong, nonatomic, readonly) SKYRecordID *recordID;
+@property (strong, nonatomic, readonly) NSString *recordType;
+@property (strong, nonatomic, readonly) NSString *recordName;
+@property (strong, nonatomic, readonly) NSDictionary *dictionary;
 
-- (NSString *)creatorUserRecordID;
-- (NSDate *)creationDate;
-- (SKYRecordID *)recordID;
-- (NSString *)recordType;
-
-- (void)setCreatorUserRecordID:(NSString *)recordID;
-- (void)setCreationDate:(NSDate *)date;
-- (NSDictionary *)dictionary;
 @end
 
 NS_ASSUME_NONNULL_END

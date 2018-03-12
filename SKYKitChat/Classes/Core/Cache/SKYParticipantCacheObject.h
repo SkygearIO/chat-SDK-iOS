@@ -1,5 +1,5 @@
 //
-//  SKYParticipant.h
+//  SKYParticipantCacheObject.h
 //  SKYKitChat
 //
 //  Copyright 2016 Oursky Ltd.
@@ -17,16 +17,17 @@
 //  limitations under the License.
 //
 
+#import "SKYParticipant.h"
+#import <Realm/Realm.h>
 #import <SKYKit/SKYKit.h>
 
-#import "SKYChatRecord.h"
+@interface SKYParticipantCacheObject : RLMObject
 
-NS_ASSUME_NONNULL_BEGIN
+@property NSString *recordID;
+@property NSData *recordData;
 
-@interface SKYParticipant : SKYChatRecord
++ (SKYParticipantCacheObject *)cacheObjectFromParticipant:(SKYParticipant *)participantRecord;
 
-+ (instancetype)recordWithRecord:(SKYRecord *_Nullable)record;
+- (SKYParticipant *)participantRecord;
 
 @end
-
-NS_ASSUME_NONNULL_END

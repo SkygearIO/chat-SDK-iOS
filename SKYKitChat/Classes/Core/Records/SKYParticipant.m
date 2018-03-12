@@ -26,14 +26,4 @@
     return [[SKYParticipant alloc] initWithRecordData:record];
 }
 
-- (NSString *)recordName
-{
-    return self.record.recordType;
-}
-
-- (SKYRecordID *)recordID
-{
-    return self.record.recordID;
-}
-
 @end

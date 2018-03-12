@@ -48,7 +48,7 @@ open class SKYChatConversationListViewController: UIViewController {
 
     var refreshControl: UIRefreshControl!
     var conversations: [SKYConversation] = []
-    var users: [String: SKYRecord] = [:]
+    var participantMap: [String: SKYParticipant] = [:]
     var conversationChangeObserver: Any?
 }
 
@@ -152,7 +152,7 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
                     return
                 }
 
-                if let eachParticipant = self.users[eachParticipantID] {
+                if let eachParticipant = self.participantMap[eachParticipantID] {
                     cell.participants.append(eachParticipant)
                 }
             })
@@ -199,14 +199,6 @@ extension SKYChatConversationListViewController: UITableViewDelegate, UITableVie
 
 extension SKYChatConversationListViewController {
 
-    public func getUsers() -> [String: SKYRecord] {
-        return self.users
-    }
-
-    public func getUser(byUserID userID: String) -> SKYRecord? {
-        return self.users[userID]
-    }
-
     public func getConversations() -> [SKYConversation] {
         return self.conversations
     }
@@ -231,56 +223,44 @@ extension SKYChatConversationListViewController {
         })
     }
 
-    open func performUserQuery(byIDs userIDs: [String]) {
-        let predicate = NSPredicate(format: "_id IN %@", userIDs)
-        let query = SKYQuery(recordType: "user", predicate: predicate)
+    open func performParticipantQuery(byIDs participantIDs: [String]) {
+        self.skygear
+            .chatExtension?
+            .fetchParticipants(
+                participantIDs: Array(participantIDs),
+                completion: {[weak self] (result, isCached, error) in
+                    guard error == nil else {
+                        self?.handleParticipantQueryError(error: error!)
+                        return
+                    }
 
-        self.skygear.publicCloudDatabase.perform(query) { (result, error) in
-            guard error == nil else {
-                self.handleUserQueryError(error: error!)
-                return
-            }
-
-            guard let users = result as? [SKYRecord] else {
-                let err = SKYErrorCreator()
-                    .error(with: SKYErrorBadResponse,
-                           message: NSLocalizedString("Cannot get any users", comment: ""))
-                self.handleUserQueryError(error: err)
-                return
-            }
-
-            self.handleUserQueryResult(result: users)
-        }
+                    self?.handleParticipantQueryResult(result: result)
+            })
     }
 
     open func handleQueryResult(result: [SKYConversation]) {
         self.conversations = result
         self.tableView.reloadData()
 
-        let currentCachedUserKeys = self.users.keys
-        let userIDs = result
+        let participantIDs = result
             .reduce(Set([])) { return $0.union(Set($1.participantIds))}
-            .filter { !currentCachedUserKeys.contains($0) }
 
-        if userIDs.count > 0 {
-            self.performUserQuery(byIDs: Array(userIDs))
-        }
+        self.performParticipantQuery(byIDs: Array(participantIDs))
     }
 
     open func handleQueryError(error: Error) {
         SVProgressHUD.showError(withStatus: error.localizedDescription)
     }
 
-    open func handleUserQueryResult(result: [SKYRecord]) {
-        result.forEach { (eachUser) in
-            let eachUserID = eachUser.recordID.recordName
-            self.users[eachUserID] = eachUser
-        }
+    open func handleParticipantQueryResult(result: [String: SKYParticipant]) {
+        result.forEach({ (eachParticipantID, eachParticipant) in
+            self.participantMap[eachParticipantID] = eachParticipant
+        })
 
         self.tableView.reloadData()
     }
 
-    open func handleUserQueryError(error: Error) {
+    open func handleParticipantQueryError(error: Error) {
         SVProgressHUD.showError(withStatus: error.localizedDescription)
     }
 
