@@ -6,7 +6,7 @@ PODS:
   - FMDB (2.6.2):
     - FMDB/standard (= 2.6.2)
   - FMDB/standard (2.6.2)
-  - JSQMessagesViewController-Skygear (7.3.5.3):
+  - JSQMessagesViewController-Skygear (7.3.5.4):
     - JSQSystemSoundPlayer (~> 2.0.1)
   - JSQSystemSoundPlayer (2.0.1)
   - Kingfisher (4.6.1)
@@ -42,7 +42,7 @@ PODS:
   - SKYKitChat/UI (1.2.0-alpha.7):
     - ALCameraViewController (~> 3.0)
     - CTAssetsPickerController (~> 3.3.1)
-    - JSQMessagesViewController-Skygear (= 7.3.5.3)
+    - JSQMessagesViewController-Skygear (= 7.3.5.4)
     - JSQSystemSoundPlayer (~> 2.0.1)
     - LruCache (~> 0.1)
     - SKPhotoBrowser (~> 5.0.5)
@@ -70,7 +70,7 @@ SPEC CHECKSUMS:
   CTAssetsPickerController: b1d1d50ab87cf6b8b13531de5f4530482e7e53ed
   Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
   FMDB: 854a0341b4726e53276f2a8996f06f1b80f9259a
-  JSQMessagesViewController-Skygear: e0ae908063ad3148a8ba077b20cd20b9cb1ba3af
+  JSQMessagesViewController-Skygear: 363f8b91363e1c18039f2abdc53ca26050b57ca7
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
   Kingfisher: 1f9157d9c02b380cbd0b7cc890161195164eb634
   LruCache: 3a1a9dbed4db352c980bc1ad956e3046bce32515
@@ -80,7 +80,7 @@ SPEC CHECKSUMS:
   Realm: 6f23fd1f178a09342eac21bfa7c2bf4312a7a180
   SKPhotoBrowser: 5969c3813727f11fe37bea74a40425cafcb32f61
   SKYKit: 49a6bd447246b3a2d0a5f78127a1429476c48ccf
-  SKYKitChat: 6bce897aab1ce5dcbaeaf31142a0ac0e1bd6374e
+  SKYKitChat: 22abf9ec3cdd5ffd06cfc16a251abbc68f5ed765
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   Specta: 3e1bd89c3517421982dc4d1c992503e48bd5fe66
   SVProgressHUD: c404a55d78acbeb7ebb78b76d3faf986475a6994
