@@ -309,22 +309,20 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
     public var typingIndicatorChangeObserver: Any?
     public var typingIndicatorPromptTimer: Timer?
 
-    public var bubbleFactory: JSQMessagesBubbleImageFactory? = JSQMessagesBubbleImageFactory()
-    public var incomingMessageBubble: JSQMessagesBubbleImage?
-    public var outgoingMessageBubble: JSQMessagesBubbleImage?
+    public let bubbleFactory = JSQMessagesBubbleImageFactory()
+    public private(set) var incomingMessageBubble: JSQMessagesBubbleImage?
+    public private(set) var outgoingMessageBubble: JSQMessagesBubbleImage?
 
-    public var incomingMessageTextColor: UIColor?
-    public var outgoingMessageTextColor: UIColor?
+    public private(set) var incomingMessageTextColor: UIColor?
+    public private(set) var outgoingMessageTextColor: UIColor?
 
-    public var incomingAudioMessageButtonColor: UIColor?
-    public var outgoingAudioMessageButtonColor: UIColor?
+    public private(set) var incomingAudioMessageButtonColor: UIColor?
+    public private(set) var outgoingAudioMessageButtonColor: UIColor?
 
     let downloadDispatcher = SimpleDownloadDispatcher.default()
-    public var dataCache: DataCache = MemoryDataCache.shared()
-    public var assetCache: SKYAssetCache = SKYAssetMemoryCache.shared()
-    public var messageMediaDataFactory = JSQMessageMediaDataFactory()
-
-    public var cameraButton: UIButton?
+    let dataCache: DataCache = MemoryDataCache.shared()
+    let assetCache: SKYAssetCache = SKYAssetMemoryCache.shared()
+    lazy var messageMediaDataFactory = JSQMessageMediaDataFactory(with: self.assetCache)
 
     public var conversationViewBackgroundColor: UIColor {
         if let color = self.delegate?.backgroundColorForConversationViewController?(self) {
@@ -471,14 +469,14 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
         return view
     }
 
-    public var incomingMessageBubbleColor: UIColor? {
+    public private(set) var incomingMessageBubbleColor: UIColor? {
         didSet {
             self.incomingMessageBubble = self.bubbleFactory?
                 .incomingMessagesBubbleImage(with: self.incomingMessageBubbleColor)
         }
     }
 
-    public var outgoingMessageBubbleColor: UIColor? {
+    public private(set) var outgoingMessageBubbleColor: UIColor? {
         didSet {
             self.outgoingMessageBubble = self.bubbleFactory?
                 .outgoingMessagesBubbleImage(with: self.outgoingMessageBubbleColor)
@@ -491,10 +489,7 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
         return SKYErrorCreator(defaultErrorDomain: SKYChatConversationViewController.errorDomain)
     }
 
-    open func getMessageMediaDataFactory() -> JSQMessageMediaDataFactory {
-        return messageMediaDataFactory
-    }
-
+    var cameraButton: UIButton?
     var sendButton: UIButton?
     var recordButton: UIButton?
     var audioRecorder: AVAudioRecorder?
