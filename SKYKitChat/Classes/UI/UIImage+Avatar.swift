@@ -27,12 +27,31 @@ public extension UIImage {
         ]
     }
 
+    class func getAvatarPlaceholderImageColor() -> UIColor {
+        return UIColor(white: 0.9, alpha: 1.0)
+    }
+
     class func getAvatarDefaultSize() -> CGSize {
         return CGSize(width: 100, height: 100)
     }
 
     class func getAvatarDefaultTextColor() -> UIColor {
         return UIColor.white
+    }
+
+    class func avatarPlaceholderImage() -> UIImage? {
+        let color = UIImage.getAvatarPlaceholderImageColor()
+        let size = UIImage.getAvatarDefaultSize()
+
+        UIGraphicsBeginImageContext(size)
+        defer {
+            UIGraphicsEndImageContext()
+        }
+
+        color.setFill()
+        UIRectFill(CGRect(origin: CGPoint(x: 0, y: 0), size: size))
+
+        return UIGraphicsGetImageFromCurrentImageContext()
     }
 
     class func avatarImage(forInitialsOfName name: String) -> UIImage? {

@@ -1158,6 +1158,23 @@ extension SKYChatConversationViewController {
             // get from avatar field
             let avatarField = SKYChatUIModelCustomization.default().userAvatarField
             let senderAvatar = sender?.record.object(forKey: avatarField)
+            let getAvatarPlaceholderImage: () -> UIImage? = { [weak self] in
+                // from cache
+                let avatarPlaceholderCacheKey = "avatar-placeholder"
+                if let cachedData = self?.dataCache.getData(forKey: avatarPlaceholderCacheKey) {
+                    return UIImage(data: cachedData)
+                }
+
+                // draw the image
+                if let placeholderImage = UIImage.avatarPlaceholderImage() {
+                    if let data = UIImagePNGRepresentation(placeholderImage) {
+                        self?.dataCache.set(data: data, forKey: avatarPlaceholderCacheKey)
+                    }
+                    return placeholderImage
+                }
+
+                return nil
+            }
             switch senderAvatar {
             case let senderAvatarUrl as String:
                 if let data = self.dataCache.getData(forKey: senderAvatarUrl) {
@@ -1174,6 +1191,10 @@ extension SKYChatConversationViewController {
                     self.dataCache.set(data: downloadedData, forKey: senderAvatarUrl)
                     self.conversationView?.reloadItems(at: [indexPath])
                 })
+
+                if let placeholderImage = getAvatarPlaceholderImage() {
+                    return JSQMessagesAvatarImage.avatar(with: placeholderImage)
+                }
             case let senderAvatarAsset as SKYAsset:
                 if let data = self.assetCache.get(asset: senderAvatarAsset) {
                     return JSQMessagesAvatarImage.avatar(with: UIImage(data: data))
@@ -1191,6 +1212,10 @@ extension SKYChatConversationViewController {
                         self.assetCache.set(data: downloadedData, for: senderAvatarAsset)
                         self.conversationView?.reloadItems(at: [indexPath])
                 })
+
+                if let placeholderImage = getAvatarPlaceholderImage() {
+                    return JSQMessagesAvatarImage.avatar(with: placeholderImage)
+                }
             default: ()
             }
         }
