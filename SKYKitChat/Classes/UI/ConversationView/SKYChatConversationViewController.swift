@@ -1850,11 +1850,6 @@ extension SKYChatConversationViewController {
                 self.skygear.chatExtension?.markLastReadMessage(msg,
                                                                 in: self.conversation!,
                                                                 completion: nil)
-
-                self.delegate?.conversationViewController?(self,
-                                                           didFetchMessages: [msg],
-                                                           isCached: false)
-
                 self.finishReceivingMessage()
             case .update:
                 self.delegate?.conversationViewController?(self, didUpdateMessage: msg)
