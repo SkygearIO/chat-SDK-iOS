@@ -2060,21 +2060,25 @@ extension SKYChatConversationViewController {
             limit: Int(self.messagesFetchLimit),
             beforeMessage: before,
             order: nil,
-            completion: { (result, isCached, error) in
+            completion: { [weak self] (result, isCached, error) in
+                guard let strongSelf = self else {
+                    return
+                }
+
                 if isCached {
                     if (result?.count ?? 0) > 0 {
-                        self.indicator?.stopAnimating()
+                        strongSelf.indicator?.stopAnimating()
                     }
 
                     cachedResult.addObjects(from: result!)
                 } else {
-                    self.isFetchingMessage = false
-                    self.indicator?.stopAnimating()
+                    strongSelf.isFetchingMessage = false
+                    strongSelf.indicator?.stopAnimating()
 
                     guard error == nil else {
                         print("Failed to fetch messages: \(error?.localizedDescription ?? "")")
-                        self.delegate?.conversationViewController?(
-                            self, failedFetchingMessagesWithError: error!)
+                        strongSelf.delegate?.conversationViewController?(
+                            strongSelf, failedFetchingMessagesWithError: error!)
 
                         return
                     }
@@ -2082,65 +2086,77 @@ extension SKYChatConversationViewController {
 
                 guard let msgs = result else {
                     print("Failed to get any messages")
-                    let err = self.errorCreator.error(
+                    let err = strongSelf.errorCreator.error(
                         with: SKYErrorBadResponse, message: "Failed to get any messages")
 
-                    self.delegate?.conversationViewController?(
-                        self, failedFetchingMessagesWithError: err)
+                    strongSelf.delegate?.conversationViewController?(
+                        strongSelf, failedFetchingMessagesWithError: err)
 
                     return
                 }
 
                 if !isCached {
                     if let cachedMessages = cachedResult as? [SKYMessage] {
-                        self.messageList.remove(cachedMessages)
+                        strongSelf.messageList.remove(cachedMessages)
                     }
                 }
-                self.messageList.merge(msgs)
+                strongSelf.messageList.merge(msgs)
                 // NOTE(cheungpat): Since we are fetching messages from
                 // the servers, these messages are assumed to be successful.
                 // Removing the failed operations because existence of
                 // a message operation is considered to be the message being
                 // failing.
                 for msg in msgs {
-                    self.removeMessageError(msg)
+                    strongSelf.removeMessageError(msg)
                 }
+
+                strongSelf.delegate?.conversationViewController?(
+                    strongSelf,
+                    didFetchMessages: msgs,
+                    isCached: isCached
+                )
+
+                strongSelf.finishReceivingMessage()
+
+                // force collection view layout
+                // to allow new content offset calculated
+                strongSelf.collectionView.layoutIfNeeded()
+
+                let fullFrameHeight =
+                    strongSelf.collectionView.contentSize.height
+                        - strongSelf.collectionView.frame.size.height
+                        + strongSelf.inputToolbarHeightConstraint.constant
+
+                let additionalOffset = strongSelf.topContentAdditionalInset
+                let offsetY = max(
+                    min(fullFrameHeight, strongSelf.collectionView.contentOffset.y),
+                    -additionalOffset)
+                strongSelf.collectionView.contentOffset = CGPoint(x: 0, y: offsetY)
+                strongSelf.collectionView.flashScrollIndicators()
 
                 if !isCached {
                     if msgs.count > 0, let first = msgs.first {
                         // this is the first page
                         chatExt?.markReadMessages(msgs, completion: nil)
                         chatExt?.markLastReadMessage(first,
-                                                     in: self.conversation!,
+                                                     in: strongSelf.conversation!,
                                                      completion: nil)
                     }
-                }
 
-                self.delegate?.conversationViewController?(self, didFetchMessages: msgs, isCached: isCached)
+                    strongSelf.hasMoreMessageToFetch = {
+                        if msgs.count == 1
+                            && !strongSelf.messageList.contains(msgs[0].recordName)
+                        {
+                            return true
+                        }
 
-                self.hasMoreMessageToFetch = msgs.count > 0
+                        return msgs.count > 1
+                    }()
 
-                self.finishReceivingMessage()
-
-                // force collection view layout
-                // to allow new content offset calculated
-                self.collectionView.layoutIfNeeded()
-
-                let fullFrameHeight =
-                    self.collectionView.contentSize.height
-                        - self.collectionView.frame.size.height
-                        + self.inputToolbarHeightConstraint.constant
-
-                let additionalOffset = self.topContentAdditionalInset
-                let offsetY = max(
-                    min(fullFrameHeight, self.collectionView.contentOffset.y),
-                    -additionalOffset)
-                self.collectionView.contentOffset = CGPoint(x: 0, y: offsetY)
-                self.collectionView.flashScrollIndicators()
-
-                // Trigger next time load more message if needed
-                if self.shouldLoadMoreMessage() {
-                    self.loadMoreMessage()
+                    // Trigger next time load more message if needed
+                    if strongSelf.shouldLoadMoreMessage() {
+                        strongSelf.loadMoreMessage()
+                    }
                 }
         })
     }
