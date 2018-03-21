@@ -2017,7 +2017,6 @@ extension SKYChatConversationViewController {
         chatExt?.fetchOutstandingMessageOperations(conversationID: self.conversation!.recordName,
                                                    operationType: SKYMessageOperationType.add,
                                                    completion: { (operations) in
-                                                    var unsentMessages = [SKYMessage]()
                                                     for operation in operations {
                                                         guard operation.status == SKYMessageOperationStatus.failed else {
                                                             continue
@@ -2035,11 +2034,7 @@ extension SKYChatConversationViewController {
                                                             )
                                                         }()
                                                         self.setMessageError(operation.message, error: error)
-                                                        unsentMessages.append(operation.message)
                                                     }
-                                                    self.delegate?.conversationViewController?(self,
-                                                                                               didFetchMessages: unsentMessages,
-                                                                                               isCached: true)
                                                     self.finishReceivingMessage()
         })
     }
