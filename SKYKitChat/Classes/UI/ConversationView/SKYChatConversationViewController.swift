@@ -163,7 +163,8 @@ import JSQMessagesViewController
      */
 
     @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
-                                                   didFetchParticipants participants: [SKYParticipant])
+                                                   didFetchParticipants participants: [SKYParticipant],
+                                                   isCached: Bool)
 
     @objc optional func conversationViewController(
         _ controller: SKYChatConversationViewController,
@@ -172,7 +173,7 @@ import JSQMessagesViewController
     @objc optional func startFetchingMessages(_ controller: SKYChatConversationViewController)
 
     @objc optional func conversationViewController(_ controller: SKYChatConversationViewController,
-                                                   didFetchedMessages messages: [SKYMessage],
+                                                   didFetchMessages messages: [SKYMessage],
                                                    isCached: Bool)
 
     @objc optional func conversationViewController(
@@ -1850,7 +1851,9 @@ extension SKYChatConversationViewController {
                                                                 in: self.conversation!,
                                                                 completion: nil)
 
-                self.delegate?.conversationViewController?(self, didFetchedMessages: [msg], isCached: false)
+                self.delegate?.conversationViewController?(self,
+                                                           didFetchMessages: [msg],
+                                                           isCached: false)
 
                 self.finishReceivingMessage()
             case .update:
@@ -1971,7 +1974,8 @@ extension SKYChatConversationViewController {
                     strongSelf.updateTitle()
 
                     strongSelf.delegate?.conversationViewController?(
-                        strongSelf, didFetchParticipants: participants.map { $0.value })
+                        strongSelf, didFetchParticipants: participants.map { $0.value },
+                        isCached: isCached)
 
                     strongSelf.collectionView?.reloadData()
                     strongSelf.collectionView?.layoutIfNeeded()
@@ -2023,12 +2027,19 @@ extension SKYChatConversationViewController {
                                                             if let err = operation.error {
                                                                 return err
                                                             }
-                                                            return NSError(domain:"", code:0, userInfo:[NSLocalizedDescriptionKey: "Error occurred sending message."])
+                                                            return NSError(domain:"",
+                                                                           code:0,
+                                                                           userInfo: [
+                                                                            NSLocalizedDescriptionKey: "Error occurred sending message."
+                                                                           ]
+                                                            )
                                                         }()
                                                         self.setMessageError(operation.message, error: error)
                                                         unsentMessages.append(operation.message)
                                                     }
-                                                    self.delegate?.conversationViewController?(self, didFetchedMessages: unsentMessages, isCached: true)
+                                                    self.delegate?.conversationViewController?(self,
+                                                                                               didFetchMessages: unsentMessages,
+                                                                                               isCached: true)
                                                     self.finishReceivingMessage()
         })
     }
@@ -2110,7 +2121,7 @@ extension SKYChatConversationViewController {
                     }
                 }
 
-                self.delegate?.conversationViewController?(self, didFetchedMessages: msgs, isCached: isCached)
+                self.delegate?.conversationViewController?(self, didFetchMessages: msgs, isCached: isCached)
 
                 self.hasMoreMessageToFetch = msgs.count > 0
 
