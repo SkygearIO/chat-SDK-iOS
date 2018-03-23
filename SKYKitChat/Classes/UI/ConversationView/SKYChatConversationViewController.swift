@@ -128,7 +128,8 @@ import JSQMessagesViewController
         _ controller: SKYChatConversationViewController)
 
     @objc optional func pubsubDidDisconnectInConversationViewController(
-        _ controller: SKYChatConversationViewController)
+        _ controller: SKYChatConversationViewController,
+        error: Error?)
 
     /**
      * Hooks on send message flow
@@ -1814,7 +1815,11 @@ extension SKYChatConversationViewController: SKYPubsubContainerDelegate {
     }
 
     open func pubsubDidClose(_ pubsub: SKYPubsubContainer) {
-        self.delegate?.pubsubDidDisconnectInConversationViewController?(self)
+        self.delegate?.pubsubDidDisconnectInConversationViewController?(self, error: nil)
+    }
+
+    open func pubsub(_ pubsub: SKYPubsubContainer, didFailWithError error: Error) {
+        self.delegate?.pubsubDidDisconnectInConversationViewController?(self, error: error)
     }
 }
 
