@@ -95,3 +95,7 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 ## License
 
 SKYKitChat is available under the Apache License, Version 2.0. See the LICENSE file for more info.
+
+## Support
+
+For implementation related questions or technical support, please find us on the [official forum](https://discuss.skygear.io) or [community chat](https://slack.skygear.io); For bug reports or feature requests, feel free to open an issue in this repo
