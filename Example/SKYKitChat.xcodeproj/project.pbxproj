@@ -112,7 +112,7 @@
 		A9C891E41FB404BF006B1112 /* SKYChatCacheControllerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SKYChatCacheControllerTests.m; sourceTree = "<group>"; };
 		ACF38D1BCF61531132635F9E /* Pods_Swift_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Swift_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C166D4E46298323DA868EE04 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
-		D848F7ED663C1EAF1A0DB616 /* SKYKitChat.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = SKYKitChat.podspec; path = ../SKYKitChat.podspec; sourceTree = "<group>"; };
+		D848F7ED663C1EAF1A0DB616 /* SKYKitChat.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = SKYKitChat.podspec; path = ../SKYKitChat.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		DF9DC27001F32EDA30C722A1 /* Pods-SKYKitChat_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SKYKitChat_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-SKYKitChat_Example/Pods-SKYKitChat_Example.release.xcconfig"; sourceTree = "<group>"; };
 		EEBC7866532676817C33E6D6 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
