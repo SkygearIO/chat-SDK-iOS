@@ -1,3 +1,9 @@
+## 1.5.1 (2018-07-11)
+
+### Other Notes
+
+- Update podspec to require SKYKit/Core version ~> 1.4, so that user can update core sdk with newer minor version.
+
 ## 1.5.0 (2018-05-16)
 
 ### Features
