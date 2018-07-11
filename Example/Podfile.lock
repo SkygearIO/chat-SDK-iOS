@@ -57,9 +57,28 @@ DEPENDENCIES:
   - SKYKitChat/UI (from `../`)
   - Specta
 
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - ALCameraViewController
+    - CTAssetsPickerController
+    - Expecta
+    - JSQMessagesViewController-Skygear
+    - JSQSystemSoundPlayer
+    - Kingfisher
+    - LruCache
+    - MagicKit-Skygear
+    - OHHTTPStubs
+    - PureLayout
+    - Realm
+    - SKPhotoBrowser
+    - SKYKit
+    - SocketRocket
+    - Specta
+    - SVProgressHUD
+
 EXTERNAL SOURCES:
   SKYKitChat:
-    :path: ../
+    :path: "../"
 
 SPEC CHECKSUMS:
   ALCameraViewController: 6398a9282057f709b87a1ecc52a83b48028ade64
@@ -82,4 +101,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 08bcd5e3aaa34705dce7fb1d8f9e85fa4957abc7
 
-COCOAPODS: 1.4.0
+COCOAPODS: 1.5.3
