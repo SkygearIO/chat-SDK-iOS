@@ -24,25 +24,18 @@ import SKYKitChat
 class ConversationsViewController: UITableViewController {
 
     var conversations = [SKYConversation]()
+    var requesting = false
+    var allLoaded = false
+    var currentPage = 1
+    let pageSize = 50
+    let loadMoreOffset = 5
 
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        SKYContainer.default().chatExtension?.fetchConversations(fetchLastMessage:false) { (conversations, error) in
-            if let err = error {
-                let alert = UIAlertController(title: "Unable to fetch conversations", message: err.localizedDescription, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                self.present(alert, animated: true, completion: nil)
-                return
-            }
-
-            if let cons = conversations {
-                self.conversations = cons.reversed()
-                self.tableView.reloadData()
-            }
-        }
+        self.fetchConversations()
     }
 
     // MARK: - Navigation
@@ -65,6 +58,10 @@ class ConversationsViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if indexPath.row >= conversations.count - loadMoreOffset {
+            self.fetchConversations()
+        }
+
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
 
         let conversation = conversations[indexPath.row]
@@ -97,5 +94,47 @@ class ConversationsViewController: UITableViewController {
         deleteAction.backgroundColor = UIColor.red
         
         return [deleteAction]
+    }
+
+    // MARK: - Table view data source
+
+    func fetchConversations() {
+        if (requesting || allLoaded) {
+            return;
+        }
+        requesting = true
+        SKYContainer
+            .default()
+            .chatExtension?
+            .fetchConversations(page: self.currentPage,
+                                pageSize: self.pageSize,
+                                fetchLastMessage: false,
+                                completion: { (conversations, error) in
+                                    self.requesting = false
+                                    self.currentPage += 1
+                                    if let err = error {
+                                        let alert = UIAlertController(title: "Unable to fetch conversations", message: err.localizedDescription, preferredStyle: .alert)
+                                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                                        self.present(alert, animated: true, completion: nil)
+                                        return
+                                    }
+
+                                    if let cons = conversations {
+                                        if cons.count < self.pageSize {
+                                            self.allLoaded = true
+                                        }
+                                        self.conversations = self.conversations + cons
+                                        // deduplicate
+                                        var cIDs = Set<String>()
+                                        self.conversations = self.conversations.filter({ (con) -> Bool in
+                                            if cIDs.contains(con.recordName()) {
+                                                return false
+                                            }
+                                            cIDs.insert(con.recordName())
+                                            return true
+                                        })
+                                        self.tableView.reloadData()
+                                    }
+            })
     }
 }
