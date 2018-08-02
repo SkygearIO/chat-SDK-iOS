@@ -44,10 +44,10 @@ PODS:
     - SKPhotoBrowser (~> 5.0.5)
     - SKYKit/Core (~> 1.4)
     - SKYKitChat/Core
-    - SVProgressHUD (~> 2.1.0)
+    - SVProgressHUD (~> 2.2)
   - SocketRocket (0.5.1)
   - Specta (1.0.7)
-  - SVProgressHUD (2.1.2)
+  - SVProgressHUD (2.2.5)
 
 DEPENDENCIES:
   - Expecta
@@ -94,10 +94,10 @@ SPEC CHECKSUMS:
   Realm: 6f23fd1f178a09342eac21bfa7c2bf4312a7a180
   SKPhotoBrowser: 5969c3813727f11fe37bea74a40425cafcb32f61
   SKYKit: b276cf12cbc79c47fd47ac83b5b836c46a5b25e9
-  SKYKitChat: 406d32fee259854c286685b092f1ef72ee1f3752
+  SKYKitChat: 939c9e065a82a67e2fcfefb7cc32bcf08ea14b79
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   Specta: 3e1bd89c3517421982dc4d1c992503e48bd5fe66
-  SVProgressHUD: c404a55d78acbeb7ebb78b76d3faf986475a6994
+  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
 
 PODFILE CHECKSUM: 08bcd5e3aaa34705dce7fb1d8f9e85fa4957abc7
 
