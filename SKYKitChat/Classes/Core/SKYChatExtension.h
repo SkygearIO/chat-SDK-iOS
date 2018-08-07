@@ -298,6 +298,20 @@ typedef void (^SKYMessageOperationListCompletion)(
     /* clang-format off */ NS_SWIFT_NAME(fetchConversations(fetchLastMessage:completion:)); /* clang-format on */
 
 /**
+ Fetches conversations with paging options and optional last message in conversation.
+
+ @param page page number
+ @param pageSize number of conversation per page
+ @param fetchLastMessage whether to fetch the last message
+ @param completion completion block
+ */
+- (void)fetchConversationsWithPage:(NSInteger)page
+                          pageSize:(NSInteger)pageSize
+                  fetchLastMessage:(BOOL)fetchLastMessage
+                        completion:(SKYChatFetchConversationListCompletion _Nullable)completion
+    /* clang-format off */ NS_SWIFT_NAME(fetchConversations(page:pageSize:fetchLastMessage:completion:)); /* clang-format on */
+
+/**
  Fetches a conversation by conversation ID.
 
  @param conversationID ID of conversation

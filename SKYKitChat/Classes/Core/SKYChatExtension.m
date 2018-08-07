@@ -266,39 +266,51 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 #pragma mark Fetching Conversations
 - (void)fetchConversationsWithCompletion:(SKYChatFetchConversationListCompletion)completion
 {
-    [self fetchConversationsWithFetchLastMessage:TRUE completion:completion];
+    [self fetchConversationsWithPage:1 pageSize:50 fetchLastMessage:TRUE completion:completion];
 }
 
 - (void)fetchConversationsWithFetchLastMessage:(BOOL)fetchLastMessage
                                     completion:(SKYChatFetchConversationListCompletion)completion
 {
-    [self.container callLambda:@"chat:get_conversations"
-                     arguments:@[
-                         [NSNumber numberWithInt:1], [NSNumber numberWithInt:50],
-                         [NSNumber numberWithBool:fetchLastMessage]
-                     ]
-             completionHandler:^(NSDictionary *response, NSError *error) {
-                 if (error) {
-                     NSLog(@"error calling chat:get_conversations: %@", error);
-                     if (completion) {
-                         completion(nil, error);
-                     }
-                     return;
-                 }
-                 NSLog(@"Received response = %@", response);
-                 SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
-                 NSMutableArray *result = [response mutableArrayValueForKey:@"conversations"];
-                 NSMutableArray *conversations = [NSMutableArray array];
-                 for (NSDictionary *obj in result) {
-                     SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
-                     SKYConversation *conversation = [SKYConversation recordWithRecord:record];
-                     [conversations addObject:conversation];
-                 }
+    [self fetchConversationsWithPage:1
+                            pageSize:50
+                    fetchLastMessage:fetchLastMessage
+                          completion:completion];
+}
 
-                 if (completion) {
-                     completion(conversations, error);
-                 }
-             }];
+- (void)fetchConversationsWithPage:(NSInteger)page
+                          pageSize:(NSInteger)pageSize
+                  fetchLastMessage:(BOOL)fetchLastMessage
+                        completion:(SKYChatFetchConversationListCompletion)completion
+{
+    [self.container callLambda:@"chat:get_conversations"
+        dictionaryArguments:@{
+            @"page" : @(page),
+            @"page_size" : @(pageSize),
+            @"include_last_message" : [NSNumber numberWithBool:fetchLastMessage]
+        }
+        completionHandler:^(NSDictionary *response, NSError *error) {
+            if (error) {
+                NSLog(@"error calling chat:get_conversations: %@", error);
+                if (completion) {
+                    completion(nil, error);
+                }
+                return;
+            }
+            NSLog(@"Received response = %@", response);
+            SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
+            NSMutableArray *result = [response mutableArrayValueForKey:@"conversations"];
+            NSMutableArray *conversations = [NSMutableArray array];
+            for (NSDictionary *obj in result) {
+                SKYRecord *record = [deserializer recordWithDictionary:[obj copy]];
+                SKYConversation *conversation = [SKYConversation recordWithRecord:record];
+                [conversations addObject:conversation];
+            }
+
+            if (completion) {
+                completion(conversations, error);
+            }
+        }];
 }
 
 - (void)fetchConversationWithConversationID:(NSString *)conversationId
