@@ -266,33 +266,22 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 #pragma mark Fetching Conversations
 - (void)fetchConversationsWithCompletion:(SKYChatFetchConversationListCompletion)completion
 {
-    [self __fetchConversationsWithPage:1 pageSize:50 fetchLastMessage:TRUE completion:completion];
+    [self fetchConversationsWithPage:1 pageSize:50 fetchLastMessage:TRUE completion:completion];
 }
 
 - (void)fetchConversationsWithFetchLastMessage:(BOOL)fetchLastMessage
                                     completion:(SKYChatFetchConversationListCompletion)completion
 {
-    [self __fetchConversationsWithPage:1
-                              pageSize:50
-                      fetchLastMessage:fetchLastMessage
-                            completion:completion];
+    [self fetchConversationsWithPage:1
+                            pageSize:50
+                    fetchLastMessage:fetchLastMessage
+                          completion:completion];
 }
 
 - (void)fetchConversationsWithPage:(NSInteger)page
                           pageSize:(NSInteger)pageSize
                   fetchLastMessage:(BOOL)fetchLastMessage
                         completion:(SKYChatFetchConversationListCompletion)completion
-{
-    [self __fetchConversationsWithPage:page
-                              pageSize:pageSize
-                      fetchLastMessage:fetchLastMessage
-                            completion:completion];
-}
-
-- (void)__fetchConversationsWithPage:(NSInteger)page
-                            pageSize:(NSInteger)pageSize
-                    fetchLastMessage:(BOOL)fetchLastMessage
-                          completion:(SKYChatFetchConversationListCompletion)completion
 {
     [self.container callLambda:@"chat:get_conversations"
         dictionaryArguments:@{
