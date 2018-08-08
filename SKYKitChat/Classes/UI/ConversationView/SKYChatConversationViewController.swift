@@ -420,7 +420,10 @@ open class SKYChatConversationViewController: JSQMessagesViewController, AVAudio
                 }
             case .send:
                 self.inputToolbar?.contentView?.rightBarButtonItem = self.sendButton
-                self.inputToolbar?.contentView?.rightBarButtonItem.isEnabled = true
+
+                let inputTextCount = self.inputTextView?.text?.count ?? 0
+                self.inputToolbar?.contentView?.rightBarButtonItem.isEnabled = inputTextCount > 0
+
                 if self.shouldShowCameraButton {
                     self.addInputToolbarCameraButton()
                 }
@@ -1390,9 +1393,11 @@ extension SKYChatConversationViewController {
 
         /**
          * [JSQMessageViewController finishSendingMessageAnimated:] will set this to false,
-         * but we it to be true
+         * synchronize the state with the inputTextView
          */
-        self.inputToolbar?.contentView.rightBarButtonItem.isEnabled = true
+        if let textView = self.inputTextView {
+            self.synchronizeInputToolbarSendButtonState(textView)
+        }
     }
 
     func failedToSend(message: SKYMessage?,
@@ -1413,9 +1418,11 @@ extension SKYChatConversationViewController {
 
         /**
          * [JSQMessageViewController finishSendingMessageAnimated:] will set this to false,
-         * but we it to be true
+         * synchronize the state with the inputTextView
          */
-        self.inputToolbar?.contentView.rightBarButtonItem.isEnabled = true
+        if let textView = self.inputTextView {
+            self.synchronizeInputToolbarSendButtonState(textView)
+        }
     }
 }
 
@@ -1425,12 +1432,7 @@ extension SKYChatConversationViewController {
     open override func textViewDidChange(_ textView: UITextView) {
         super.textViewDidChange(textView)
 
-        if self.shouldShowVoiceMessageButton && textView.text.count == 0 {
-            self.inputToolbarSendButtonState = .record
-        } else {
-            self.inputToolbarSendButtonState = .send
-        }
-
+        self.synchronizeInputToolbarSendButtonState(textView)
         self.skygear.chatExtension?.sendTypingIndicator(.begin, in: self.conversation!)
     }
 
@@ -1594,6 +1596,14 @@ extension SKYChatConversationViewController {
                                                 self.removeMessageError(message)
                                                 ext?.cancel(messageOperation: operation)
         })
+    }
+
+    func synchronizeInputToolbarSendButtonState(_ textView: UITextView) {
+        if self.shouldShowVoiceMessageButton && textView.text.count == 0 {
+            self.inputToolbarSendButtonState = .record
+        } else {
+            self.inputToolbarSendButtonState = .send
+        }
     }
 }
 
