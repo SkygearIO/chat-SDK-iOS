@@ -37,18 +37,21 @@ NSString *const SKYConversationUnreadCountKey = @"unread_count";
 {
     SKYConversation *conversation = [[SKYConversation alloc] initWithRecordData:record];
     SKYRecordDeserializer *deserializer = [SKYRecordDeserializer deserializer];
-    if (conversation.record[SKYConversationLastMessageKey]) {
-        conversation.lastMessage = [SKYMessage
-            recordWithRecord:[deserializer
-                                 recordWithDictionary:conversation
-                                                          .record[SKYConversationLastMessageKey]]];
+
+    // type of lastMessage maybe SKYReference or NSDictionary, only deserialize
+    // when it is NSDictionary
+    id lastMessage = conversation.record[SKYConversationLastMessageKey];
+    if ([lastMessage isKindOfClass:[NSDictionary class]]) {
+        conversation.lastMessage =
+            [SKYMessage recordWithRecord:[deserializer recordWithDictionary:lastMessage]];
     }
 
-    if (conversation.record[SKYConversationLastReadMessageKey]) {
-        conversation.lastReadMessage = [SKYMessage
-            recordWithRecord:
-                [deserializer
-                    recordWithDictionary:conversation.record[SKYConversationLastReadMessageKey]]];
+    // type of lastReadMessage maybe SKYReference or NSDictionary, only deserialize
+    // when it is NSDictionary
+    id lastReadMessage = conversation.record[SKYConversationLastReadMessageKey];
+    if ([lastReadMessage isKindOfClass:[NSDictionary class]]) {
+        conversation.lastReadMessage =
+            [SKYMessage recordWithRecord:[deserializer recordWithDictionary:lastReadMessage]];
     }
 
     return conversation;
