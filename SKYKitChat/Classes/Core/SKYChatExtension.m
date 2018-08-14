@@ -247,7 +247,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 - (void)saveConversation:(SKYConversation *)conversation
               completion:(SKYChatConversationCompletion)completion
 {
-    [self.container.publicCloudDatabase saveRecord:conversation.record
+    [self.container.publicCloudDatabase saveRecord:conversation.recordForSave
                                         completion:^(SKYRecord *record, NSError *error) {
                                             if (!completion) {
                                                 return;

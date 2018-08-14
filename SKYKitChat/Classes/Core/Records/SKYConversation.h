@@ -59,6 +59,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (assign, nonatomic, getter=isDistinctByParticipants) BOOL distinctByParticipants;
 
 /**
+ Gets the record representing this conversation, which is available for saving.
+
+ The purpose of this property is providing a record with restricted fields being filtered.
+ */
+@property (copy, nonatomic, readonly) SKYRecord *recordForSave;
+
+/**
  The ID of the last message in this conversation.
  */
 @property (readonly, nonatomic, nullable) NSString *lastMessageId;

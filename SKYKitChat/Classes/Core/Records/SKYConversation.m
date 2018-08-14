@@ -57,6 +57,32 @@ NSString *const SKYConversationUnreadCountKey = @"unread_count";
     return conversation;
 }
 
++ (NSArray<NSString *> *)restrictedFieldKeys
+{
+    static NSArray<NSString *> *_restrictedFieldKeys;
+    if (!_restrictedFieldKeys) {
+        // this list is retrieved from:
+        //   https://github.com/SkygearIO/chat/blob/1.6.0-3/chat/conversation_handlers.py#L211
+        _restrictedFieldKeys = @[
+            SKYConversationLastReadMessageIDKey, SKYConversationLastMessageKey,
+            SKYConversationAdminsKey, SKYConversationLastReadMessageKey,
+            SKYConversationUnreadCountKey, SKYConversationLastMessageIDKey,
+            SKYConversationParticipantsKey
+        ];
+    }
+
+    return _restrictedFieldKeys;
+}
+
+- (SKYRecord *)recordForSave
+{
+    NSMutableDictionary<NSString *, id> *recordDict =
+        [[[SKYRecordSerializer serializer] dictionaryWithRecord:self.record] mutableCopy];
+    [recordDict removeObjectsForKeys:[SKYConversation restrictedFieldKeys]];
+
+    return [[SKYRecordDeserializer deserializer] recordWithDictionary:recordDict];
+}
+
 - (NSArray<NSString *> *)participantIds
 {
     NSArray *admins = self.record[SKYConversationParticipantsKey];
