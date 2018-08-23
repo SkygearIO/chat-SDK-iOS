@@ -1,3 +1,19 @@
+## 1.6.2 (2018-08-23)
+
+### Features
+
+- Add fetchConversationsWithPage api that support paging (#226)
+
+### Bug Fixes
+
+- Fix save conversation exception
+- Fix SKYConversation deserialization error
+- Synchronize the send button state with input text view
+
+### Other Notes
+
+- Update SVProgressHUD
+
 ## 1.5.1 (2018-07-11)
 
 ### Other Notes
