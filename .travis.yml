@@ -20,6 +20,18 @@ script:
 # failed swiftlint version found on travis is 0.23.1
 - swiftlint lint --path SKYKitChat --config ../.swiftlint.yml
 - lizard SKYKitChat/ -C 15 -w -i 0
+before_deploy:
+- rvm install ruby-2.2.4 # jazzy doesn't work in old rubies
+- rvm use ruby-2.2.4
+- gem install jazzy
+- pip2 install awscli
+deploy:
+- provider: script
+  script: scripts/deploy.sh
+  skip_cleanup: true
+  on:
+    repo: SkygearIO/chat-SDK-iOS
+    all_branches: true
 env:
   global:
     - LC_CTYPE=en_US.UTF-8
