@@ -48,6 +48,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 @implementation SKYChatExtension {
     id notificationObserver;
     SKYUserChannel *subscribedUserChannel;
+    BOOL isFetchingUserChannel;
+    NSMutableArray<SKYChatChannelCompletion> *fetchOrCreateUserChannelCompletions;
 }
 
 - (instancetype)initWithContainer:(SKYContainer *)container
@@ -73,6 +75,7 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                     }];
 
         _cacheController = cacheController;
+        fetchOrCreateUserChannelCompletions = [NSMutableArray array];
     }
     return self;
 }
@@ -1102,24 +1105,42 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 - (void)fetchOrCreateUserChannelWithCompletion:(SKYChatChannelCompletion)completion
 {
+    if (completion) {
+        [fetchOrCreateUserChannelCompletions addObject:completion];
+    }
+    if (isFetchingUserChannel)
+        return;
+
+    isFetchingUserChannel = true;
     [self fetchUserChannelWithCompletion:^(SKYUserChannel *_Nullable userChannel,
                                            NSError *_Nullable error) {
         if (error) {
-            if (completion) {
-                completion(nil, error);
-            }
+            [self handleFetchOrCreateUserChannelCompletionWithUserChannel:userChannel error:error];
             return;
         }
 
         if (!userChannel) {
-            [self createUserChannelWithCompletion:completion];
+            [self createUserChannelWithCompletion:^(SKYUserChannel *_Nullable userChannel,
+                                                    NSError *_Nullable error) {
+                [self handleFetchOrCreateUserChannelCompletionWithUserChannel:userChannel
+                                                                        error:error];
+            }];
             return;
         }
 
-        if (completion) {
-            completion(userChannel, nil);
-        }
+        [self handleFetchOrCreateUserChannelCompletionWithUserChannel:userChannel error:error];
     }];
+}
+
+- (void)handleFetchOrCreateUserChannelCompletionWithUserChannel:(SKYUserChannel *)userChannel
+                                                          error:(NSError *)error
+{
+    for (SKYChatChannelCompletion completion in fetchOrCreateUserChannelCompletions) {
+        completion(userChannel, error);
+    }
+
+    [fetchOrCreateUserChannelCompletions removeAllObjects];
+    isFetchingUserChannel = false;
 }
 
 - (void)fetchUserChannelWithCompletion:(SKYChatChannelCompletion)completion
