@@ -66,9 +66,12 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
         notificationObserver = [[NSNotificationCenter defaultCenter]
             addObserverForName:SKYContainerDidChangeCurrentUserNotification
-                        object:container
+                        object:container.auth
                          queue:[NSOperationQueue mainQueue]
                     usingBlock:^(NSNotification *note) {
+                        if (container.auth.currentUser != nil) {
+                            return;
+                        }
                         // Unsubscribe because the current user has changed. We do not
                         // want the UI to keep notified for changes intended for previous user.
                         [self unsubscribeFromUserChannel];
