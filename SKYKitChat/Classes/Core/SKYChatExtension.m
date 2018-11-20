@@ -72,6 +72,14 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
                         // Unsubscribe because the current user has changed. We do not
                         // want the UI to keep notified for changes intended for previous user.
                         [self unsubscribeFromUserChannel];
+
+                        // cleanup fetchOrCreateUserChannelCompletions if needed when user logout
+                        NSError *error = [NSError
+                            errorWithDomain:@"SKYChatExtension"
+                                       code:0
+                                   userInfo:@{NSLocalizedDescriptionKey : @"user logged out"}];
+                        [self handleFetchOrCreateUserChannelCompletionWithUserChannel:nil
+                                                                                error:error];
                     }];
 
         _cacheController = cacheController;
@@ -1112,8 +1120,15 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         return;
 
     isFetchingUserChannel = true;
+    NSString *_userID = self.container.auth.currentUser.recordID.recordName;
     [self fetchUserChannelWithCompletion:^(SKYUserChannel *_Nullable userChannel,
                                            NSError *_Nullable error) {
+        // user logged out
+        if (self.container.auth.currentUser == nil ||
+            ![self.container.auth.currentUser.recordID.recordName isEqualToString:_userID]) {
+            return;
+        }
+
         if (error) {
             [self handleFetchOrCreateUserChannelCompletionWithUserChannel:userChannel error:error];
             return;
@@ -1122,6 +1137,12 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
         if (!userChannel) {
             [self createUserChannelWithCompletion:^(SKYUserChannel *_Nullable userChannel,
                                                     NSError *_Nullable error) {
+                // user logged out
+                if (self.container.auth.currentUser == nil ||
+                    !
+                    [self.container.auth.currentUser.recordID.recordName isEqualToString:_userID]) {
+                    return;
+                }
                 [self handleFetchOrCreateUserChannelCompletionWithUserChannel:userChannel
                                                                         error:error];
             }];
