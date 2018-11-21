@@ -48,6 +48,8 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 @implementation SKYChatExtension {
     id notificationObserver;
     SKYUserChannel *subscribedUserChannel;
+    BOOL isFetchingUserChannel;
+    NSMutableArray<SKYChatChannelCompletion> *fetchOrCreateUserChannelCompletions;
 }
 
 - (instancetype)initWithContainer:(SKYContainer *)container
@@ -64,15 +66,27 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
         notificationObserver = [[NSNotificationCenter defaultCenter]
             addObserverForName:SKYContainerDidChangeCurrentUserNotification
-                        object:container
+                        object:container.auth
                          queue:[NSOperationQueue mainQueue]
                     usingBlock:^(NSNotification *note) {
+                        if (container.auth.currentUser != nil) {
+                            return;
+                        }
                         // Unsubscribe because the current user has changed. We do not
                         // want the UI to keep notified for changes intended for previous user.
                         [self unsubscribeFromUserChannel];
+
+                        // cleanup fetchOrCreateUserChannelCompletions if needed when user logout
+                        NSError *error = [NSError
+                            errorWithDomain:@"SKYChatExtension"
+                                       code:0
+                                   userInfo:@{NSLocalizedDescriptionKey : @"user logged out"}];
+                        [self handleFetchOrCreateUserChannelCompletionWithUserChannel:nil
+                                                                                error:error];
                     }];
 
         _cacheController = cacheController;
+        fetchOrCreateUserChannelCompletions = [NSMutableArray array];
     }
     return self;
 }
@@ -1102,24 +1116,55 @@ NSString *const SKYChatRecordChangeUserInfoKey = @"recordChange";
 
 - (void)fetchOrCreateUserChannelWithCompletion:(SKYChatChannelCompletion)completion
 {
+    if (completion) {
+        [fetchOrCreateUserChannelCompletions addObject:completion];
+    }
+    if (isFetchingUserChannel)
+        return;
+
+    isFetchingUserChannel = true;
+    NSString *_userID = self.container.auth.currentUser.recordID.recordName;
     [self fetchUserChannelWithCompletion:^(SKYUserChannel *_Nullable userChannel,
                                            NSError *_Nullable error) {
+        // user logged out
+        if (self.container.auth.currentUser == nil ||
+            ![self.container.auth.currentUser.recordID.recordName isEqualToString:_userID]) {
+            return;
+        }
+
         if (error) {
-            if (completion) {
-                completion(nil, error);
-            }
+            [self handleFetchOrCreateUserChannelCompletionWithUserChannel:userChannel error:error];
             return;
         }
 
         if (!userChannel) {
-            [self createUserChannelWithCompletion:completion];
+            [self createUserChannelWithCompletion:^(SKYUserChannel *_Nullable userChannel,
+                                                    NSError *_Nullable error) {
+                // user logged out
+                if (self.container.auth.currentUser == nil ||
+                    !
+                    [self.container.auth.currentUser.recordID.recordName isEqualToString:_userID]) {
+                    return;
+                }
+                [self handleFetchOrCreateUserChannelCompletionWithUserChannel:userChannel
+                                                                        error:error];
+            }];
             return;
         }
 
-        if (completion) {
-            completion(userChannel, nil);
-        }
+        [self handleFetchOrCreateUserChannelCompletionWithUserChannel:userChannel error:error];
     }];
+}
+
+- (void)handleFetchOrCreateUserChannelCompletionWithUserChannel:(SKYUserChannel *)userChannel
+                                                          error:(NSError *)error
+{
+    for (SKYChatChannelCompletion completion in fetchOrCreateUserChannelCompletions) {
+        completion(userChannel, error);
+    }
+
+    [fetchOrCreateUserChannelCompletions removeAllObjects];
+    isFetchingUserChannel = false;
 }
 
 - (void)fetchUserChannelWithCompletion:(SKYChatChannelCompletion)completion
