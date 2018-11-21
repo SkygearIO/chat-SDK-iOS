@@ -1,3 +1,9 @@
+## 1.6.3 (2018-11-21)
+
+### Bug Fixes
+
+- Prevent create multiple user channel when calling subscribeTo function sequentially #236
+
 ## 1.6.2 (2018-08-23)
 
 ### Features
