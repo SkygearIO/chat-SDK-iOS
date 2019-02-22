@@ -1,3 +1,9 @@
+## 1.7.0 (2019-02-22)
+
+### Other Notes
+
+- Update podspec to install core sdk ~> 1.7
+
 ## 1.6.3 (2018-11-21)
 
 ### Bug Fixes

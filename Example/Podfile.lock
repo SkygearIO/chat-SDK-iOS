@@ -31,12 +31,12 @@ PODS:
     - MagicKit-Skygear (~> 0.0.6)
     - SocketRocket (~> 0.4)
     - UICKeyChainStore (~> 2.1.0)
-  - SKYKitChat (1.6.3):
-    - SKYKitChat/Core (= 1.6.3)
-  - SKYKitChat/Core (1.6.3):
+  - SKYKitChat (1.7.0):
+    - SKYKitChat/Core (= 1.7.0)
+  - SKYKitChat/Core (1.7.0):
     - Realm (~> 3.0.1)
     - SKYKit/Core (~> 1.7)
-  - SKYKitChat/UI (1.6.3):
+  - SKYKitChat/UI (1.7.0):
     - ALCameraViewController (~> 3.0)
     - CTAssetsPickerController (~> 3.3.1)
     - JSQMessagesViewController-Skygear (= 7.3.5.4)
@@ -97,7 +97,7 @@ SPEC CHECKSUMS:
   Realm: 6f23fd1f178a09342eac21bfa7c2bf4312a7a180
   SKPhotoBrowser: 5969c3813727f11fe37bea74a40425cafcb32f61
   SKYKit: c76e8722eeb900a3369f2d27a31c06bbdab5ff45
-  SKYKitChat: 493a4bc4dcd2f5b3b1e2d5fde802abe43052339f
+  SKYKitChat: 5a17c461f4cae8a7925727f3259c4004f4f85615
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   Specta: 3e1bd89c3517421982dc4d1c992503e48bd5fe66
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
