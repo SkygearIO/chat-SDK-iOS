@@ -24,7 +24,7 @@ This is the client library for the Skygear Chat extension.
         ]
     }
 
-    sp.dependency 'SKYKit/Core', '~> 1.4'
+    sp.dependency 'SKYKit/Core', '~> 1.7'
     sp.dependency 'Realm', '~> 3.0.1'
   end
 
@@ -33,7 +33,7 @@ This is the client library for the Skygear Chat extension.
     sp.source_files = 'SKYKitChat/Classes/UI/**/*'
 
     sp.dependency 'SKYKitChat/Core'
-    sp.dependency 'SKYKit/Core',                       '~> 1.4'
+    sp.dependency 'SKYKit/Core',                       '~> 1.7'
     sp.dependency 'SVProgressHUD',                     '~> 2.2'
     sp.dependency 'ALCameraViewController',            '~> 3.0'
     sp.dependency 'LruCache',                          '~> 0.1'
